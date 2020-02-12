@@ -1,13 +1,7 @@
-plugins {
-  id 'java-library'
-  id 'eclipse'
-  id 'application'
-  id 'maven'
-}
-
-repositories {
-  mavenCentral()
-}
+apply plugin: 'java-library'
+apply plugin: 'eclipse'
+apply plugin: 'application'
+apply plugin: 'maven'
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
@@ -19,10 +13,10 @@ configurations {
 }
 
 dependencies {
-  implementation 'biz.aQute.bnd:biz.aQute.bndlib:4.3.1'
-  implementation 'commons-cli:commons-cli:1.4'
+  compile 'biz.aQute.bnd:biz.aQute.bndlib:4.3.1'
+  compile 'commons-cli:commons-cli:1.4'
 
-  runtimeOnly 'org.slf4j:slf4j-simple:1.7.29'
+  compile 'org.slf4j:slf4j-simple:1.7.29'
 
   testImplementation 'org.junit.jupiter:junit-jupiter:5.5.2'
   testImplementation 'org.assertj:assertj-core:3.14.0'
@@ -57,13 +51,11 @@ task testJar(type: Jar) {
     from sourceSets.test.output
 }
 
-tasks.named('wrapper') {
-  jarFile = rootProject.file('.gradle-wrapper/gradle-wrapper.jar')
-}
-
 task showArchives {
-  configurations.archive.each {
-    println it
+  doLast {
+    configurations.archive.each {
+      println it
+    }
   }
 }
 
@@ -71,3 +63,22 @@ task downloadArchives(type: Copy) {
   into "${buildDir}/archives"
   from configurations.archive
 }
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.ibm.ws.jakarta.transformer.JakartaTransformer'
+        attributes 'Class-Path': configurations.compile.collect { it.name }.join(' ')
+    }
+}
+
+// Needed to run transformer right out of libs directory
+task copyLibs(type: Copy) {
+    from configurations.compile
+    into "$buildDir/libs/"
+    doLast {
+      println "Copied to build/libs"
+    }
+}
+
+
+build.finalizedBy(copyLibs)
