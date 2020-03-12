@@ -300,23 +300,6 @@ public abstract class ActionImpl implements Action {
 
 	//
 
-	@Override
-	public String asClassName(String resourceName) {
-		return Action.resourceNameToClassName(resourceName);
-	}
-
-	@Override
-	public String asResourceName(String className) {
-		return Action.classNameToResourceName(className);
-	}
-	
-	@Override
-	public String asBinaryTypeName(String className) {
-		return Action.classNameToBinaryTypeName(className);
-	}
-
-	//
-
 	/**
 	 * Read bytes from an input stream.  Answer byte data and
 	 * a count of bytes read.
