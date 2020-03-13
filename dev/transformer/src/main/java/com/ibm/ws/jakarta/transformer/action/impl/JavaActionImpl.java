@@ -138,13 +138,13 @@ public class JavaActionImpl extends ActionImpl implements JavaAction {
 
 		clearChanges();
 
-		String outputName = inputName; 
+		String outputName = null; 
 		// String outputName = renameInput(inputName); // TODO
-		if ( outputName == null ) {
+		// if ( outputName == null ) {
 			outputName = inputName;
-		} else {
-			log("Class name [ %s ]\n          -> [ %s ]\n", inputName, outputName);
-		}
+		// } else {
+		//     log("Class name [ %s ]\n        -> [ %s ]\n", inputName, outputName);
+		// }
 		setResourceNames(inputName, outputName);
 
 		InputStream inputStream = new ByteArrayInputStream(inputBytes);

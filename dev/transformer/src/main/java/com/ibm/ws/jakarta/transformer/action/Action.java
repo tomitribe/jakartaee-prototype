@@ -50,6 +50,25 @@ public interface Action {
 	//
 
 	/**
+	 * Tell if this action uses streams.
+	 * 
+	 * This is necessary for handing resources off to composite actions which are
+	 * run as container actions (except for directories).
+	 * 
+	 * To stream a child resource forces a write of the resource name.  But, for
+	 * certain actions, the output resource name is not known until after the
+	 * transform is performed.
+	 *
+	 * Leaf actions are expected to use byte arrays, while nested archives must
+	 * use streams.
+	 *
+	 * @return True or false telling if the action processes streams.
+	 */
+	boolean useStreams();
+
+	//
+
+	/**
 	 * Tell if a resource is to be transformed.
 	 *
 	 * @param resourceName The name of the resource.
