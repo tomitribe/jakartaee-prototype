@@ -14,18 +14,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.transformer.TransformException;
+import org.eclipse.transformer.action.BundleData;
+import org.eclipse.transformer.action.impl.BundleDataImpl;
+import org.eclipse.transformer.action.impl.InputBufferImpl;
+import org.eclipse.transformer.action.impl.LoggerImpl;
+import org.eclipse.transformer.action.impl.ManifestActionImpl;
+import org.eclipse.transformer.action.impl.SelectionRuleImpl;
+import org.eclipse.transformer.action.impl.SignatureRuleImpl;
+import org.eclipse.transformer.util.InputStreamData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import com.ibm.ws.jakarta.transformer.JakartaTransformException;
-import com.ibm.ws.jakarta.transformer.action.BundleData;
-import com.ibm.ws.jakarta.transformer.action.impl.BundleDataImpl;
-import com.ibm.ws.jakarta.transformer.action.impl.InputBufferImpl;
-import com.ibm.ws.jakarta.transformer.action.impl.LoggerImpl;
-import com.ibm.ws.jakarta.transformer.action.impl.ManifestActionImpl;
-import com.ibm.ws.jakarta.transformer.action.impl.SelectionRuleImpl;
-import com.ibm.ws.jakarta.transformer.action.impl.SignatureRuleImpl;
-import com.ibm.ws.jakarta.transformer.util.InputStreamData;
 
 public class TestTransformManifest {
 	public LoggerImpl createLogger(PrintStream printStream, boolean isTerse, boolean isVerbose) {
@@ -215,13 +214,13 @@ public class TestTransformManifest {
 	}
 
 	public void testTransform(String inputPath, Occurrences[] outputOccurrences, boolean isManifest)
-		throws JakartaTransformException, IOException {
+		throws TransformException, IOException {
 
 		testTransform(inputPath, outputOccurrences, null, isManifest);
 	}
 
 	public void testTransform(String inputPath, Occurrences[] outputOccurrences, String[][] identityUpdates, boolean isManifest)
-		throws JakartaTransformException, IOException {
+		throws TransformException, IOException {
 
 		System.out.println("Read [ " + inputPath + " ]");
 		InputStream manifestInput = TestUtils.getResourceStream(inputPath); // throws IOException
@@ -368,13 +367,13 @@ public class TestTransformManifest {
 	};
 
 	@Test
-	public void testTransformManifest() throws JakartaTransformException, IOException {
+	public void testTransformManifest() throws TransformException, IOException {
 		testTransform(TEST_MANIFEST_PATH, MANIFEST_TO_JAKARTA_DATA, WEBCONTAINER_BUNDLE_OUTPUT, ManifestActionImpl.IS_MANIFEST);
 		// throws JakartaTransformException, IOException
 	}
 
 	@Test
-	public void testTransformFeature() throws JakartaTransformException, IOException {
+	public void testTransformFeature() throws TransformException, IOException {
 		testTransform(TEST_FEATURE_PATH, FEATURE_TO_JAKARTA_DATA, ManifestActionImpl.IS_FEATURE);
 		// throws JakartaTransformException, IOException
 	}

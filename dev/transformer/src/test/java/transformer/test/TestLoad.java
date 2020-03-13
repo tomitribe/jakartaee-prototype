@@ -6,20 +6,20 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.ibm.ws.jakarta.transformer.JakartaTransformer;
+import org.eclipse.transformer.Transformer;
 
 public class TestLoad {
 
 	public static final String RULES_RENAMES_PATH =
-		JakartaTransformer.DEFAULT_RENAMES_REFERENCE;
+		Transformer.DEFAULT_RENAMES_REFERENCE;
 
 	public static final String RULES_VERSIONS_PATH =
-		JakartaTransformer.DEFAULT_VERSIONS_REFERENCE;
+		Transformer.DEFAULT_VERSIONS_REFERENCE;
 
 	public static final String TRANSFORMER_PREFIX;
 
 	static {
-		String transformerPackageName = JakartaTransformer.class.getPackage().getName();
+		String transformerPackageName = Transformer.class.getPackage().getName();
 		TRANSFORMER_PREFIX = transformerPackageName.replace('.',  '/') + '/';
 	}
 

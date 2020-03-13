@@ -10,20 +10,19 @@ import java.net.URLStreamHandler;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import com.ibm.ws.jakarta.transformer.JakartaTransformException;
-import com.ibm.ws.jakarta.transformer.action.ClassAction;
-import com.ibm.ws.jakarta.transformer.action.JarAction;
-import com.ibm.ws.jakarta.transformer.action.ServiceConfigAction;
-import com.ibm.ws.jakarta.transformer.action.impl.ClassActionImpl;
-import com.ibm.ws.jakarta.transformer.util.ByteData;
-import com.ibm.ws.jakarta.transformer.util.FileUtils;
-import com.ibm.ws.jakarta.transformer.util.InputStreamData;
+import org.eclipse.transformer.TransformException;
+import org.eclipse.transformer.action.impl.ClassActionImpl;
+import org.eclipse.transformer.action.impl.JarActionImpl;
+import org.eclipse.transformer.action.impl.ServiceConfigActionImpl;
+import org.eclipse.transformer.util.ByteData;
+import org.eclipse.transformer.util.FileUtils;
+import org.eclipse.transformer.util.InputStreamData;
 
 public class TransformClassLoader extends ClassLoader {
 
 	public TransformClassLoader(
 		ClassLoader parent,
-		JarAction jarAction, ClassAction classAction, ServiceConfigAction configAction) {
+		JarActionImpl jarAction, ClassActionImpl classAction, ServiceConfigActionImpl configAction) {
 
 		super(parent);
 
@@ -34,9 +33,9 @@ public class TransformClassLoader extends ClassLoader {
 
 	//
 
-	private final JarAction jarAction;
+	private final JarActionImpl jarAction;
 
-	public JarAction getJarAction() {
+	public JarActionImpl getJarAction() {
 		return jarAction;
 	}
 
@@ -50,9 +49,9 @@ public class TransformClassLoader extends ClassLoader {
 
 	//
 
-	private final ClassAction classAction;
+	private final ClassActionImpl classAction;
 
-	public ClassAction getClassAction() {
+	public ClassActionImpl getClassAction() {
 		return classAction;
 	}
 
@@ -61,7 +60,7 @@ public class TransformClassLoader extends ClassLoader {
 	}
 
 	public InputStream applyClass(String resourceName, InputStream inputStream)
-		throws JakartaTransformException {
+		throws TransformException {
 
 		InputStreamData outputData = getClassAction().apply(resourceName, inputStream);
 		 // 'apply' throws JakartaTransformException
@@ -71,9 +70,9 @@ public class TransformClassLoader extends ClassLoader {
 
 	//
 
-	private final ServiceConfigAction serviceConfigAction;
+	private final ServiceConfigActionImpl serviceConfigAction;
 
-	public ServiceConfigAction getServiceConfigAction() {
+	public ServiceConfigActionImpl getServiceConfigAction() {
 		return serviceConfigAction;
 	}
 
@@ -82,7 +81,7 @@ public class TransformClassLoader extends ClassLoader {
 	}
 
 	public InputStream applyServiceConfig(String resourceName, InputStream inputStream)
-		throws JakartaTransformException {
+		throws TransformException {
 
 		InputStreamData outputData = getServiceConfigAction().apply(resourceName, inputStream);
 		// 'apply' throws JakartaTransformException
@@ -202,7 +201,7 @@ public class TransformClassLoader extends ClassLoader {
     		try {
     			return applyClass(resourceName, baseStream); // throws JakartaTransformException
 
-    		} catch ( JakartaTransformException e ) {
+    		} catch ( TransformException e ) {
     			System.err.println("Class transform failure [ " + resourceName + " ]");
     			e.printStackTrace();
 
@@ -215,7 +214,7 @@ public class TransformClassLoader extends ClassLoader {
     		try {
     			return applyServiceConfig(resourceName, baseStream); // throws JakartaTransformException
 
-    		} catch ( JakartaTransformException e ) {
+    		} catch ( TransformException e ) {
     			System.err.println("Servic configuration transform failure [ " + resourceName + " ]");
     			e.printStackTrace();
 
