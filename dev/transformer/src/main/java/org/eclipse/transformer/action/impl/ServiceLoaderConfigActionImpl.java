@@ -28,13 +28,13 @@ import org.eclipse.transformer.util.ByteData;
  * on each line all characters following the first comment character are ignored. The file
  * must be encoded in UTF-8.
  */
-public class ServiceConfigActionImpl extends ActionImpl {
+public class ServiceLoaderConfigActionImpl extends ActionImpl {
 	public static final String META_INF = "META-INF/";
 	public static final String META_INF_SERVICES = "META-INF/services/";
 
 	//
 
-	public ServiceConfigActionImpl(
+	public ServiceLoaderConfigActionImpl(
 		LoggerImpl logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
@@ -51,19 +51,19 @@ public class ServiceConfigActionImpl extends ActionImpl {
 
 	@Override
 	public ActionType getActionType() {
-		return ActionType.SERVICE_CONFIG;
+		return ActionType.SERVICE_LOADER_CONFIG;
 	}
 
 	//
 
 	@Override
-	protected ServiceConfigChangesImpl newChanges() {
-		return new ServiceConfigChangesImpl();
+	protected ServiceLoaderConfigChangesImpl newChanges() {
+		return new ServiceLoaderConfigChangesImpl();
 	}
 
 	@Override
-	public ServiceConfigChangesImpl getChanges() {
-		return (ServiceConfigChangesImpl) super.getChanges();
+	public ServiceLoaderConfigChangesImpl getChanges() {
+		return (ServiceLoaderConfigChangesImpl) super.getChanges();
 	}
 
 	protected void addUnchangedProvider() {

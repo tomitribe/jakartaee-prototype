@@ -25,7 +25,7 @@ import org.eclipse.transformer.action.impl.InputBufferImpl;
 import org.eclipse.transformer.action.impl.JarActionImpl;
 import org.eclipse.transformer.action.impl.LoggerImpl;
 import org.eclipse.transformer.action.impl.SelectionRuleImpl;
-import org.eclipse.transformer.action.impl.ServiceConfigActionImpl;
+import org.eclipse.transformer.action.impl.ServiceLoaderConfigActionImpl;
 import org.eclipse.transformer.action.impl.SignatureRuleImpl;
 import org.eclipse.transformer.util.FileUtils;
 import org.eclipse.transformer.util.InputStreamData;
@@ -173,7 +173,7 @@ public class TestTransformClass {
 	public ClassLoader getClassLoader_toJakarta() {
 		JarActionImpl jarAction = getJakartaJarAction();
 		ClassActionImpl classAction = jarAction.addUsing( ClassActionImpl::new );
-		ServiceConfigActionImpl configAction = jarAction.addUsing( ServiceConfigActionImpl::new );
+		ServiceLoaderConfigActionImpl configAction = jarAction.addUsing( ServiceLoaderConfigActionImpl::new );
 
 		return new TransformClassLoader(
 			getClass().getClassLoader(),
@@ -183,7 +183,7 @@ public class TestTransformClass {
 	public ClassLoader getClassLoader_toJavax() {
 		JarActionImpl jarAction = getJavaxJarAction();
 		ClassActionImpl classAction = jarAction.addUsing( ClassActionImpl::new );
-		ServiceConfigActionImpl configAction = jarAction.addUsing( ServiceConfigActionImpl::new );
+		ServiceLoaderConfigActionImpl configAction = jarAction.addUsing( ServiceLoaderConfigActionImpl::new );
 
 		return new TransformClassLoader(
 			getClass().getClassLoader(),

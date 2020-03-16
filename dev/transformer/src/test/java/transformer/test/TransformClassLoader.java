@@ -13,7 +13,7 @@ import java.util.Vector;
 import org.eclipse.transformer.TransformException;
 import org.eclipse.transformer.action.impl.ClassActionImpl;
 import org.eclipse.transformer.action.impl.JarActionImpl;
-import org.eclipse.transformer.action.impl.ServiceConfigActionImpl;
+import org.eclipse.transformer.action.impl.ServiceLoaderConfigActionImpl;
 import org.eclipse.transformer.util.ByteData;
 import org.eclipse.transformer.util.FileUtils;
 import org.eclipse.transformer.util.InputStreamData;
@@ -22,7 +22,7 @@ public class TransformClassLoader extends ClassLoader {
 
 	public TransformClassLoader(
 		ClassLoader parent,
-		JarActionImpl jarAction, ClassActionImpl classAction, ServiceConfigActionImpl configAction) {
+		JarActionImpl jarAction, ClassActionImpl classAction, ServiceLoaderConfigActionImpl configAction) {
 
 		super(parent);
 
@@ -70,9 +70,9 @@ public class TransformClassLoader extends ClassLoader {
 
 	//
 
-	private final ServiceConfigActionImpl serviceConfigAction;
+	private final ServiceLoaderConfigActionImpl serviceConfigAction;
 
-	public ServiceConfigActionImpl getServiceConfigAction() {
+	public ServiceLoaderConfigActionImpl getServiceConfigAction() {
 		return serviceConfigAction;
 	}
 

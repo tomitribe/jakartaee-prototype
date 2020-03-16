@@ -16,7 +16,7 @@ import org.eclipse.transformer.action.BundleData;
 import org.eclipse.transformer.action.impl.InputBufferImpl;
 import org.eclipse.transformer.action.impl.LoggerImpl;
 import org.eclipse.transformer.action.impl.SelectionRuleImpl;
-import org.eclipse.transformer.action.impl.ServiceConfigActionImpl;
+import org.eclipse.transformer.action.impl.ServiceLoaderConfigActionImpl;
 import org.eclipse.transformer.action.impl.SignatureRuleImpl;
 import org.eclipse.transformer.util.InputStreamData;
 import org.junit.jupiter.api.Test;
@@ -105,14 +105,14 @@ public class TestTransformServiceConfig {
 		return packageRenames;
 	}
 	
-	public ServiceConfigActionImpl jakartaServiceAction;
-	public ServiceConfigActionImpl javaxServiceAction;
+	public ServiceLoaderConfigActionImpl jakartaServiceAction;
+	public ServiceLoaderConfigActionImpl javaxServiceAction;
 
-	public ServiceConfigActionImpl getJakartaServiceAction() {
+	public ServiceLoaderConfigActionImpl getJakartaServiceAction() {
 		if ( jakartaServiceAction == null ) {
 			LoggerImpl logger = createLogger( System.out, !LoggerImpl.IS_TERSE, LoggerImpl.IS_VERBOSE );
 
-			jakartaServiceAction = new ServiceConfigActionImpl(
+			jakartaServiceAction = new ServiceLoaderConfigActionImpl(
 					logger,
 					createBuffer(),
 					createSelectionRule( logger, getIncludes(), getExcludes() ),
@@ -121,12 +121,12 @@ public class TestTransformServiceConfig {
 		return jakartaServiceAction;
 	}
 
-	public ServiceConfigActionImpl getJavaxServiceAction() {
+	public ServiceLoaderConfigActionImpl getJavaxServiceAction() {
 		if ( javaxServiceAction == null ) {
 			Map<String, String> invertedRenames = TransformProperties.invert( getPackageRenames() );
 			LoggerImpl logger = createLogger( System.out, !LoggerImpl.IS_TERSE, LoggerImpl.IS_VERBOSE );
 
-			javaxServiceAction = new ServiceConfigActionImpl(
+			javaxServiceAction = new ServiceLoaderConfigActionImpl(
 					logger,
 					createBuffer(),
 					createSelectionRule( logger, getIncludes(), getExcludes() ),
@@ -137,7 +137,7 @@ public class TestTransformServiceConfig {
 
 	@Test
 	public void testJakartaTransform() throws IOException, TransformException {
-		ServiceConfigActionImpl jakartaAction = getJakartaServiceAction();
+		ServiceLoaderConfigActionImpl jakartaAction = getJakartaServiceAction();
 
 		verifyTransform(
 			jakartaAction,
@@ -155,7 +155,7 @@ public class TestTransformServiceConfig {
 
 	@Test
 	public void testJavaxTransform() throws IOException, TransformException {
-		ServiceConfigActionImpl javaxAction = getJavaxServiceAction();
+		ServiceLoaderConfigActionImpl javaxAction = getJavaxServiceAction();
 
 		verifyTransform(
 			javaxAction,
@@ -172,7 +172,7 @@ public class TestTransformServiceConfig {
 	}
 
 	protected void verifyTransform(
-		ServiceConfigActionImpl action,
+		ServiceLoaderConfigActionImpl action,
 		String inputName,
 		String[] expectedLines) throws IOException, TransformException {
 
