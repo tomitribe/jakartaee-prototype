@@ -1,11 +1,10 @@
 package com.ibm.ws.jakarta.transformer.action.impl;
 
 import com.ibm.ws.jakarta.transformer.action.ActionType;
-import com.ibm.ws.jakarta.transformer.action.JarAction;
+import com.ibm.ws.jakarta.transformer.action.EarAction;
 
-public class JarActionImpl extends ZipActionImpl implements JarAction {
-
-	public JarActionImpl(
+public class EarActionImpl extends ContainerActionImpl implements EarAction {
+	public EarActionImpl(
 		LoggerImpl logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
@@ -17,30 +16,30 @@ public class JarActionImpl extends ZipActionImpl implements JarAction {
 	//
 
 	public String getName() {
-		return "Jar Action";
+		return "EAR Action";
 	}
 
 	@Override
 	public ActionType getActionType() {
-		return ActionType.JAR;
+		return ActionType.EAR;
 	}
 
 	//
 
 	@Override
-	protected JarChangesImpl newChanges() {
-		return new JarChangesImpl();
+	protected EarChangesImpl newChanges() {
+		return new EarChangesImpl();
 	}
 
 	@Override
-	public JarChangesImpl getChanges() {
-		return (JarChangesImpl) super.getChanges();
+	public EarChangesImpl getChanges() {
+		return (EarChangesImpl) super.getChanges();
 	}
 
 	//
 
 	@Override
 	public String getAcceptExtension() {
-		return ".jar";
+		return ".ear";
 	}
 }

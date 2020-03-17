@@ -27,6 +27,7 @@ import aQute.bnd.classfile.ConstantPool.ClassInfo;
 import aQute.bnd.classfile.ConstantPool.MethodTypeInfo;
 import aQute.bnd.classfile.ConstantPool.NameAndTypeInfo;
 import aQute.bnd.classfile.ConstantPool.StringInfo;
+import aQute.bnd.classfile.ConstantValueAttribute;
 import aQute.bnd.classfile.ElementValueInfo;
 import aQute.bnd.classfile.ElementValueInfo.EnumConst;
 import aQute.bnd.classfile.ElementValueInfo.ResultConst;
@@ -73,6 +74,103 @@ import aQute.lib.io.ByteBufferDataOutput;
  * Transform class bytes.
  */
 public class ClassActionImpl extends ActionImpl implements ClassAction {
+	public static String resourceNameToClassName(String resourceName) {
+		String className = resourceName.substring( resourceName.length() - ".class".length() );
+		className = className.replace('/',  '.');
+		return className;
+	}
+
+	public static String classNameToResourceName(String className) {
+		String resourceName = className.replace('.',  '/');
+		resourceName = resourceName + ".class";
+		return resourceName;
+	}
+
+	public static String classNameToBinaryTypeName(String className) {
+		return className.replace('.',  '/');
+	}
+
+	// public static for unit testing
+
+	/**
+	 * Adjust an input path according to the changes made to the name of
+	 * the class stored at that path.
+	 *
+	 * The input path is expected to match the input class name using usual java
+	 * class resource placement.
+	 *
+	 * If the input path does does not match the input class name, the class is
+	 * incorrectly placed.  Find an approximate location for the class based on
+	 * whether the input path begins with "WEB-INF/classes/" or "META-INF/versions/".
+	 * Otherwise, use the usual path for the output class name using java class
+	 * resource placement.
+	 *
+	 * @param useLogger Logger for messaging
+	 * @param inputPath The initial path to the class.
+	 * @param inputClassName The initial class name.
+	 * @param outputClassName The final class name.
+	 *
+	 * @return An output path for the class, placing the output class name in the same
+	 *     relationship to the output path as the input class name has relative to the
+	 *     input path.
+	 */
+	public static String relocateClass(
+		LoggerImpl useLogger,
+		String inputPath, String inputClassName, String outputClassName) {
+
+		String directInputPath = classNameToResourceName(inputClassName);
+		String directOutputPath = classNameToResourceName(outputClassName);
+
+		// Expected cases:
+		// The class was located at the usual relative location,
+		// or the class was located under a sub-path.
+
+		if ( directInputPath.equals(inputPath) ) {
+			return directOutputPath;
+		} else if ( inputPath.endsWith(directInputPath) ) {
+			return inputPath.substring( 0, inputPath.length() - directInputPath.length() ) + directOutputPath;
+		}
+
+		// Unexpected cases:
+		// The class was not properly named.  Do our best to place the class in the
+		// same relative location. 
+
+		String relocationCase;
+		String outputPath;
+
+		if ( inputPath.startsWith("WEB-INF/classes/") ) {
+			relocationCase = "WEB-INF/classes";
+			outputPath = "WEB-INF/classes/" + directOutputPath;
+		} else if ( inputPath.startsWith("META-INF/versions/") ) {
+			int nextSlash = inputPath.indexOf('/', "META-INF/versions/".length());
+			if ( nextSlash == -1 ) {
+				relocationCase = "META-INF/versions with no version number";
+				outputPath = "META-INF/versions/" + directOutputPath;
+			} else {
+				relocationCase = "META-INF/versions";
+				outputPath = inputPath.substring(0, nextSlash + 1) + directOutputPath;
+			}
+		} else {
+			relocationCase = "Unknown location";
+			outputPath = directOutputPath;
+		}
+
+		useLogger.error(
+			"Approximate relocation of class: %s case:\n" +
+			 " initial class name [ %s ]; final class name [ %s ];\n" +
+			 " initial resource location [ %s ]; final resource location [ %s ].",
+			 relocationCase,
+			 inputClassName, outputClassName,
+			 inputPath, outputPath);
+
+		return outputPath;
+	}
+
+	public String relocateClass(String inputPath, String inputClassName, String outputClassName) {
+		return ClassActionImpl.relocateClass( getLogger(), inputPath, inputClassName, outputClassName );
+	}
+
+	//
 
 	protected static final int DUMP_WIDTH = 16;
 
@@ -221,7 +319,7 @@ public class ClassActionImpl extends ActionImpl implements ClassAction {
 		String outputName;
 		if ( outputClassName != null ) {
 			classBuilder.this_class(outputClassName);
-			outputName = asResourceName(outputClassName);
+			outputName = relocateClass(inputName, inputClassName, outputClassName);
 		} else {
 			outputClassName = inputClassName;
 			outputName = inputName;
@@ -671,9 +769,9 @@ public class ClassActionImpl extends ActionImpl implements ClassAction {
 
 			case AnnotationDefaultAttribute.NAME: {
 				AnnotationDefaultAttribute inputAttribute =
-					(AnnotationDefaultAttribute) attr;
-				Object outputValue = transformElementValue(inputAttribute.value);
-				return ( (outputValue == null) ? null : new AnnotationDefaultAttribute(outputValue) );
+						(AnnotationDefaultAttribute) attr;
+					Object outputValue = transformElementValue(inputAttribute.value);
+					return ( (outputValue == null) ? null : new AnnotationDefaultAttribute(outputValue) );
 			}
 
 			case ModuleAttribute.NAME:
@@ -703,7 +801,6 @@ public class ClassActionImpl extends ActionImpl implements ClassAction {
 
 		return null;
 	}
-
 	    
     private Object transformConstantValue(Object inputValue) {
         if ( inputValue instanceof String ) {
@@ -719,13 +816,13 @@ public class ClassActionImpl extends ActionImpl implements ClassAction {
                 }
             }
             if ( outputString == null ) {
-                verbose("    String ConstantValue: %s\n (unchanged)", inputValue);
+                verbose("    String ConstantValue: %s (unchanged)\n", inputValue);
             } else {
                 verbose("    String ConstantValue: %s\n                       -> %s (%s)\n", inputValue, outputString, transformCase);
             }
             return outputString;
         } else {
-            verbose("    Non-String ConstantValue: %s\n (unchanged)", inputValue);
+            verbose("    Non-String ConstantValue: %s (unchanged)\n", inputValue);
             return null;
         }
     }

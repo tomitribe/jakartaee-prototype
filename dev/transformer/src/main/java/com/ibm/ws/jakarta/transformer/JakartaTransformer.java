@@ -27,15 +27,19 @@ import com.ibm.ws.jakarta.transformer.action.impl.ActionImpl;
 import com.ibm.ws.jakarta.transformer.action.impl.ClassActionImpl;
 import com.ibm.ws.jakarta.transformer.action.impl.CompositeActionImpl;
 import com.ibm.ws.jakarta.transformer.action.impl.DirectoryActionImpl;
+import com.ibm.ws.jakarta.transformer.action.impl.EarActionImpl;
 import com.ibm.ws.jakarta.transformer.action.impl.InputBufferImpl;
 import com.ibm.ws.jakarta.transformer.action.impl.JarActionImpl;
 import com.ibm.ws.jakarta.transformer.action.impl.JavaActionImpl;
 import com.ibm.ws.jakarta.transformer.action.impl.LoggerImpl;
 import com.ibm.ws.jakarta.transformer.action.impl.ManifestActionImpl;
 import com.ibm.ws.jakarta.transformer.action.impl.NullActionImpl;
+import com.ibm.ws.jakarta.transformer.action.impl.RarActionImpl;
 import com.ibm.ws.jakarta.transformer.action.impl.SelectionRuleImpl;
 import com.ibm.ws.jakarta.transformer.action.impl.ServiceConfigActionImpl;
 import com.ibm.ws.jakarta.transformer.action.impl.SignatureRuleImpl;
+import com.ibm.ws.jakarta.transformer.action.impl.WarActionImpl;
+import com.ibm.ws.jakarta.transformer.action.impl.ZipActionImpl;
 import com.ibm.ws.jakarta.transformer.util.FileUtils;
 
 import aQute.lib.io.IO;
@@ -804,11 +808,9 @@ public class JakartaTransformer {
         		CompositeActionImpl useRootAction = new CompositeActionImpl(
                     getLogger(), getBuffer(), getSelectionRule(), getSignatureRule() );
 
-        		// The root action knows about all action types, and, as a special case,
-        		// knows about directory actions.
-
         		DirectoryActionImpl directoryAction =
         			useRootAction.addUsing( DirectoryActionImpl::new );
+
         		ClassActionImpl classAction =
         			useRootAction.addUsing( ClassActionImpl::new );
         		JavaActionImpl javaAction =
@@ -819,8 +821,19 @@ public class JakartaTransformer {
         			useRootAction.addUsing( ManifestActionImpl::newManifestAction );
         		ManifestActionImpl featureAction =
         			useRootAction.addUsing( ManifestActionImpl::newFeatureAction );
+
         		JarActionImpl jarAction =
-        			useRootAction.addUsing( JarActionImpl::new );
+                	useRootAction.addUsing( JarActionImpl::new );
+        		WarActionImpl warAction =
+                	useRootAction.addUsing( WarActionImpl::new );
+        		RarActionImpl rarAction =
+                	useRootAction.addUsing( RarActionImpl::new );
+        		EarActionImpl earAction =
+                	useRootAction.addUsing( EarActionImpl::new );
+
+        		ZipActionImpl zipAction =
+        			useRootAction.addUsing( ZipActionImpl::new );
+
         		NullActionImpl nullAction =
         			useRootAction.addUsing( NullActionImpl::new );
 
@@ -831,11 +844,12 @@ public class JakartaTransformer {
         		directoryAction.addAction(serviceConfigAction);
         		directoryAction.addAction(manifestAction);
         		directoryAction.addAction(featureAction);
+        		directoryAction.addAction(zipAction);
         		directoryAction.addAction(jarAction);
+        		directoryAction.addAction(warAction);
+        		directoryAction.addAction(rarAction);
+        		directoryAction.addAction(earAction);
         		directoryAction.addAction(nullAction);
-
-        		// Jar actions know about all actions except directory actions and jar actions.
-        		// TODO: Should jars be allowed to nest other archives?
 
         		jarAction.addAction(classAction);
         		jarAction.addAction(javaAction);
@@ -843,6 +857,39 @@ public class JakartaTransformer {
         		jarAction.addAction(manifestAction);
         		jarAction.addAction(featureAction);
         		jarAction.addAction(nullAction);
+
+        		warAction.addAction(classAction);
+        		warAction.addAction(javaAction);
+        		warAction.addAction(serviceConfigAction);
+        		warAction.addAction(manifestAction);
+        		warAction.addAction(featureAction);
+        		warAction.addAction(jarAction);
+        		warAction.addAction(nullAction);
+
+        		rarAction.addAction(classAction);
+        		rarAction.addAction(javaAction);
+        		rarAction.addAction(serviceConfigAction);
+        		rarAction.addAction(manifestAction);
+        		rarAction.addAction(featureAction);
+        		rarAction.addAction(jarAction);
+        		rarAction.addAction(nullAction);
+
+        		earAction.addAction(manifestAction);
+        		earAction.addAction(jarAction);
+        		earAction.addAction(warAction);
+        		earAction.addAction(rarAction);
+        		earAction.addAction(nullAction);
+
+        		zipAction.addAction(classAction);
+        		zipAction.addAction(javaAction);
+        		zipAction.addAction(serviceConfigAction);
+        		zipAction.addAction(manifestAction);
+        		zipAction.addAction(featureAction);
+        		zipAction.addAction(jarAction);
+        		zipAction.addAction(warAction);
+        		zipAction.addAction(rarAction);
+        		zipAction.addAction(earAction);
+        		zipAction.addAction(nullAction);
 
         		rootAction = useRootAction;
             }

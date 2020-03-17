@@ -14,6 +14,7 @@ import com.ibm.ws.jakarta.transformer.JakartaTransformException;
 import com.ibm.ws.jakarta.transformer.action.ClassAction;
 import com.ibm.ws.jakarta.transformer.action.JarAction;
 import com.ibm.ws.jakarta.transformer.action.ServiceConfigAction;
+import com.ibm.ws.jakarta.transformer.action.impl.ClassActionImpl;
 import com.ibm.ws.jakarta.transformer.util.ByteData;
 import com.ibm.ws.jakarta.transformer.util.FileUtils;
 import com.ibm.ws.jakarta.transformer.util.InputStreamData;
@@ -44,7 +45,7 @@ public class TransformClassLoader extends ClassLoader {
 	}
 
 	public String getResourceName(String className) {
-		return getJarAction().asResourceName(className);
+		return ClassActionImpl.classNameToResourceName(className);
 	}
 
 	//

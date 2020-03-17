@@ -1,11 +1,10 @@
 package com.ibm.ws.jakarta.transformer.action.impl;
 
 import com.ibm.ws.jakarta.transformer.action.ActionType;
-import com.ibm.ws.jakarta.transformer.action.JarAction;
+import com.ibm.ws.jakarta.transformer.action.RarAction;
 
-public class JarActionImpl extends ZipActionImpl implements JarAction {
-
-	public JarActionImpl(
+public class RarActionImpl extends ContainerActionImpl implements RarAction {
+	public RarActionImpl(
 		LoggerImpl logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
@@ -17,30 +16,30 @@ public class JarActionImpl extends ZipActionImpl implements JarAction {
 	//
 
 	public String getName() {
-		return "Jar Action";
+		return "RAR Action";
 	}
 
 	@Override
 	public ActionType getActionType() {
-		return ActionType.JAR;
+		return ActionType.RAR;
 	}
 
 	//
 
 	@Override
-	protected JarChangesImpl newChanges() {
-		return new JarChangesImpl();
+	protected RarChangesImpl newChanges() {
+		return new RarChangesImpl();
 	}
 
 	@Override
-	public JarChangesImpl getChanges() {
-		return (JarChangesImpl) super.getChanges();
+	public RarChangesImpl getChanges() {
+		return (RarChangesImpl) super.getChanges();
 	}
 
 	//
 
 	@Override
 	public String getAcceptExtension() {
-		return ".jar";
+		return ".war";
 	}
 }

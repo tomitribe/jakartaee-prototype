@@ -1,5 +1,6 @@
 package transformer.test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import com.ibm.ws.jakarta.transformer.JakartaTransformException;
 import com.ibm.ws.jakarta.transformer.JakartaTransformProperties;
 import com.ibm.ws.jakarta.transformer.JakartaTransformer;
-import com.ibm.ws.jakarta.transformer.action.Action;
 import com.ibm.ws.jakarta.transformer.action.BundleData;
 import com.ibm.ws.jakarta.transformer.action.ClassAction;
 import com.ibm.ws.jakarta.transformer.action.ClassChanges;
@@ -107,8 +107,8 @@ public class TestTransformClass {
 	public Set<String> getIncludes() {
 		if ( includes == null ) {
 			includes = new HashSet<String>();
-			includes.add( Action.classNameToBinaryTypeName(JAVAX_CLASS_NAME) );
-			includes.add( Action.classNameToBinaryTypeName(JAKARTA_CLASS_NAME) );
+			includes.add( ClassActionImpl.classNameToBinaryTypeName(JAVAX_CLASS_NAME) );
+			includes.add( ClassActionImpl.classNameToBinaryTypeName(JAKARTA_CLASS_NAME) );
 		}
 
 		return includes;
@@ -127,8 +127,8 @@ public class TestTransformClass {
 		if ( packageRenames == null ) {
 			packageRenames = new HashMap<String, String>();
 			packageRenames.put(
-				Action.classNameToBinaryTypeName(JAVAX_INJECT_PACKAGE_NAME),
-				Action.classNameToBinaryTypeName(JAKARTA_INJECT_PACKAGE_NAME) );
+				ClassActionImpl.classNameToBinaryTypeName(JAVAX_INJECT_PACKAGE_NAME),
+				ClassActionImpl.classNameToBinaryTypeName(JAKARTA_INJECT_PACKAGE_NAME) );
 		}
 		return packageRenames;
 	}
@@ -344,5 +344,85 @@ public class TestTransformClass {
 		Assertions.assertEquals(
 			expectedChanges, actualChanges, 
 			"Incorrect count of constant changes");
+	}
+
+	public static final boolean IS_EXACT = false;
+
+	public static class ClassRelocation {
+		public final String inputPath;
+		public final String inputName;
+		
+		public final String outputName;
+		public final String outputPath;
+
+		public final boolean isApproximate;
+
+		public ClassRelocation(
+			String inputPath, String inputName,
+			String outputName, String outputPath,
+			boolean isApproximate) {
+
+			this.inputPath = inputPath;
+			this.inputName = inputName;
+
+			this.outputName = outputName;
+			this.outputPath = outputPath;
+
+			this.isApproximate = isApproximate;
+		}
+	}
+
+	public static ClassRelocation[] RELOCATION_CASES = new ClassRelocation[] {
+		new ClassRelocation(
+			"com/ibm/test/Sample.class", "com.ibm.test.Sample",
+			 "com.ibm.prod.Sample", "com/ibm/prod/Sample.class", IS_EXACT),
+		new ClassRelocation(
+			"WEB-INF/classes/com/ibm/test/Sample.class", "com.ibm.test.Sample",
+		    "com.ibm.prod.Sample", "WEB-INF/classes/com/ibm/prod/Sample.class", IS_EXACT),
+		new ClassRelocation(
+			"META-INF/versions/9/com/ibm/test/Sample.class", "com.ibm.test.Sample",
+			"com.ibm.prod.Sample", "META-INF/versions/9/com/ibm/prod/Sample.class", IS_EXACT),
+		new ClassRelocation(
+			"META-INF/versions/com/ibm/test/Sample.class", "com.ibm.test.Sample",
+			"com.ibm.prod.Sample", "META-INF/versions/com/ibm/prod/Sample.class", IS_EXACT),
+		new ClassRelocation(
+			"sample/com/ibm/test/Sample.class", "com.ibm.test.Sample",
+			"com.ibm.prod.Sample", "sample/com/ibm/prod/Sample.class", IS_EXACT),
+
+		new ClassRelocation(
+			"com/ibm/broken/Sample.class", "com.ibm.test.Sample",
+			"com.ibm.prod.Sample", "com/ibm/prod/Sample.class", !IS_EXACT),
+		new ClassRelocation(
+			"WEB-INF/classes/com/ibm/broken/Sample.class", "com.ibm.test.Sample",
+			"com.ibm.prod.Sample", "WEB-INF/classes/com/ibm/prod/Sample.class", !IS_EXACT),
+		new ClassRelocation(
+			"META-INF/versions/9/com/ibm/broken/Sample.class", "com.ibm.test.Sample",
+			"com.ibm.prod.Sample", "META-INF/versions/9/com/ibm/prod/Sample.class", !IS_EXACT),
+		
+	};
+
+	@Test
+	public void testClassRelocation() {
+		ByteArrayOutputStream loggerBytes = new ByteArrayOutputStream();
+		PrintStream loggerStream = new PrintStream(loggerBytes);
+		LoggerImpl testLogger = new LoggerImpl(loggerStream, !LoggerImpl.IS_TERSE, LoggerImpl.IS_VERBOSE);
+
+		for ( ClassRelocation relocationCase : RELOCATION_CASES ) {
+			String outputPath = ClassActionImpl.relocateClass(testLogger,
+				relocationCase.inputPath, relocationCase.inputName, relocationCase.outputName);
+			String logText = loggerBytes.toString();
+			loggerBytes.reset();
+
+			System.out.printf("Relocation [ %s ] as [ %s ]\n" +
+			                  "        to [ %s ] as [ %s ]\n",
+			                  relocationCase.inputPath, relocationCase.inputName,
+			                  relocationCase.outputName, outputPath);
+			if ( !logText.isEmpty() ) {
+				System.out.printf("Relocation error [ %s ]\n", logText);
+			}
+
+			Assertions.assertEquals(relocationCase.outputPath, outputPath, "Incorrect output path");
+			Assertions.assertEquals(!logText.isEmpty(), relocationCase.isApproximate, "Incorrect error text");
+		}
 	}
 }
