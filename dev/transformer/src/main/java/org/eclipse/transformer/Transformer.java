@@ -35,7 +35,7 @@ import org.eclipse.transformer.action.impl.ManifestActionImpl;
 import org.eclipse.transformer.action.impl.NullActionImpl;
 import org.eclipse.transformer.action.impl.RarActionImpl;
 import org.eclipse.transformer.action.impl.SelectionRuleImpl;
-import org.eclipse.transformer.action.impl.ServiceConfigActionImpl;
+import org.eclipse.transformer.action.impl.ServiceLoaderConfigActionImpl;
 import org.eclipse.transformer.action.impl.SignatureRuleImpl;
 import org.eclipse.transformer.action.impl.WarActionImpl;
 import org.eclipse.transformer.action.impl.ZipActionImpl;
@@ -814,8 +814,8 @@ public class Transformer {
         			useRootAction.addUsing( ClassActionImpl::new );
         		JavaActionImpl javaAction =
         			useRootAction.addUsing( JavaActionImpl::new );
-        		ServiceConfigActionImpl serviceConfigAction =
-        			useRootAction.addUsing( ServiceConfigActionImpl::new );
+        		ServiceLoaderConfigActionImpl serviceConfigAction =
+        			useRootAction.addUsing( ServiceLoaderConfigActionImpl::new );
         		ManifestActionImpl manifestAction =
         			useRootAction.addUsing( ManifestActionImpl::newManifestAction );
         		ManifestActionImpl featureAction =

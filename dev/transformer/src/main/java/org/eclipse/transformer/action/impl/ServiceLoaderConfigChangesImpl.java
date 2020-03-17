@@ -2,9 +2,9 @@ package org.eclipse.transformer.action.impl;
 
 import java.io.PrintStream;
 
-public class ServiceConfigChangesImpl extends ChangesImpl {
+public class ServiceLoaderConfigChangesImpl extends ChangesImpl {
 
-	public ServiceConfigChangesImpl() {
+	public ServiceLoaderConfigChangesImpl() {
 		super();
 
 		this.clearChanges();
