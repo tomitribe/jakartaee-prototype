@@ -1,5 +1,6 @@
 package com.ibm.ws.jakarta.transformer.action;
 
+import java.util.Map;
 import java.util.Set;
 
 public interface ContainerChanges extends Changes {
@@ -11,6 +12,9 @@ public interface ContainerChanges extends Changes {
 	int getAllUnchanged();
 	int getAllChanged();
 
+	Map<String, int[]> getChangedByAction();
+	Map<String, int[]> getUnchangedByAction();
+
 	Set<String> getActionNames();
 
 	int getChanged(Action action);
@@ -18,6 +22,14 @@ public interface ContainerChanges extends Changes {
 
 	int getUnchanged(Action action);
 	int getUnchanged(String name);
+
+	//
+
+	void add(ContainerChanges otherChanges);
+
+	boolean hasNestedChanges();
+	ContainerChanges getNestedChanges();
+	void addNested(ContainerChanges otherChanges);
 
 	//
 

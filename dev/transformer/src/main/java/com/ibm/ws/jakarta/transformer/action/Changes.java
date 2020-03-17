@@ -9,6 +9,8 @@ public interface Changes {
 	String getOutputResourceName();
 	void setOutputResourceName(String outputResourceName);
 
+	void addNestedInto(ContainerChanges containerChanges);
+
 	boolean hasChanges();
 	boolean hasNonResourceNameChanges();
 	boolean hasResourceNameChange();

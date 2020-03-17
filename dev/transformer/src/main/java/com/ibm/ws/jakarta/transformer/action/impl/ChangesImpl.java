@@ -1,6 +1,7 @@
 package com.ibm.ws.jakarta.transformer.action.impl;
 
 import com.ibm.ws.jakarta.transformer.action.Changes;
+import com.ibm.ws.jakarta.transformer.action.ContainerChanges;
 
 public abstract class ChangesImpl implements Changes {
 	public ChangesImpl() {
@@ -48,6 +49,13 @@ public abstract class ChangesImpl implements Changes {
 		// The input name will be null if the transform fails very early.
 		return ( (inputResourceName != null) &&
 				 !inputResourceName.equals(outputResourceName) );
+	}
+
+	//
+
+	@Override
+	public void addNestedInto(ContainerChanges containerChanges) {
+		// By default do nothing. 
 	}
 
 	//

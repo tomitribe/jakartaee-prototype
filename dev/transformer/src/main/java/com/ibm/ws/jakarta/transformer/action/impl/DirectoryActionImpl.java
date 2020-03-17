@@ -44,6 +44,14 @@ public class DirectoryActionImpl extends ContainerActionImpl implements Director
 
 	//
 
+	/**
+	 * The choice of using a stream or using an input stream should never occur
+	 * on a directory action.
+	 */
+	public boolean useStreams() {
+		throw new UnsupportedOperationException();
+	}
+
 	@Override
 	public boolean accept(String resourceName, File resourceFile) {
 		return ( (resourceFile != null) && resourceFile.isDirectory() );
@@ -62,6 +70,16 @@ public class DirectoryActionImpl extends ContainerActionImpl implements Director
 		File outputFile)  throws JakartaTransformException {
 
 	    inputPath = inputPath + '/' + inputFile.getName();
+
+	    // Note the asymmetry between the handling of the root directory, 
+	    // which is selected by a composite action, and the handling of sub-directories,
+	    // which are handled automatically by the directory action.
+	    //
+	    // This means that the directory action processes the entire tree
+	    // of child directories.
+	    //
+	    // The alternative would be to put the directory action as a child of itself,
+	    // and have sub-directories be accepted using composite action selection.
 
 	    if ( inputFile.isDirectory() ) {
 	    	if ( !outputFile.exists() ) {

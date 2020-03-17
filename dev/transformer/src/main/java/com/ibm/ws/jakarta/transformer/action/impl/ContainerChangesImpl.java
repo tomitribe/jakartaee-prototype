@@ -1,6 +1,7 @@
 package com.ibm.ws.jakarta.transformer.action.impl;
 
 import java.io.PrintStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -23,6 +24,8 @@ public class ContainerChangesImpl extends ChangesImpl implements ContainerChange
 		this.allSelected = 0;
 		this.allUnselected = 0;
 		this.allResources = 0;
+
+		this.allNestedChanges = null;
 	}
 
 	//
@@ -43,6 +46,8 @@ public class ContainerChangesImpl extends ChangesImpl implements ContainerChange
 		allSelected = 0;
 		allUnselected = 0;
 		allResources = 0;
+
+		allNestedChanges = null;
 
 		super.clearChanges();
 	}
@@ -73,6 +78,18 @@ public class ContainerChangesImpl extends ChangesImpl implements ContainerChange
 		allNames.addAll(unchangedNames);
 
 		return allNames;
+	}
+
+	//
+
+	@Override
+	public Map<String, int[]> getChangedByAction() {
+		return Collections.unmodifiableMap( changedByAction );
+	}
+
+	@Override
+	public Map<String, int[]> getUnchangedByAction() {
+		return Collections.unmodifiableMap( unchangedByAction );
 	}
 
 	//
@@ -127,6 +144,8 @@ public class ContainerChangesImpl extends ChangesImpl implements ContainerChange
 	@Override
 	public void record(Action action) {
 		record( action.getName(), action.hasChanges() );
+
+		action.getChanges().addNestedInto(this);
 	}
 
 	@Override
@@ -162,33 +181,87 @@ public class ContainerChangesImpl extends ChangesImpl implements ContainerChange
 		allResources++;
 		allUnselected++;
 	}
-	
+
+	@Override
+	public void addNestedInto(ContainerChanges containerChanges) {
+		containerChanges.addNested(this);
+	}
+
+	//
+
+	private ContainerChangesImpl allNestedChanges;
+
+	@Override
+	public boolean hasNestedChanges() {
+		return ( allNestedChanges != null );
+	}
+
+	@Override
+	public ContainerChangesImpl getNestedChanges() {
+		return allNestedChanges;
+	}
+
+	/**
+	 * Add other changes as nested changes.
+	 *
+	 * Both the immediate part of the other changes and the nested part
+	 * of the other changes are added.
+	 *
+	 * @param otherChanges Other container changes to add as nested changes.
+	 */
+	@Override
+	public void addNested(ContainerChanges otherChanges) {
+		if ( allNestedChanges == null ) {
+			allNestedChanges = new ContainerChangesImpl();
+		}
+		allNestedChanges.add(otherChanges);
+
+		ContainerChanges otherNestedChanges = otherChanges.getNestedChanges();
+		if ( otherNestedChanges != null ) {
+			allNestedChanges.add(otherNestedChanges);
+		}
+	}
+
+	@Override
+	public void add(ContainerChanges otherChanges) {
+		addChangeMap( this.changedByAction, otherChanges.getChangedByAction() );
+		addChangeMap( this.unchangedByAction, otherChanges.getUnchangedByAction() );
+
+		this.allChanged += otherChanges.getAllChanged();
+		this.allUnchanged += otherChanges.getAllUnchanged();
+
+		this.allSelected += otherChanges.getAllSelected();
+		this.allUnselected += otherChanges.getAllUnselected();
+		this.allResources += otherChanges.getAllResources();
+	}
+
+	private void addChangeMap(
+		Map<String, int[]> thisChangeMap, Map<String, int[]> otherChangeMap) {
+
+		int[] nextChanges = new int[1];
+		for ( Map.Entry<String, int[]> mapEntry : otherChangeMap.entrySet() ) {
+			int[] thisChanges = thisChangeMap.putIfAbsent( mapEntry.getKey(), nextChanges );
+			if ( thisChanges == null ) {
+				thisChanges = nextChanges;
+				nextChanges = new int[1];
+			}
+			thisChanges[0] += mapEntry.getValue()[0];
+		}
+	}
+
+	//
+
 	private static final String DASH_LINE =
-			"================================================================================\n";
+		"================================================================================\n";
+	private static final String SMALL_DASH_LINE =
+		"--------------------------------------------------------------------------------\n";
+
 	private static final String DATA_LINE =
-			"[ %22s ] [ %6s ] %10s [ %6s ] %8s [ %6s ]\n";
+		"[ %22s ] [ %6s ] %10s [ %6s ] %8s [ %6s ]\n";
 
-    @Override
-	public void displayChanges(PrintStream stream, String inputPath, String outputPath) {
-		// ================================================================================
-		// [ Input  ] [ c:\dev\jakarta-repo-pub\jakartaee-prototype\dev\transformer\app\test.jar ]
-		// [ Output ] [ c:\dev\jakarta-repo-pub\jakartaee-prototype\dev\transformer\app\testOutput.jar ]
-		// ================================================================================  
-		// [          All Resources ] [     55 ] Unselected [      6 ] Selected [     49 ]
-		// ================================================================================  
-		// [            All Actions ] [     49 ]   Unchangd [     43 ]  Changed [      6 ]
-		// [           Class Action ] [     41 ]  Unchanged [     38 ]  Changed [      3 ]
-		// [        Manifest Action ] [      1 ]  Unchanged [      0 ]  Changed [      1 ]
-		// [  Service Config Action ] [      7 ]  Unchanged [      5 ]  Changed [      2 ]
-		// ================================================================================
-
-		stream.printf( DASH_LINE );
-		stream.printf( "Input  [ %s ] as [ %s ]\n", getInputResourceName(), inputPath );
-		stream.printf( "Output [ %s ] as [ %s ]\n", getOutputResourceName(), outputPath );
-
-		stream.printf( DASH_LINE );
+	protected void displayChanges(PrintStream stream) {
 		stream.printf( DATA_LINE,
-			"All Resources", this.getAllResources(),
+			"All Resources", getAllResources(),
 			"Unselected", getAllUnselected(),
 			"Selected", getAllSelected() );
 
@@ -206,7 +279,46 @@ public class ContainerChangesImpl extends ChangesImpl implements ContainerChange
 				"Unchanged", useUnchangedByAction,
 				"Changed", useChangedByAction);
 		}
+	}
+
+    @Override
+	public void displayChanges(PrintStream stream, String inputPath, String outputPath) {
+		// ================================================================================
+		// [ Input  ] [ test.jar ]
+    	//            [ c:\dev\jakarta-repo-pub\jakartaee-prototype\dev\transformer\app\test.jar ]
+		// [ Output ] [ output_test.jar ]
+    	//            [ c:\dev\jakarta-repo-pub\jakartaee-prototype\dev\transformer\app\testOutput.jar ]
+		// ================================================================================  
+		// [          All Resources ] [     55 ] Unselected [      6 ] Selected [     49 ]
+		// ================================================================================
+    	// [ Immediate changes: ]
+		// --------------------------------------------------------------------------------
+		// [            All Actions ] [     49 ]   Unchangd [     43 ]  Changed [      6 ]
+		// [           Class Action ] [     41 ]  Unchanged [     38 ]  Changed [      3 ]
+		// [        Manifest Action ] [      1 ]  Unchanged [      0 ]  Changed [      1 ]
+		// [  Service Config Action ] [      7 ]  Unchanged [      5 ]  Changed [      2 ]
+		// ================================================================================
+    	// [ Nested changes: ]
+		// --------------------------------------------------------------------------------
+    	// [ ... ]
+		// ================================================================================
 
 		stream.printf( DASH_LINE );
+
+		stream.printf( "[ Input  ] [ %s ]\n           [ %s ]\n", getInputResourceName(), inputPath );
+		stream.printf( "[ Output ] [ %s ]\n           [ %s ]\n", getOutputResourceName(), outputPath );
+		stream.printf( DASH_LINE );
+
+		stream.printf( "[ Immediate changes: ]\n");
+		stream.printf( SMALL_DASH_LINE );
+		displayChanges(stream);
+		stream.printf( DASH_LINE );
+
+		if ( allNestedChanges != null ) {
+			stream.printf( "[ Nested changes: ]\n");
+			stream.printf( SMALL_DASH_LINE );
+			allNestedChanges.displayChanges(stream);
+			stream.printf( DASH_LINE );
+		}
 	}
 }

@@ -300,6 +300,10 @@ public abstract class ActionImpl implements Action {
 
 	//
 
+	public boolean useStreams() {
+		return false;
+	}
+
 	/**
 	 * Read bytes from an input stream.  Answer byte data and
 	 * a count of bytes read.
