@@ -9,10 +9,9 @@ import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
 import org.assertj.core.api.Assertions;
+import org.eclipse.transformer.util.ByteData;
+import org.eclipse.transformer.util.FileUtils;
 import org.junit.jupiter.api.Test;
-
-import com.ibm.ws.jakarta.transformer.util.ByteData;
-import com.ibm.ws.jakarta.transformer.util.FileUtils;
 
 public class TestURL {
 

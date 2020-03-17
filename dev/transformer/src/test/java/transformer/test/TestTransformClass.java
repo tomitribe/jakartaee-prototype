@@ -16,24 +16,23 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.eclipse.transformer.TransformException;
+import org.eclipse.transformer.TransformProperties;
+import org.eclipse.transformer.action.BundleData;
+import org.eclipse.transformer.action.impl.ClassActionImpl;
+import org.eclipse.transformer.action.impl.ClassChangesImpl;
+import org.eclipse.transformer.action.impl.InputBufferImpl;
+import org.eclipse.transformer.action.impl.JarActionImpl;
+import org.eclipse.transformer.action.impl.LoggerImpl;
+import org.eclipse.transformer.action.impl.SelectionRuleImpl;
+import org.eclipse.transformer.action.impl.ServiceConfigActionImpl;
+import org.eclipse.transformer.action.impl.SignatureRuleImpl;
+import org.eclipse.transformer.util.FileUtils;
+import org.eclipse.transformer.util.InputStreamData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.ibm.ws.jakarta.transformer.JakartaTransformException;
-import com.ibm.ws.jakarta.transformer.JakartaTransformProperties;
-import com.ibm.ws.jakarta.transformer.JakartaTransformer;
-import com.ibm.ws.jakarta.transformer.action.BundleData;
-import com.ibm.ws.jakarta.transformer.action.ClassAction;
-import com.ibm.ws.jakarta.transformer.action.ClassChanges;
-import com.ibm.ws.jakarta.transformer.action.impl.ClassActionImpl;
-import com.ibm.ws.jakarta.transformer.action.impl.InputBufferImpl;
-import com.ibm.ws.jakarta.transformer.action.impl.JarActionImpl;
-import com.ibm.ws.jakarta.transformer.action.impl.LoggerImpl;
-import com.ibm.ws.jakarta.transformer.action.impl.SelectionRuleImpl;
-import com.ibm.ws.jakarta.transformer.action.impl.ServiceConfigActionImpl;
-import com.ibm.ws.jakarta.transformer.action.impl.SignatureRuleImpl;
-import com.ibm.ws.jakarta.transformer.util.FileUtils;
-import com.ibm.ws.jakarta.transformer.util.InputStreamData;
+import org.eclipse.transformer.Transformer;
 
 import transformer.test.data.Sample_InjectAPI_Jakarta;
 import transformer.test.data.Sample_InjectAPI_Javax;
@@ -159,7 +158,7 @@ public class TestTransformClass {
 			LoggerImpl logger = createLogger( System.out, !LoggerImpl.IS_TERSE, LoggerImpl.IS_VERBOSE );
 
 			Map<String, String> invertedRenames =
-				JakartaTransformProperties.invert( getPackageRenames() );
+				TransformProperties.invert( getPackageRenames() );
 
 			javaxJarAction = new JarActionImpl(
 				logger,
@@ -235,8 +234,8 @@ public class TestTransformClass {
 	public static final String TRANSFORMER_RESOURCE_NAME = "com/ibm/ws/jakarta/transformer";
 
 	public static Map<String, String> getStandardRenames() throws IOException {
-		String transformerResourceName = JakartaTransformer.class.getPackage().getName().replace('.', '/');
-		String renamesResourceName = transformerResourceName + '/' + JakartaTransformer.DEFAULT_RENAMES_REFERENCE;
+		String transformerResourceName = Transformer.class.getPackage().getName().replace('.', '/');
+		String renamesResourceName = transformerResourceName + '/' + Transformer.DEFAULT_RENAMES_REFERENCE;
 
 		InputStream renamesInputStream = getResourceStream(renamesResourceName); // throws IOException
 		Reader renamesReader = new InputStreamReader(renamesInputStream);
@@ -254,7 +253,7 @@ public class TestTransformClass {
 		return renames;
 	}
 
-	public ClassAction createStandardClassAction() throws IOException {
+	public ClassActionImpl createStandardClassAction() throws IOException {
 		LoggerImpl logger =
 			createLogger( System.out, !LoggerImpl.IS_TERSE, LoggerImpl.IS_VERBOSE );
 
@@ -267,13 +266,13 @@ public class TestTransformClass {
 	}
 
 	@Test
-	public void testAnnotatedServlet() throws JakartaTransformException, IOException {
-		ClassAction classAction = createStandardClassAction(); // throws IOException
+	public void testAnnotatedServlet() throws TransformException, IOException {
+		ClassActionImpl classAction = createStandardClassAction(); // throws IOException
 
 		String resourceName = TEST_DATA_RESOURCE_NAME + '/' + ANNOTATED_SERVLET_RESOURCE_NAME;
 		InputStream inputStream = getResourceStream(resourceName); // throws IOException
 
-		InputStreamData outputStreamData = classAction.apply(resourceName, inputStream); // throws JakartaTransformException
+		InputStreamData outputStreamData = classAction.apply(resourceName, inputStream); // throws TransformException
 		display( classAction.getChanges() );
 
 		OutputStream outputStream = new FileOutputStream("build" + '/' + ANNOTATED_SERVLET_RESOURCE_NAME); // throws FileNotFoundException
@@ -284,7 +283,7 @@ public class TestTransformClass {
 		}
 	}
 
-	public void display(ClassChanges classChanges) {
+	public void display(ClassChangesImpl classChanges) {
 		System.out.println("Input class [ " + classChanges.getInputClassName() + " ]");
 		System.out.println("Output class [ " + classChanges.getOutputClassName() + " ]");
 
@@ -329,14 +328,14 @@ public class TestTransformClass {
 	public static final String DIRECT_STRINGS_RESOURCE_NAME = "Sample_DirectStrings.class";
 
 	@Test
-	public void testDirectStrings() throws JakartaTransformException, IOException {
-		ClassAction classAction = createDirectClassAction();
+	public void testDirectStrings() throws TransformException, IOException {
+		ClassActionImpl classAction = createDirectClassAction();
 
 		String resourceName = TEST_DATA_RESOURCE_NAME + '/' + DIRECT_STRINGS_RESOURCE_NAME;
 		InputStream inputStream = getResourceStream(resourceName); // throws IOException
 
 		@SuppressWarnings("unused")
-		InputStreamData outputStreamData = classAction.apply(resourceName, inputStream); // throws JakartaTransformException
+		InputStreamData outputStreamData = classAction.apply(resourceName, inputStream); // throws TransformException
 		display( classAction.getChanges() );
 
 		int expectedChanges = 5;

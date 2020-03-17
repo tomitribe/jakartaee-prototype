@@ -14,7 +14,7 @@ Bundle-SCM: connection=scm:git:https://github.com/OpenLiberty/open-lib
  erty.git, developerConnection=scm:git:https://github.com:OpenLiberty/
  open-liberty.git, url=https://github.com/OpenLiberty/open-liberty/tre
  e/master
-Bundle-SymbolicName: com.ibm.ws.webcontainer.jakarta
+Bundle-SymbolicName: com.ibm.ws.webcontainer.jakarta; singleton:=true
 Bundle-Vendor: IBM
 Bundle-Version: 2.0
 Created-By: 11.0.2 (Eclipse OpenJ9)

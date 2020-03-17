@@ -4,13 +4,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 
+import org.eclipse.transformer.action.impl.JavaActionImpl;
+import org.eclipse.transformer.action.impl.ManifestActionImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.ibm.ws.jakarta.transformer.JakartaTransformer;
-import com.ibm.ws.jakarta.transformer.JakartaTransformer.TransformOptions;
-import com.ibm.ws.jakarta.transformer.action.impl.JavaActionImpl;
-import com.ibm.ws.jakarta.transformer.action.impl.ManifestActionImpl;
+import org.eclipse.transformer.Transformer;
+import org.eclipse.transformer.Transformer.TransformOptions;
 
 class TestCommandLine {
     
@@ -41,7 +41,7 @@ class TestCommandLine {
     	String actionClassName,
     	String inputFileName, String outputFileName) throws Exception {
 
-        JakartaTransformer t = new JakartaTransformer(System.out, System.err);
+        Transformer t = new Transformer(System.out, System.err);
 
         String[] args = new String[] { inputFileName, "-o"};
 
