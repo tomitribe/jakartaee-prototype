@@ -24,12 +24,11 @@ import org.eclipse.transformer.action.ActionType;
 public class JarActionImpl extends ZipActionImpl {
 
 	public JarActionImpl(
-		LoggerImpl logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
 
-		super(logger, buffer, selectionRule, signatureRule);
+		super(buffer, selectionRule, signatureRule);
 	}
 
 	//

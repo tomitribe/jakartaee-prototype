@@ -41,12 +41,11 @@ public class XMLActionImpl extends ActionImpl {
 	public static final String CLASS_NAME = XMLActionImpl.class.getSimpleName();
 
 	public XMLActionImpl(
-		LoggerImpl logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
 
-		super(logger, buffer, selectionRule, signatureRule);
+		super(buffer, selectionRule, signatureRule);
 	}
 
 	//

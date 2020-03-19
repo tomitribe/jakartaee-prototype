@@ -28,12 +28,11 @@ import org.eclipse.transformer.util.ByteData;
 public class NullActionImpl extends ActionImpl {
 
 	public NullActionImpl(
-			LoggerImpl logger,
 			InputBufferImpl buffer,
 			SelectionRuleImpl selectionRule,
 			SignatureRuleImpl signatureRule) {
 
-		super(logger, buffer, selectionRule, signatureRule);
+		super(buffer, selectionRule, signatureRule);
 	}
 
 	//

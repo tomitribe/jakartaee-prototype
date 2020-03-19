@@ -37,7 +37,6 @@ import org.eclipse.transformer.TransformException;
 import org.eclipse.transformer.action.BundleData;
 import org.eclipse.transformer.action.impl.BundleDataImpl;
 import org.eclipse.transformer.action.impl.InputBufferImpl;
-import org.eclipse.transformer.action.impl.LoggerImpl;
 import org.eclipse.transformer.action.impl.ManifestActionImpl;
 import org.eclipse.transformer.action.impl.SelectionRuleImpl;
 import org.eclipse.transformer.action.impl.SignatureRuleImpl;
@@ -46,30 +45,25 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class TestTransformManifest {
-	public LoggerImpl createLogger(PrintStream printStream, boolean isTerse, boolean isVerbose) {
-		return new LoggerImpl(printStream, isTerse, isVerbose);
-	}
 
 	public InputBufferImpl createBuffer() {
 		return new InputBufferImpl();
 	}
 
 	public SelectionRuleImpl createSelectionRule(
-		LoggerImpl logger,
 		Set<String> useIncludes,
 		Set<String> useExcludes) {
 
-		return new SelectionRuleImpl( logger, useIncludes, useExcludes );
+		return new SelectionRuleImpl(useIncludes, useExcludes );
 	}
 
 	public SignatureRuleImpl createSignatureRule(
-		LoggerImpl logger,
 		Map<String, String> usePackageRenames,
 		Map<String, String> usePackageVersions,
 		Map<String, BundleData> bundleData,
 		Map<String, String> directStrings) {
 
-		return new SignatureRuleImpl( logger, usePackageRenames, usePackageVersions, bundleData, directStrings );
+		return new SignatureRuleImpl(usePackageRenames, usePackageVersions, bundleData, directStrings );
 	}
 
 	//
@@ -174,13 +168,11 @@ public class TestTransformManifest {
 
 	public ManifestActionImpl getJakartaManifestAction() {
 		if ( jakartaManifestAction == null ) {
-			LoggerImpl logger = createLogger( System.out, !LoggerImpl.IS_TERSE, LoggerImpl.IS_VERBOSE );
-
+	
 			jakartaManifestAction = new ManifestActionImpl(
-				logger,
 				new InputBufferImpl(),
-				new SelectionRuleImpl( logger, getIncludes(), getExcludes() ),
-				new SignatureRuleImpl( logger,
+				new SelectionRuleImpl( getIncludes(), getExcludes() ),
+				new SignatureRuleImpl(
 					getPackageRenames(), getPackageVersions(), getBundleUpdates(), getDirectStrings() ),
 				ManifestActionImpl.IS_MANIFEST );
 		}
@@ -191,13 +183,11 @@ public class TestTransformManifest {
 
 	public ManifestActionImpl getJakartaFeatureAction() {
 		if ( jakartaFeatureAction == null ) {
-			LoggerImpl logger = createLogger( System.out, !LoggerImpl.IS_TERSE, LoggerImpl.IS_VERBOSE );
 
 			jakartaFeatureAction = new ManifestActionImpl(
-				logger,
 				new InputBufferImpl(),
-				new SelectionRuleImpl( logger, getIncludes(), getExcludes() ),
-				new SignatureRuleImpl( logger, getPackageRenames(), getPackageVersions(), null, null ),
+				new SelectionRuleImpl( getIncludes(), getExcludes() ),
+				new SignatureRuleImpl( getPackageRenames(), getPackageVersions(), null, null ),
 				ManifestActionImpl.IS_FEATURE );
 		}
 
@@ -453,13 +443,12 @@ public class TestTransformManifest {
 	 */
 	class ManifestActionImpl_Test extends ManifestActionImpl {
 		public ManifestActionImpl_Test (
-			LoggerImpl logger,
 			InputBufferImpl buffer,
 			SelectionRuleImpl selectionRule,
 			SignatureRuleImpl signatureRule,
 			boolean isManifest) {
 
-			super(logger, buffer, selectionRule, signatureRule, isManifest);
+			super(buffer, selectionRule, signatureRule, isManifest);
 		}
 
 		public boolean callIsTrueMatch(String text, int matchStart, int keyLen ) {
@@ -479,13 +468,11 @@ public class TestTransformManifest {
 	
 	protected ManifestActionImpl_Test getManifestAction() {
 		if ( manifestAction_test == null ) {
-			LoggerImpl logger = new LoggerImpl( System.out, !LoggerImpl.IS_TERSE, LoggerImpl.IS_VERBOSE);
 
 			manifestAction_test = new ManifestActionImpl_Test(
-				logger,
 				new InputBufferImpl(),
-				new SelectionRuleImpl( logger, getIncludes(), getExcludes() ), 
-				new SignatureRuleImpl( logger, getPackageRenames(), getPackageVersions(), null, null ),
+				new SelectionRuleImpl( getIncludes(), getExcludes() ), 
+				new SignatureRuleImpl( getPackageRenames(), getPackageVersions(), null, null ),
 				ManifestActionImpl.IS_MANIFEST );
 		}
 

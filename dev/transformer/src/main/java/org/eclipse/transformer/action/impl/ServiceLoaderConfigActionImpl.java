@@ -54,12 +54,11 @@ public class ServiceLoaderConfigActionImpl extends ActionImpl {
 	//
 
 	public ServiceLoaderConfigActionImpl(
-		LoggerImpl logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
 
-		super(logger, buffer, selectionRule, signatureRule);
+		super(buffer, selectionRule, signatureRule);
 	}
 
 	//
@@ -117,7 +116,7 @@ public class ServiceLoaderConfigActionImpl extends ActionImpl {
 		if ( outputName == null ) {
 			outputName = inputName;
 		} else {
-			log("Service name [ %s ]\n          -> [ %s ]\n", inputName, outputName);
+			logger.info("Service name [ {} ]\n          -> [ {} ]\n", inputName, outputName);
 		}
 		setResourceNames(inputName, outputName);
 
@@ -126,7 +125,7 @@ public class ServiceLoaderConfigActionImpl extends ActionImpl {
 		try {
 			inputReader = new InputStreamReader(inputStream, "UTF-8");
 		} catch ( UnsupportedEncodingException e ) {
-			error("Strange: UTF-8 is an unrecognized encoding for reading [ %s ]\n", e, inputName);
+			logger.error("Strange: UTF-8 is an unrecognized encoding for reading [ {} ]\n", inputName, e);
 			return null;
 		}
 
@@ -137,7 +136,7 @@ public class ServiceLoaderConfigActionImpl extends ActionImpl {
 		try {
 			outputWriter = new OutputStreamWriter(outputStream, "UTF-8");
 		} catch ( UnsupportedEncodingException e ) {
-			error("Strange: UTF-8 is an unrecognized encoding for writing [ %s ]\n", e, inputName);
+			logger.error("Strange: UTF-8 is an unrecognized encoding for writing [ {} ]\n", inputName, e);
 			return null;
 		}
 
@@ -146,14 +145,14 @@ public class ServiceLoaderConfigActionImpl extends ActionImpl {
 		try {
 			transform(reader, writer); // throws IOException
 		} catch ( IOException e ) {
-			error("Failed to transform [ %s ]\n", e, inputName);
+			logger.error("Failed to transform [ {} ]\n", inputName, e);
 			return null;
 		}
 
 		try {
 			writer.flush(); // throws
 		} catch ( IOException e ) {
-			error("Failed to flush [ %s ]\n", e, inputName);
+			logger.error("Failed to flush [ {} ]\n", inputName, e);
 			return null;
 		}
 

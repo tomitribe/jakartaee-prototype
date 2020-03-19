@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.util.Map;
 
 import org.eclipse.transformer.TransformException;
@@ -33,6 +32,8 @@ import org.eclipse.transformer.action.SignatureRule.SignatureType;
 import org.eclipse.transformer.util.ByteData;
 import org.eclipse.transformer.util.FileUtils;
 import org.eclipse.transformer.util.InputStreamData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import aQute.bnd.signatures.ArrayTypeSignature;
 import aQute.bnd.signatures.ClassSignature;
@@ -50,13 +51,12 @@ import aQute.lib.io.IO;
 
 public abstract class ActionImpl implements Action {
 
+    static Logger logger = LoggerFactory.getLogger(ActionImpl.class);
+    
 	public ActionImpl(
-		LoggerImpl logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
-
-		this.logger = logger;
 
 		this.buffer = buffer;
 
@@ -70,51 +70,14 @@ public abstract class ActionImpl implements Action {
 
 	public static interface ActionInit<A extends ActionImpl> {
 		A apply(
-			LoggerImpl logger,
 			InputBufferImpl buffer,
 			SelectionRuleImpl selectionRule,
 			SignatureRuleImpl signatureRule);
 	}
 
 	public <A extends ActionImpl> A createUsing(ActionInit<A> init) {
-		return init.apply( getLogger(), getBuffer(), getSelectionRule(), getSignatureRule() );
+		return init.apply( getBuffer(), getSelectionRule(), getSignatureRule() );
 	}
-
-	//
-
-	private final LoggerImpl logger;
-
-	public LoggerImpl getLogger() {
-		return logger;
-	}
-
-	public PrintStream getLogStream() {
-		return getLogger().getLogStream();
-	}
-
-	public boolean getIsTerse() {
-		return getLogger().getIsTerse();
-	}
-
-	public boolean getIsVerbose() {
-		return getLogger().getIsVerbose();
-	}
-
-	public void log(String text, Object... parms) {
-		getLogger().log(text, parms);
-	}
-
-	public void verbose(String text, Object... parms) {
-		getLogger().verbose(text, parms);
-	}
-
-    public void error(String message, Object... parms) {
-    	getLogger().error(message, parms);
-    }
-
-    public void error(String message, Throwable th, Object... parms) {
-    	getLogger().error(message, th, parms);
-    }
 
 	//
 
@@ -405,24 +368,24 @@ public abstract class ActionImpl implements Action {
 		String className = getClass().getSimpleName();
 		String methodName = "apply";
 
-		verbose("[ %s.%s ]: Requested [ %s ] [ %s ]\n", className, methodName, inputName, inputCount);
+		logger.debug("[ %s.%s ]: Requested [ %s ] [ %s ]\n", className, methodName, inputName, inputCount);
 		ByteData inputData = read(inputName, inputStream, inputCount); // throws JakartaTransformException
-		verbose("[ %s.%s ]: Obtained [ %s ] [ %s ] [ %s ]\n", className, methodName, inputName, inputData.length, inputData.data);
+		logger.debug("[ %s.%s ]: Obtained [ %s ] [ %s ] [ %s ]\n", className, methodName, inputName, inputData.length, inputData.data);
 
 		ByteData outputData;
 		try {
 			outputData = apply(inputName, inputData.data, inputData.length);
 			// throws JakartaTransformException
 		} catch ( Throwable th ) {
-			error("Transform failure [ %s ]\n", th, inputName);
+			logger.error("Transform failure [ %s ]\n", th, inputName);
 			outputData = null;			
 		}
 
 		if ( outputData == null ) {
-			verbose("[ %s.%s ]: Null transform\n", className, methodName);
+			logger.debug("[ %s.%s ]: Null transform\n", className, methodName);
 			outputData = inputData;
 		} else {
-			verbose(
+			logger.debug(
 				"[ %s.%s ]: Active transform [ %s ] [ %s ] [ %s ]\n",
 				className, methodName,
 				outputData.name, outputData.length, outputData.data);
@@ -441,24 +404,24 @@ public abstract class ActionImpl implements Action {
 		String className = getClass().getSimpleName();
 		String methodName = "apply";
 
-		verbose("[ %s.%s ]: Requested [ %s ] [ %s ]\n", className, methodName, inputName, inputCount);
+		logger.debug("[ %s.%s ]: Requested [ %s ] [ %s ]\n", className, methodName, inputName, inputCount);
 		ByteData inputData = read(inputName, inputStream, intInputCount); // throws JakartaTransformException
-		verbose("[ %s.%s ]: Obtained [ %s ] [ %s ]\n", className, methodName, inputName, inputData.length);
+		logger.debug("[ %s.%s ]: Obtained [ %s ] [ %s ]\n", className, methodName, inputName, inputData.length);
 
 		ByteData outputData;
 		try {
 			outputData = apply(inputName, inputData.data, inputData.length);
 			// throws JakartaTransformException
 		} catch ( Throwable th ) {
-			error("Transform failure [ %s ]\n", th, inputName);
+			logger.error("Transform failure [ %s ]\n", th, inputName);
 			outputData = null;
 		}
 
 		if ( outputData == null ) {
-			verbose("[ %s.%s ]: Null transform\n", className, methodName);
+			logger.debug("[ %s.%s ]: Null transform\n", className, methodName);
 			outputData = inputData;
 		} else {
-			verbose("[ %s.%s ]: Active transform [ %s ] [ %s ]\n", className, methodName, outputData.name, outputData.length);
+			logger.debug("[ %s.%s ]: Active transform [ %s ] [ %s ]\n", className, methodName, outputData.name, outputData.length);
 		}
 
 		write(outputData, outputStream); // throws JakartaTransformException		
@@ -473,7 +436,7 @@ public abstract class ActionImpl implements Action {
 		throws TransformException {
 
 		long inputLength = inputFile.length();
-        verbose("Input [ %s ] Length [ %s ]\n", inputName, inputLength);
+        logger.debug("Input [ %s ] Length [ %s ]\n", inputName, inputLength);
 
 		InputStream inputStream = openInputStream(inputFile);
 		try {

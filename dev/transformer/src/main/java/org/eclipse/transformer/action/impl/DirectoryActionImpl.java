@@ -28,12 +28,11 @@ import org.eclipse.transformer.action.ContainerChanges;
 
 public class DirectoryActionImpl extends ContainerActionImpl {
 
-    public DirectoryActionImpl(LoggerImpl logger,
-                               InputBufferImpl buffer,
+    public DirectoryActionImpl(InputBufferImpl buffer,
                                SelectionRuleImpl selectionRule,
                                SignatureRuleImpl signatureRule) {
 
-            super(logger, buffer, selectionRule, signatureRule);
+            super(buffer, selectionRule, signatureRule);
     }
 
 	//

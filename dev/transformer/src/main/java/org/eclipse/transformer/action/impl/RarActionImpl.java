@@ -23,12 +23,11 @@ import org.eclipse.transformer.action.ActionType;
 
 public class RarActionImpl extends ContainerActionImpl {
 	public RarActionImpl(
-		LoggerImpl logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
 
-		super(logger, buffer, selectionRule, signatureRule);
+		super(buffer, selectionRule, signatureRule);
 	}
 
 	//

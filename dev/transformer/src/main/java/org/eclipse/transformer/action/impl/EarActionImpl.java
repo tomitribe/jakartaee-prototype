@@ -23,12 +23,11 @@ import org.eclipse.transformer.action.ActionType;
 
 public class EarActionImpl extends ContainerActionImpl {
 	public EarActionImpl(
-		LoggerImpl logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
 
-		super(logger, buffer, selectionRule, signatureRule);
+		super(buffer, selectionRule, signatureRule);
 	}
 
 	//

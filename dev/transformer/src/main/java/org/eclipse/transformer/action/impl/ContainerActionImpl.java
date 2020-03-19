@@ -46,12 +46,11 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 	}
 
 	public ContainerActionImpl(
-		LoggerImpl logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
 
-		super(logger, buffer, selectionRule, signatureRule);
+		super(buffer, selectionRule, signatureRule);
 
 		this.compositeAction = createUsing( CompositeActionImpl::new );
 	}
@@ -112,22 +111,22 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 	//
 
 	protected void recordUnaccepted(String resourceName) {
-		verbose( "Resource [ %s ]: Not accepted\n", resourceName );
+		logger.debug( "Resource [ {} ]: Not accepted\n", resourceName );
 
 		getChanges().record();
 	}
 
 	protected void recordUnselected(Action action, boolean hasChanges, String resourceName) {
-		verbose(
-			"Resource [ %s ] Action [ %s ]: Accepted but not selected\n",
+		logger.debug(
+			"Resource [ {} ] Action [ {} ]: Accepted but not selected\n",
 			resourceName, action.getName() );
 
 		getChanges().record(action, hasChanges);
 	}
 
 	protected void recordTransform(Action action, String resourceName) {
-		verbose(
-			"Resource [ %s ] Action [ %s ]: Changes [ %s ]\n",
+		logger.debug(
+			"Resource [ {} ] Action [ {} ]: Changes [ {} ]\n",
 			resourceName, action.getName(), action.hasChanges() );
 
 		getChanges().record(action);
@@ -189,7 +188,7 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 				inputName = inputEntry.getName();
 				long inputLength = inputEntry.getSize();
 
-				verbose("[ %s.%s ] [ %s ] Size [ %s ]\n",
+				logger.debug("[ {}.{} ] [ {} ] Size [ {} ]\n",
 					getClass().getSimpleName(), "applyZip", inputName, inputLength);
 
 				boolean selected = select(inputName);
@@ -210,7 +209,7 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 					zipOutputStream.closeEntry(); // throws IOException
 
 				} else {
-//					if ( getIsVerbose() ) {
+
 //						long inputCRC = inputEntry.getCrc();
 //
 //						int inputMethod = inputEntry.getMethod();
@@ -223,13 +222,12 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 //						String className = getClass().getSimpleName();
 //						String methodName = "applyZip";
 //
-//						verbose("[ %s.%s ] [ %s ] Size [ %s ] CRC [ %s ]\n",
+//						logger.debug("[ {}.{} ] [ {} ] Size [ {} ] CRC [ {} ]\n",
 //							className, methodName, inputName, inputLength, inputCRC);
-//						verbose("[ %s.%s ] [ %s ] Compressed size [ %s ] Method [ %s ]\n",
+//						logger.debug("[ {}.{} ] [ {} ] Compressed size [ {} ] Method [ {} ]\n",
 //								className, methodName, inputName, inputCompressed, inputMethod);
-//						verbose("[ %s.%s ] [ %s ] Created [ %s ] Accessed [ %s ] Modified [ %s ]\n",
+//						logger.debug("[ {}.{} ] [ {} ] Created [ {} ] Accessed [ {} ] Modified [ {} ]\n",
 //								className, methodName, inputName, inputCreation, inputAccess, inputModified);
-//					}
 
 					// Archive type actions are processed using streams,
 					// while non-archive type actions do a full read of the entry

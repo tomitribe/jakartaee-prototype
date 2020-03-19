@@ -37,12 +37,11 @@ public class CompositeActionImpl extends ActionImpl implements CompositeAction {
 	}
 
 	public CompositeActionImpl(
-		LoggerImpl logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
 
-		super(logger, buffer, selectionRule, signatureRule);
+		super(buffer, selectionRule, signatureRule);
 
 		this.actions = new ArrayList<ActionImpl>();
 		this.acceptedAction = null;

@@ -23,12 +23,11 @@ import org.eclipse.transformer.action.ActionType;
 
 public class WarActionImpl extends ContainerActionImpl {
 	public WarActionImpl(
-		LoggerImpl logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
 
-		super(logger, buffer, selectionRule, signatureRule);
+		super(buffer, selectionRule, signatureRule);
 	}
 
 	//

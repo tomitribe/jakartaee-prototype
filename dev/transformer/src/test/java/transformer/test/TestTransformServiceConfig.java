@@ -33,7 +33,6 @@ import org.eclipse.transformer.TransformException;
 import org.eclipse.transformer.TransformProperties;
 import org.eclipse.transformer.action.BundleData;
 import org.eclipse.transformer.action.impl.InputBufferImpl;
-import org.eclipse.transformer.action.impl.LoggerImpl;
 import org.eclipse.transformer.action.impl.SelectionRuleImpl;
 import org.eclipse.transformer.action.impl.ServiceLoaderConfigActionImpl;
 import org.eclipse.transformer.action.impl.SignatureRuleImpl;
@@ -41,30 +40,25 @@ import org.eclipse.transformer.util.InputStreamData;
 import org.junit.jupiter.api.Test;
 
 public class TestTransformServiceConfig {
-	public LoggerImpl createLogger(PrintStream printStream, boolean isTerse, boolean isVerbose) {
-		return new LoggerImpl(printStream, isTerse, isVerbose);
-	}
 
 	public InputBufferImpl createBuffer() {
 		return new InputBufferImpl();
 	}
 
 	public SelectionRuleImpl createSelectionRule(
-		LoggerImpl logger,
 		Set<String> useIncludes,
 		Set<String> useExcludes) {
 
-		return new SelectionRuleImpl( logger, useIncludes, useExcludes );
+		return new SelectionRuleImpl( useIncludes, useExcludes );
 	}
 
 	public SignatureRuleImpl createSignatureRule(
-		LoggerImpl logger,
 		Map<String, String> usePackageRenames,
 		Map<String, String> usePackageVersions,
 		Map<String, BundleData> bundleData,
 		Map<String, String> directStrings) {
 
-		return new SignatureRuleImpl( logger, usePackageRenames, usePackageVersions, bundleData, directStrings );
+		return new SignatureRuleImpl(usePackageRenames, usePackageVersions, bundleData, directStrings );
 	}
 
 	//
@@ -129,13 +123,11 @@ public class TestTransformServiceConfig {
 
 	public ServiceLoaderConfigActionImpl getJakartaServiceAction() {
 		if ( jakartaServiceAction == null ) {
-			LoggerImpl logger = createLogger( System.out, !LoggerImpl.IS_TERSE, LoggerImpl.IS_VERBOSE );
 
 			jakartaServiceAction = new ServiceLoaderConfigActionImpl(
-					logger,
 					createBuffer(),
-					createSelectionRule( logger, getIncludes(), getExcludes() ),
-					createSignatureRule( logger, getPackageRenames(), null, null, null ) );
+					createSelectionRule( getIncludes(), getExcludes() ),
+					createSignatureRule( getPackageRenames(), null, null, null ) );
 		}
 		return jakartaServiceAction;
 	}
@@ -143,13 +135,11 @@ public class TestTransformServiceConfig {
 	public ServiceLoaderConfigActionImpl getJavaxServiceAction() {
 		if ( javaxServiceAction == null ) {
 			Map<String, String> invertedRenames = TransformProperties.invert( getPackageRenames() );
-			LoggerImpl logger = createLogger( System.out, !LoggerImpl.IS_TERSE, LoggerImpl.IS_VERBOSE );
 
 			javaxServiceAction = new ServiceLoaderConfigActionImpl(
-					logger,
 					createBuffer(),
-					createSelectionRule( logger, getIncludes(), getExcludes() ),
-					createSignatureRule( logger, invertedRenames, null, null, null ) );
+					createSelectionRule( getIncludes(), getExcludes() ),
+					createSignatureRule( invertedRenames, null, null, null ) );
 		}
 		return javaxServiceAction;
 	}

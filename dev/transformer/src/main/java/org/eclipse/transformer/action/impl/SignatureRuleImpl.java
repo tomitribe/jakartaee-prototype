@@ -19,7 +19,6 @@
 
 package org.eclipse.transformer.action.impl;
 
-import java.io.PrintStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,6 +27,8 @@ import java.util.Set;
 
 import org.eclipse.transformer.action.BundleData;
 import org.eclipse.transformer.action.SignatureRule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import aQute.bnd.signatures.ArrayTypeSignature;
 import aQute.bnd.signatures.BaseType;
@@ -45,15 +46,15 @@ import aQute.bnd.signatures.TypeParameter;
 import aQute.bnd.signatures.TypeVariableSignature;
 
 public class SignatureRuleImpl implements SignatureRule {
+    
+    static Logger logger = LoggerFactory.getLogger(SignatureRuleImpl.class);
+    
 	public SignatureRuleImpl(
-		LoggerImpl logger,
 
 		Map<String, String> renames,
 		Map<String, String> versions,
 		Map<String, BundleData> bundleUpdates,
 		Map<String, String> directStrings) {
-
-		this.logger = logger;
 
 		Map<String, String> useRenames = new HashMap<String, String>( renames.size() );
 		Map<String, String> useBinaryRenames = new HashMap<String, String>( renames.size() );
@@ -107,42 +108,6 @@ public class SignatureRuleImpl implements SignatureRule {
 		this.unchangedDescriptors = new HashSet<>();
 		this.changedDescriptors = new HashMap<>();
 	}
-
-	//
-	
-	private final LoggerImpl logger;
-
-	public LoggerImpl getLogger() {
-		return logger;
-	}
-
-	public PrintStream getLogStream() {
-		return getLogger().getLogStream();
-	}
-
-	public boolean getIsTerse() {
-		return getLogger().getIsTerse();
-	}
-
-	public boolean getIsVerbose() {
-		return getLogger().getIsVerbose();
-	}
-
-	public void log(String text, Object... parms) {
-		getLogger().log(text, parms);
-	}
-
-	public void verbose(String text, Object... parms) {
-		getLogger().verbose(text, parms);
-	}
-
-    public void error(String text, Object... parms) {
-		getLogger().error(text, parms);
-    }
-
-    public void error(String text, Throwable th, Object... parms) {
-		getLogger().error(text, th, parms);
-    }
 
 	//
 
@@ -296,7 +261,7 @@ public class SignatureRuleImpl implements SignatureRule {
 	    try {
 	        return transformBinaryType(inputConstant, allowSimpleSubstitution);
 	    } catch ( Throwable th ) {
-	        verbose("Failed to parse constant as resource reference [ %s ]: %s", inputConstant, th.getMessage());
+	        logger.debug("Failed to parse constant as resource reference [ {} ]: {}", inputConstant, th.getMessage());
 	        return null;
 	    }
 	}
@@ -383,7 +348,7 @@ public class SignatureRuleImpl implements SignatureRule {
 		try {
 			return transformDescriptor(inputConstant, allowSimpleSubstitution);
 		} catch ( Throwable th ) {
-			verbose("Failed to parse constant as descriptor [ %s ]: %s", inputConstant, th.getMessage());
+			logger.debug("Failed to parse constant as descriptor [ {} ]: {}", inputConstant, th.getMessage());
 			return null;
 		}
 	}

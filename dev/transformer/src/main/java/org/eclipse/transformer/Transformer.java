@@ -49,7 +49,6 @@ import org.eclipse.transformer.action.impl.EarActionImpl;
 import org.eclipse.transformer.action.impl.InputBufferImpl;
 import org.eclipse.transformer.action.impl.JarActionImpl;
 import org.eclipse.transformer.action.impl.JavaActionImpl;
-import org.eclipse.transformer.action.impl.LoggerImpl;
 import org.eclipse.transformer.action.impl.ManifestActionImpl;
 import org.eclipse.transformer.action.impl.NullActionImpl;
 import org.eclipse.transformer.action.impl.RarActionImpl;
@@ -511,15 +510,6 @@ public class Transformer {
             return outputName;
         }
 
-    	private LoggerImpl logger;
-
-    	public LoggerImpl getLogger() {
-    		if ( logger == null ) {
-    			logger = new LoggerImpl( getInfoStream(), isTerse, isVerbose );
-    		}
-    		return logger;
-    	}
-
     	private InputBufferImpl buffer;
     	
     	protected InputBufferImpl getBuffer() {
@@ -689,7 +679,6 @@ public class Transformer {
     	protected SelectionRuleImpl getSelectionRule() {
     		if ( selectionRules == null ) {
     			selectionRules = new SelectionRuleImpl(
-    				getLogger(),
     				includes, excludes);
     		}
     		return selectionRules;
@@ -700,7 +689,6 @@ public class Transformer {
     	protected SignatureRuleImpl getSignatureRule() {
     		if ( signatureRules == null ) {
     			signatureRules =  new SignatureRuleImpl(
-        			getLogger(),
         			packageRenames, packageVersions, bundleUpdates,
         			directStrings);
     		}
@@ -824,7 +812,7 @@ public class Transformer {
         public CompositeActionImpl getRootAction() {
         	if ( rootAction == null ) {
         		CompositeActionImpl useRootAction = new CompositeActionImpl(
-                    getLogger(), getBuffer(), getSelectionRule(), getSignatureRule() );
+                     getBuffer(), getSelectionRule(), getSignatureRule() );
 
         		DirectoryActionImpl directoryAction =
         			useRootAction.addUsing( DirectoryActionImpl::new );
