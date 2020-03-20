@@ -49,7 +49,8 @@ import org.eclipse.transformer.util.FileUtils;
 import org.eclipse.transformer.util.InputStreamData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.eclipse.transformer.Transformer;
 
 import transformer.test.data.Sample_InjectAPI_Jakarta;
@@ -405,12 +406,14 @@ public class TestTransformClass {
 	@Test
 	public void testClassRelocation() {
 		ByteArrayOutputStream loggerBytes = new ByteArrayOutputStream();
-		PrintStream loggerStream = new PrintStream(loggerBytes);
+		Logger logger = LoggerFactory.getLogger("Test");
 
 		for ( ClassRelocation relocationCase : RELOCATION_CASES ) {
-			String outputPath = ClassActionImpl.relocateClass(relocationCase.inputPath,
-			                                                  relocationCase.inputName, 
-			                                                  relocationCase.outputName);
+			String outputPath = ClassActionImpl.relocateClass(
+				logger,
+				relocationCase.inputPath, relocationCase.inputName, 
+				relocationCase.outputName);
+
 			String logText = loggerBytes.toString();
 			loggerBytes.reset();
 

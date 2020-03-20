@@ -43,6 +43,8 @@ import org.eclipse.transformer.action.impl.SignatureRuleImpl;
 import org.eclipse.transformer.util.InputStreamData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TestTransformManifest {
 
@@ -443,12 +445,13 @@ public class TestTransformManifest {
 	 */
 	class ManifestActionImpl_Test extends ManifestActionImpl {
 		public ManifestActionImpl_Test (
+			Logger logger,
 			InputBufferImpl buffer,
 			SelectionRuleImpl selectionRule,
 			SignatureRuleImpl signatureRule,
 			boolean isManifest) {
 
-			super(buffer, selectionRule, signatureRule, isManifest);
+			super(logger, buffer, selectionRule, signatureRule, isManifest);
 		}
 
 		public boolean callIsTrueMatch(String text, int matchStart, int keyLen ) {
@@ -470,6 +473,7 @@ public class TestTransformManifest {
 		if ( manifestAction_test == null ) {
 
 			manifestAction_test = new ManifestActionImpl_Test(
+				LoggerFactory.getLogger("Test"),
 				new InputBufferImpl(),
 				new SelectionRuleImpl( getIncludes(), getExcludes() ), 
 				new SignatureRuleImpl( getPackageRenames(), getPackageVersions(), null, null ),

@@ -20,14 +20,16 @@
 package org.eclipse.transformer.action.impl;
 
 import org.eclipse.transformer.action.ActionType;
+import org.slf4j.Logger;
 
 public class RarActionImpl extends ContainerActionImpl {
 	public RarActionImpl(
+		Logger logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
 
-		super(buffer, selectionRule, signatureRule);
+		super(logger, buffer, selectionRule, signatureRule);
 	}
 
 	//

@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.MessageFormat;
 import java.util.Map;
 
 import org.eclipse.transformer.TransformException;
@@ -33,7 +34,6 @@ import org.eclipse.transformer.util.ByteData;
 import org.eclipse.transformer.util.FileUtils;
 import org.eclipse.transformer.util.InputStreamData;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import aQute.bnd.signatures.ArrayTypeSignature;
 import aQute.bnd.signatures.ClassSignature;
@@ -50,13 +50,13 @@ import aQute.bnd.signatures.TypeParameter;
 import aQute.lib.io.IO;
 
 public abstract class ActionImpl implements Action {
-
-    static Logger logger = LoggerFactory.getLogger(ActionImpl.class);
-    
 	public ActionImpl(
+		Logger logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
+
+		this.logger = logger;
 
 		this.buffer = buffer;
 
@@ -70,13 +70,56 @@ public abstract class ActionImpl implements Action {
 
 	public static interface ActionInit<A extends ActionImpl> {
 		A apply(
+			Logger logger,
 			InputBufferImpl buffer,
 			SelectionRuleImpl selectionRule,
 			SignatureRuleImpl signatureRule);
 	}
 
 	public <A extends ActionImpl> A createUsing(ActionInit<A> init) {
-		return init.apply( getBuffer(), getSelectionRule(), getSignatureRule() );
+		return init.apply( getLogger(), getBuffer(), getSelectionRule(), getSignatureRule() );
+	}
+
+	//
+
+	private final Logger logger;
+
+	public Logger getLogger() {
+		return logger;
+	}
+
+	public void trace(String message, Object... parms) {
+		getLogger().trace(message, parms);
+	}
+	
+	public void debug(String message, Object... parms) {
+		getLogger().debug(message, parms);
+	}
+
+	public void info(String message, Object... parms) {
+		getLogger().info(message, parms);
+	}
+
+	public void warn(String message, Object... parms) {
+		getLogger().warn(message, parms);
+	}
+
+	public void error(String message, Object... parms) {
+		getLogger().error(message, parms);
+	}
+
+	public void error(String message, Throwable th, Object... parms) {
+		Logger useLogger = getLogger();
+		if ( !useLogger.isErrorEnabled() ) {
+			return;
+		}
+
+		if ( parms.length != 0 ) {
+			message = message.replace("{}", "%s");
+			message = MessageFormat.format(message, parms);
+		}
+
+		useLogger.error(message, th);
 	}
 
 	//
@@ -368,27 +411,26 @@ public abstract class ActionImpl implements Action {
 		String className = getClass().getSimpleName();
 		String methodName = "apply";
 
-		logger.debug("[ %s.%s ]: Requested [ %s ] [ %s ]\n", className, methodName, inputName, inputCount);
+		debug("[ {}.{} ]: Requested [ {} ] [ {} ]", className, methodName, inputName, inputCount);
 		ByteData inputData = read(inputName, inputStream, inputCount); // throws JakartaTransformException
-		logger.debug("[ %s.%s ]: Obtained [ %s ] [ %s ] [ %s ]\n", className, methodName, inputName, inputData.length, inputData.data);
+		debug("[ {}.{} ]: Obtained [ {} ] [ {} ] [ {} ]", className, methodName, inputName, inputData.length, inputData.data);
 
 		ByteData outputData;
 		try {
 			outputData = apply(inputName, inputData.data, inputData.length);
 			// throws JakartaTransformException
 		} catch ( Throwable th ) {
-			logger.error("Transform failure [ %s ]\n", th, inputName);
+			error("Transform failure [ {} ]", th, inputName);
 			outputData = null;			
 		}
 
 		if ( outputData == null ) {
-			logger.debug("[ %s.%s ]: Null transform\n", className, methodName);
+			debug("[ {}.{} ]: Null transform", className, methodName);
 			outputData = inputData;
 		} else {
-			logger.debug(
-				"[ %s.%s ]: Active transform [ %s ] [ %s ] [ %s ]\n",
-				className, methodName,
-				outputData.name, outputData.length, outputData.data);
+			debug( "[ {}.{} ]: Active transform [ {} ] [ {} ] [ {} ]",
+				   className, methodName,
+				   outputData.name, outputData.length, outputData.data );
 		}
 
 		return new InputStreamData(outputData);
@@ -404,24 +446,25 @@ public abstract class ActionImpl implements Action {
 		String className = getClass().getSimpleName();
 		String methodName = "apply";
 
-		logger.debug("[ %s.%s ]: Requested [ %s ] [ %s ]\n", className, methodName, inputName, inputCount);
+		debug("[ {}.{} ]: Requested [ {} ] [ {} ]", className, methodName, inputName, inputCount);
 		ByteData inputData = read(inputName, inputStream, intInputCount); // throws JakartaTransformException
-		logger.debug("[ %s.%s ]: Obtained [ %s ] [ %s ]\n", className, methodName, inputName, inputData.length);
+		debug("[ {}.{} ]: Obtained [ {} ] [ {} ]", className, methodName, inputName, inputData.length);
 
 		ByteData outputData;
 		try {
 			outputData = apply(inputName, inputData.data, inputData.length);
 			// throws JakartaTransformException
 		} catch ( Throwable th ) {
-			logger.error("Transform failure [ %s ]\n", th, inputName);
+			error("Transform failure [ {} ]", th, inputName);
 			outputData = null;
 		}
 
 		if ( outputData == null ) {
-			logger.debug("[ %s.%s ]: Null transform\n", className, methodName);
+			debug("[ {}.{} ]: Null transform", className, methodName);
 			outputData = inputData;
 		} else {
-			logger.debug("[ %s.%s ]: Active transform [ %s ] [ %s ]\n", className, methodName, outputData.name, outputData.length);
+			debug( "[ {}.{} ]: Active transform [ {} ] [ {} ]",
+				   className, methodName, outputData.name, outputData.length );
 		}
 
 		write(outputData, outputStream); // throws JakartaTransformException		
@@ -436,7 +479,7 @@ public abstract class ActionImpl implements Action {
 		throws TransformException {
 
 		long inputLength = inputFile.length();
-        logger.debug("Input [ %s ] Length [ %s ]\n", inputName, inputLength);
+        debug("Input [ {} ] Length [ {} ]", inputName, inputLength);
 
 		InputStream inputStream = openInputStream(inputFile);
 		try {
@@ -500,11 +543,11 @@ public abstract class ActionImpl implements Action {
      * is NOT a subset of a larger package, and thus not really a match.
      */
     protected static boolean isTruePackageMatch(String text, int matchStart, int keyLen ) {
-//        System.out.println("isTruePackageMatch:\n" 
-//                           + "text[" + text + "]\n"
-//                           + "key[" + text.substring(matchStart, matchStart + keyLen) + "]\n"
-//                           + "tail[" + text.substring(matchStart + keyLen)
-//                           + "*************");
+//        System.out.println("isTruePackageMatch:" 
+//                           + " text[" + text + "]"
+//                           + " key[" + text.substring(matchStart, matchStart + keyLen) + "]"
+//                           + " tail[" + text.substring(matchStart + keyLen)
+//                           + " *************");
 
         int textLength = text.length();
               

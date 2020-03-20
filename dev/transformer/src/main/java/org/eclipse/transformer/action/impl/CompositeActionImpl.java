@@ -27,6 +27,7 @@ import org.eclipse.transformer.TransformException;
 import org.eclipse.transformer.action.ActionType;
 import org.eclipse.transformer.action.CompositeAction;
 import org.eclipse.transformer.util.ByteData;
+import org.slf4j.Logger;
 
 public class CompositeActionImpl extends ActionImpl implements CompositeAction {
 
@@ -37,11 +38,12 @@ public class CompositeActionImpl extends ActionImpl implements CompositeAction {
 	}
 
 	public CompositeActionImpl(
+		Logger logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
 
-		super(buffer, selectionRule, signatureRule);
+		super(logger, buffer, selectionRule, signatureRule);
 
 		this.actions = new ArrayList<ActionImpl>();
 		this.acceptedAction = null;

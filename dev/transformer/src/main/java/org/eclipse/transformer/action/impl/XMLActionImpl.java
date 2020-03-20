@@ -32,20 +32,21 @@ import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.transformer.TransformException;
 import org.eclipse.transformer.action.ActionType;
 import org.eclipse.transformer.util.ByteData;
+import org.slf4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class XMLActionImpl extends ActionImpl {
-	public static final String CLASS_NAME = XMLActionImpl.class.getSimpleName();
 
 	public XMLActionImpl(
+		Logger logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
 
-		super(buffer, selectionRule, signatureRule);
+		super(logger, buffer, selectionRule, signatureRule);
 	}
 
 	//

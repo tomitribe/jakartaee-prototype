@@ -28,7 +28,6 @@ import java.util.Set;
 import org.eclipse.transformer.action.BundleData;
 import org.eclipse.transformer.action.SignatureRule;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import aQute.bnd.signatures.ArrayTypeSignature;
 import aQute.bnd.signatures.BaseType;
@@ -46,15 +45,16 @@ import aQute.bnd.signatures.TypeParameter;
 import aQute.bnd.signatures.TypeVariableSignature;
 
 public class SignatureRuleImpl implements SignatureRule {
-    
-    static Logger logger = LoggerFactory.getLogger(SignatureRuleImpl.class);
-    
+
 	public SignatureRuleImpl(
+		Logger logger,
 
 		Map<String, String> renames,
 		Map<String, String> versions,
 		Map<String, BundleData> bundleUpdates,
 		Map<String, String> directStrings) {
+
+		this.logger = logger;
 
 		Map<String, String> useRenames = new HashMap<String, String>( renames.size() );
 		Map<String, String> useBinaryRenames = new HashMap<String, String>( renames.size() );
@@ -107,6 +107,18 @@ public class SignatureRuleImpl implements SignatureRule {
 
 		this.unchangedDescriptors = new HashSet<>();
 		this.changedDescriptors = new HashMap<>();
+	}
+
+	//
+	
+	private final Logger logger;
+
+	public Logger getLogger() {
+		return logger;
+	}
+
+	public void debug(String message, Object... parms) {
+		getLogger().debug(message, parms);
 	}
 
 	//
@@ -261,7 +273,7 @@ public class SignatureRuleImpl implements SignatureRule {
 	    try {
 	        return transformBinaryType(inputConstant, allowSimpleSubstitution);
 	    } catch ( Throwable th ) {
-	        logger.debug("Failed to parse constant as resource reference [ {} ]: {}", inputConstant, th.getMessage());
+	        debug("Failed to parse constant as resource reference [ {} ]: {}", inputConstant, th.getMessage());
 	        return null;
 	    }
 	}
@@ -348,7 +360,7 @@ public class SignatureRuleImpl implements SignatureRule {
 		try {
 			return transformDescriptor(inputConstant, allowSimpleSubstitution);
 		} catch ( Throwable th ) {
-			logger.debug("Failed to parse constant as descriptor [ {} ]: {}", inputConstant, th.getMessage());
+			debug("Failed to parse constant as descriptor [ {} ]: {}", inputConstant, th.getMessage());
 			return null;
 		}
 	}

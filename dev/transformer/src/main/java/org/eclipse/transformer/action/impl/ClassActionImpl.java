@@ -32,7 +32,6 @@ import org.eclipse.transformer.action.SignatureRule.SignatureType;
 import org.eclipse.transformer.util.ByteData;
 import org.eclipse.transformer.util.FileUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import aQute.bnd.classfile.AnnotationDefaultAttribute;
 import aQute.bnd.classfile.AnnotationInfo;
@@ -94,8 +93,6 @@ import aQute.lib.io.ByteBufferDataOutput;
  */
 public class ClassActionImpl extends ActionImpl {
 
-    static Logger logger = LoggerFactory.getLogger(ClassActionImpl.class);
-    
 	public static String resourceNameToClassName(String resourceName) {
 		String className = resourceName.substring( resourceName.length() - ".class".length() );
 		className = className.replace('/',  '.');
@@ -137,6 +134,7 @@ public class ClassActionImpl extends ActionImpl {
 	 *     input path.
 	 */
 	public static String relocateClass(
+		Logger logger,
 		String inputPath, String inputClassName, String outputClassName) {
 
 		String directInputPath = classNameToResourceName(inputClassName);
@@ -177,8 +175,8 @@ public class ClassActionImpl extends ActionImpl {
 		}
 
 		logger.error(
-			"Approximate relocation of class: {}s case:\n" +
-			 " initial class name [ {} ]; final class name [ {} ];\n" +
+			"Approximate relocation of class; case {}:" +
+			 " initial class name [ {} ]; final class name [ {} ];" +
 			 " initial resource location [ {} ]; final resource location [ {} ].",
 			 relocationCase,
 			 inputClassName, outputClassName,
@@ -191,30 +189,40 @@ public class ClassActionImpl extends ActionImpl {
 
 	protected static final int DUMP_WIDTH = 16;
 
-	protected void dump(byte[] bytes, int offset, int length) {
+	protected void debugDump(byte[] bytes, int offset, int length) {
+		if ( !getLogger().isDebugEnabled() ) {
+			return;
+		}
+
+		StringBuilder outputBuilder = new StringBuilder();
 
 		while ( length > 0 ) {
 			int nextWidth = ( (length > DUMP_WIDTH) ? DUMP_WIDTH : length );
-			dumpLine(bytes, offset, nextWidth);
+			String nextLine = debugDumpLine(outputBuilder, bytes, offset, nextWidth);
+			debug(nextLine);
+
 			offset += nextWidth;
 			length -= nextWidth;
 		}
 	}
 
-	protected void dumpLine(byte[] bytes, int offset, int width) {
+	private String debugDumpLine(StringBuilder builder, byte[] bytes, int offset, int width) {
 		for ( int byteNo = 0; byteNo < width; byteNo++ ) {
 			byte nextByte = bytes[ offset + byteNo ];
-			logger.info(MessageFormat.format("%02x", nextByte));
+			builder.append( MessageFormat.format("%02x ", nextByte) );
 		}
-		logger.info("\n");
+		String line = builder.toString();
+		builder.setLength(0);
+		return line;
 	}
 
 	public ClassActionImpl(
+		Logger logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
 
-		super(buffer, selectionRule, signatureRule);
+		super(logger, buffer, selectionRule, signatureRule);
 	}
 
 	//
@@ -287,36 +295,36 @@ public class ClassActionImpl extends ActionImpl {
 
 		clearChanges();
 
-		logger.debug("Read [ {} ] Bytes [ {} ] [ {} ]\n", inputName, inputLength, inputBytes);
-		// dump(inputBytes, 0, inputLength);
+		debug("Read [ {} ] Bytes [ {} ]", inputName, inputLength);
+		debugDump(inputBytes, 0, inputLength);
 
 		ClassFile inputClass;
 		try {
 			DataInput inputClassData = ByteBufferDataInput.wrap(inputBytes, 0, inputLength);
 			inputClass = ClassFile.parseClassFile(inputClassData); // throws IOException
 		} catch ( IOException e ) {
-			logger.error("Failed to parse raw class bytes [ {} ]\n", inputName, e);
+			error("Failed to parse raw class bytes [ {} ]", e, inputName);
 			return null;
 		}
 
-		logger.debug("\nClass [ {} ] as [ {} ] \n", inputName, inputClass.this_class);
-		logger.debug("  Super [ {} ]\n", inputClass.super_class);
+		debug("Class [ {} ] as [ {} ] ", inputName, inputClass.this_class);
+		debug("  Super [ {} ]", inputClass.super_class);
 		if ( inputClass.interfaces != null ) {
-		    logger.debug("  Interfaces [ {} ]\n", inputClass.interfaces.length);
+		    debug("  Interfaces [ {} ]", inputClass.interfaces.length);
 		    for ( String interfaceName : inputClass.interfaces ) {
-		        logger.debug("    [ {} ]\n", interfaceName);
+		        debug("    [ {} ]", interfaceName);
 		    }
 		}
 		if ( inputClass.fields != null ) {
-		    logger.debug("  Fields [ {} ]\n", inputClass.fields.length);
+		    debug("  Fields [ {} ]", inputClass.fields.length);
 		    for ( FieldInfo field : inputClass.fields ) {
-		        logger.debug("    [ {} ] [ {} ]\n", field.name, field.descriptor);
+		        debug("    [ {} ] [ {} ]", field.name, field.descriptor);
 		    }
 		}
 		if ( inputClass.methods != null ) {
-		    logger.debug("  Methods [ {} ]\n", inputClass.methods.length);
+		    debug("  Methods [ {} ]", inputClass.methods.length);
 		    for ( MethodInfo method : inputClass.methods) {
-		        logger.debug("    [ {} ] [ {} ]\n", method.name, method.descriptor);
+		        debug("    [ {} ] [ {} ]", method.name, method.descriptor);
 		    }
 		}
 
@@ -330,7 +338,7 @@ public class ClassActionImpl extends ActionImpl {
 		String outputName;
 		if ( outputClassName != null ) {
 			classBuilder.this_class(outputClassName);
-			outputName = relocateClass(inputName, inputClassName, outputClassName);
+			outputName = relocateClass( getLogger(), inputName, inputClassName, outputClassName );
 		} else {
 			outputClassName = inputClassName;
 			outputName = inputName;
@@ -339,7 +347,7 @@ public class ClassActionImpl extends ActionImpl {
 		setClassNames(inputClassName, outputClassName);
 		setResourceNames(inputName, outputName);
 
-		logger.debug("\n{}\n", classBuilder);
+		debug("{}", classBuilder);
 
 		String inputSuperName = classBuilder.super_class(); 
 		if ( inputSuperName != null ) {
@@ -353,7 +361,7 @@ public class ClassActionImpl extends ActionImpl {
 			setSuperClassNames(inputSuperName, outputSuperName);
 
 			if ( !outputSuperName.equals("java/lang/Object") ) {
-			    logger.debug("  extends {}\n", outputSuperName);
+			    debug("  extends {}", outputSuperName);
 			}
 		}
 
@@ -368,14 +376,14 @@ public class ClassActionImpl extends ActionImpl {
 				}
 			}
 
-			logger.debug("  implements {}\n", interfaces);
+			debug("  implements {}", interfaces);
 		}
 
 		// Transform members ...
 
 		ListIterator<FieldInfo> fields = classBuilder.fields().listIterator();
 		if ( fields.hasNext() ) {
-		    logger.debug("  Fields:\n");
+		    debug("  Fields:");
 		}
 		while ( fields.hasNext() ) {
 			FieldInfo inputField = fields.next();
@@ -383,14 +391,14 @@ public class ClassActionImpl extends ActionImpl {
 			if ( outputField != null ) {
 				fields.set(outputField);
 				addModifiedField();
-				logger.debug( "       {}\n    -> {}\n", inputField, outputField);
+				debug( "       {}    -> {}", inputField, outputField);
 
 			}
 		}
 
 		ListIterator<MethodInfo> methods = classBuilder.methods().listIterator();
 		if ( methods.hasNext() ) {
-		    logger.debug("  Methods:\n");
+		    debug("  Methods:");
 		}
 		while ( methods.hasNext() ) {
 			MethodInfo inputMethod = methods.next();
@@ -398,17 +406,17 @@ public class ClassActionImpl extends ActionImpl {
 			if ( outputMethod != null ) {
 				methods.set(outputMethod);
 				addModifiedMethod();
-				logger.debug( "       {}\n    -> {}\n", inputMethod, outputMethod);
+				debug( "       {}    -> {}", inputMethod, outputMethod);
 			}
 		}
 
-		// verbose("  <<class>>\n");
+		// verbose("  <<class>>");
 
 		// Transform attributes ...
 
 		ListIterator<Attribute> attributes = classBuilder.attributes().listIterator();
 		if ( attributes.hasNext() ) {
-		    logger.debug("  Attributes:\n");
+		    debug("  Attributes:");
 		}
 		while ( attributes.hasNext() ) {
 			Attribute inputAttribute = attributes.next();
@@ -416,12 +424,12 @@ public class ClassActionImpl extends ActionImpl {
 			if ( outputAttribute != null ) {
 				attributes.set(outputAttribute);
 				addModifiedAttribute();
-				logger.debug( "       {}\n    -> {}\n", inputAttribute, outputAttribute);
+				debug( "       {}    -> {}", inputAttribute, outputAttribute);
 			}
 		}
 
 		MutableConstantPool constants = classBuilder.constant_pool();
-		logger.debug("  Constant pool: {}\n", constants.size()); 
+		debug("  Constant pool: {}", constants.size()); 
 
 		int modifiedConstants = transform(constants);
 		if ( modifiedConstants > 0 ) {
@@ -429,7 +437,7 @@ public class ClassActionImpl extends ActionImpl {
 		}
 
 		if ( !hasNonResourceNameChanges() ) {
-			logger.info("  Class bytes: {} {}\n", inputName, inputLength);
+			info("  Class bytes: {} {}", inputName, inputLength);
 			return null;
 		}
 
@@ -443,7 +451,7 @@ public class ClassActionImpl extends ActionImpl {
 		}
 
 		byte[] outputBytes = outputClassData.toByteArray();
-		logger.info("  Class size: {}: {} -> {}\n", inputName, inputBytes.length, outputBytes.length);
+		info("  Class size: {}: {} -> {}", inputName, inputBytes.length, outputBytes.length);
 		
 		return new ByteData(outputName, outputBytes, 0, outputBytes.length);
 	}
@@ -458,7 +466,7 @@ public class ClassActionImpl extends ActionImpl {
 		String inputDescriptor = member.descriptor;
 		String outputDescriptor = transformDescriptor(inputDescriptor);
 		if ( outputDescriptor != null ) {
-		    logger.debug("    {}\n       {}\n    -> {}\n", member.name, member.descriptor, outputDescriptor);
+		    debug("    {}       {}    -> {}", member.name, member.descriptor, outputDescriptor);
 		}
 
 		Attribute[] inputAttributes = member.attributes;
@@ -486,7 +494,7 @@ public class ClassActionImpl extends ActionImpl {
 				}
 				outputAttributes[attributeNo] = outputAttribute;
 
-				logger.debug("       {}\n    -> {}\n", inputAttribute, outputAttribute);
+				debug("       {}    -> {}", inputAttribute, outputAttribute);
 			}
 		}
 
@@ -827,13 +835,13 @@ public class ClassActionImpl extends ActionImpl {
                 }
             }
             if ( outputString == null ) {
-                logger.debug("    String ConstantValue: {} (unchanged)\n", inputValue);
+                debug("    String ConstantValue: {} (unchanged)", inputValue);
             } else {
-                logger.debug("    String ConstantValue: {}\n                       -> {} ({})\n", inputValue, outputString, transformCase);
+                debug("    String ConstantValue: {}                       -> {} ({})", inputValue, outputString, transformCase);
             }
             return outputString;
         } else {
-            logger.debug("    Non-String ConstantValue: {} (unchanged)\n", inputValue);
+            debug("    Non-String ConstantValue: {} (unchanged)", inputValue);
             return null;
         }
     }
@@ -1061,8 +1069,9 @@ public class ClassActionImpl extends ActionImpl {
 
 		int numConstants = constants.size();
 		for ( int constantNo = 1; constantNo < numConstants; constantNo++ ) {
-		    logger.debug(MessageFormat.format("Constant [ %3s ] [ %16s ] [ %s ]\n", 
-		                 constantNo, constants.tag(constantNo), constants.entry(constantNo)));
+		    debug( MessageFormat.format(
+		    	"Constant [ %3s ] [ %16s ] [ %s ]", 
+		        constantNo, constants.tag(constantNo), constants.entry(constantNo) ) );
 
 			switch ( constants.tag(constantNo) ) {
 				case ConstantPool.CONSTANT_Class: {
@@ -1072,9 +1081,9 @@ public class ClassActionImpl extends ActionImpl {
 					if ( outputClassName != null ) {
 						constants.entry( constantNo, new ClassInfo(constants.utf8Info(outputClassName)) );
 						modifiedConstants++;
-						logger.debug("    Class: {}\n        -> {}\n", inputClassName, outputClassName);
+						debug("    Class: {}        -> {}", inputClassName, outputClassName);
 					} else {
-					    logger.debug("Skip class {} (unchanged)\n", inputClassName);
+					    debug("Skip class {} (unchanged)", inputClassName);
 					}
 					break;
 				}
@@ -1087,9 +1096,9 @@ public class ClassActionImpl extends ActionImpl {
 						constants.entry(constantNo,
 							new NameAndTypeInfo( info.name_index, constants.utf8Info(outputDescriptor)) );
 						modifiedConstants++;
-						logger.debug("    NameAndType: {}\n              -> {}\n", inputDescriptor, outputDescriptor);
+						debug("    NameAndType: {}              -> {}", inputDescriptor, outputDescriptor);
 					} else {
-					    logger.debug("Skip name-and-type {} (unchanged)\n", inputDescriptor);
+					    debug("Skip name-and-type {} (unchanged)", inputDescriptor);
 					}
 					break;
 				}
@@ -1101,9 +1110,9 @@ public class ClassActionImpl extends ActionImpl {
 					if ( outputDescriptor != null ) {
 						constants.entry( constantNo, new MethodTypeInfo(constants.utf8Info(outputDescriptor)) );
 						modifiedConstants++;
-						logger.debug("    MethodType: {}\n             -> {}\n", inputDescriptor, outputDescriptor);
+						debug("    MethodType: {}             -> {}", inputDescriptor, outputDescriptor);
 					} else {
-					    logger.debug("Skip method-type {} (unchanged)\n", inputDescriptor);
+					    debug("Skip method-type {} (unchanged)", inputDescriptor);
 					}
 					break;
 				}
@@ -1133,9 +1142,9 @@ public class ClassActionImpl extends ActionImpl {
 					if ( outputUtf8 != null ) {
 						constants.entry(constantNo, outputUtf8);
 						modifiedConstants++;
-						logger.debug("    UTF8: {}\n       -> {} ({})\n", inputUtf8, outputUtf8, transformCase);
+						debug("    UTF8: {}       -> {} ({})", inputUtf8, outputUtf8, transformCase);
 					} else {
-					    logger.debug("Skip UTF8 {} (unchanged)\n", inputUtf8);
+					    debug("Skip UTF8 {} (unchanged)", inputUtf8);
 					}
 
 					break;
@@ -1156,9 +1165,9 @@ public class ClassActionImpl extends ActionImpl {
 					if ( outputString != null ) {
 						constants.entry(constantNo, new StringInfo( constants.utf8Info(outputString) ) );
 						modifiedConstants++;
-						logger.debug("    String: {}\n         -> {}\n", inputString, outputString);
+						debug("    String: {}         -> {}", inputString, outputString);
 					} else {
-					    logger.debug("Skip string {} (unchanged)\n", inputString);
+					    debug("Skip string {} (unchanged)", inputString);
 					}
 					break;
 				}
@@ -1173,12 +1182,12 @@ public class ClassActionImpl extends ActionImpl {
 				case ConstantPool.CONSTANT_Package:
 				case ConstantPool.CONSTANT_Integer:
 				case ConstantPool.CONSTANT_Float:
-					logger.debug("Skip other (ignored)\n");
+					debug("Skip other (ignored)");
 					break;
 
 				case ConstantPool.CONSTANT_Long:
 				case ConstantPool.CONSTANT_Double:
-					logger.debug("Skip floating point value +1 (ignored)\n");
+					debug("Skip floating point value +1 (ignored)");
 					// For some insane optimization reason, the Long(5) and Double(6)
 					// entries take two slots in the constant pool.  See 4.4.5
 					constantNo++;

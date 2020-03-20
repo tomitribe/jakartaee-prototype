@@ -34,18 +34,16 @@ import org.eclipse.transformer.TransformException;
 import org.eclipse.transformer.action.ActionType;
 import org.eclipse.transformer.util.ByteData;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class JavaActionImpl extends ActionImpl {
-    
-    static Logger logger = LoggerFactory.getLogger(JavaActionImpl.class);
 
 	public JavaActionImpl(
+		Logger logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
 
-        super(buffer, selectionRule, signatureRule);
+        super(logger, buffer, selectionRule, signatureRule);
 	}
 
 	//
@@ -144,7 +142,8 @@ public class JavaActionImpl extends ActionImpl {
 		// if ( outputName == null ) {
 			outputName = inputName;
 		// } else {
-		//     log("Class name [ {} ]\n        -> [ {} ]\n", inputName, outputName);
+		//     info("Input class name  [ {} ]", inputName);
+		//     info("Output class name [ {} ]", outputName);
 		// }
 		setResourceNames(inputName, outputName);
 
@@ -153,7 +152,7 @@ public class JavaActionImpl extends ActionImpl {
 		try {
 			inputReader = new InputStreamReader(inputStream, "UTF-8");
 		} catch ( UnsupportedEncodingException e ) {
-			logger.error("Strange: UTF-8 is an unrecognized encoding for reading [ {} ]\n", inputName, e);
+			error("Strange: UTF-8 is an unrecognized encoding for reading [ {} ]", e, inputName);
 			return null;
 		}
 
@@ -164,7 +163,7 @@ public class JavaActionImpl extends ActionImpl {
 		try {
 			outputWriter = new OutputStreamWriter(outputStream, "UTF-8");
 		} catch ( UnsupportedEncodingException e ) {
-			logger.error("Strange: UTF-8 is an unrecognized encoding for writing [ {} ]\n", inputName, e);
+			error("Strange: UTF-8 is an unrecognized encoding for writing [ {} ]", e, inputName);
 			return null;
 		}
 
@@ -173,14 +172,14 @@ public class JavaActionImpl extends ActionImpl {
 		try {
 			transform(reader, writer); // throws IOException
 		} catch ( IOException e ) {
-			logger.error("Failed to transform [ {} ]\n", inputName, e);
+			error("Failed to transform [ {} ]", e, inputName);
 			return null;
 		}
 
 		try {
 			writer.flush(); // throws
 		} catch ( IOException e ) {
-			logger.error("Failed to flush [ {} ]\n", inputName, e);
+			error("Failed to flush [ {} ]", e, inputName);
 			return null;
 		}
 

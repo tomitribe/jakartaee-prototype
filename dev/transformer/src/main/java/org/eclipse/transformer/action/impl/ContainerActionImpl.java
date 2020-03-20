@@ -36,6 +36,7 @@ import org.eclipse.transformer.action.ContainerChanges;
 import org.eclipse.transformer.util.ByteData;
 import org.eclipse.transformer.util.FileUtils;
 import org.eclipse.transformer.util.InputStreamData;
+import org.slf4j.Logger;
 
 public abstract class ContainerActionImpl extends ActionImpl implements ContainerAction {
 
@@ -46,11 +47,12 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 	}
 
 	public ContainerActionImpl(
+		Logger logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
 
-		super(buffer, selectionRule, signatureRule);
+		super(logger, buffer, selectionRule, signatureRule);
 
 		this.compositeAction = createUsing( CompositeActionImpl::new );
 	}
@@ -111,23 +113,21 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 	//
 
 	protected void recordUnaccepted(String resourceName) {
-		logger.debug( "Resource [ {} ]: Not accepted\n", resourceName );
+		debug("Resource [ {} ]: Not accepted", resourceName);
 
 		getChanges().record();
 	}
 
 	protected void recordUnselected(Action action, boolean hasChanges, String resourceName) {
-		logger.debug(
-			"Resource [ {} ] Action [ {} ]: Accepted but not selected\n",
-			resourceName, action.getName() );
+		debug( "Resource [ {} ] Action [ {} ]: Accepted but not selected",
+			   resourceName, action.getName() );
 
 		getChanges().record(action, hasChanges);
 	}
 
 	protected void recordTransform(Action action, String resourceName) {
-		logger.debug(
-			"Resource [ {} ] Action [ {} ]: Changes [ {} ]\n",
-			resourceName, action.getName(), action.hasChanges() );
+		debug( "Resource [ {} ] Action [ {} ]: Changes [ {} ]",
+			   resourceName, action.getName(), action.hasChanges() );
 
 		getChanges().record(action);
 	}
@@ -188,8 +188,8 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 				inputName = inputEntry.getName();
 				long inputLength = inputEntry.getSize();
 
-				logger.debug("[ {}.{} ] [ {} ] Size [ {} ]\n",
-					getClass().getSimpleName(), "applyZip", inputName, inputLength);
+				debug( "[ {}.{} ] [ {} ] Size [ {} ]",
+					   getClass().getSimpleName(), "apply", inputName, inputLength );
 
 				boolean selected = select(inputName);
 				Action acceptedAction = acceptAction(inputName);
@@ -209,25 +209,24 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 					zipOutputStream.closeEntry(); // throws IOException
 
 				} else {
-
-//						long inputCRC = inputEntry.getCrc();
+//					long inputCRC = inputEntry.getCrc();
 //
-//						int inputMethod = inputEntry.getMethod();
-//						long inputCompressed = inputEntry.getCompressedSize();
+//					int inputMethod = inputEntry.getMethod();
+//					long inputCompressed = inputEntry.getCompressedSize();
 //
-//						FileTime inputCreation = inputEntry.getCreationTime();
-//						FileTime inputAccess = inputEntry.getLastAccessTime();
-//						FileTime inputModified = inputEntry.getLastModifiedTime();
+//					FileTime inputCreation = inputEntry.getCreationTime();
+//					FileTime inputAccess = inputEntry.getLastAccessTime();
+//					FileTime inputModified = inputEntry.getLastModifiedTime();
 //
-//						String className = getClass().getSimpleName();
-//						String methodName = "applyZip";
+//					String className = getClass().getSimpleName();
+//					String methodName = "applyZip";
 //
-//						logger.debug("[ {}.{} ] [ {} ] Size [ {} ] CRC [ {} ]\n",
-//							className, methodName, inputName, inputLength, inputCRC);
-//						logger.debug("[ {}.{} ] [ {} ] Compressed size [ {} ] Method [ {} ]\n",
-//								className, methodName, inputName, inputCompressed, inputMethod);
-//						logger.debug("[ {}.{} ] [ {} ] Created [ {} ] Accessed [ {} ] Modified [ {} ]\n",
-//								className, methodName, inputName, inputCreation, inputAccess, inputModified);
+//					debug( "[ {}.{} ] [ {} ] Size [ {} ] CRC [ {} ]",
+//						   className, methodName, inputName, inputLength, inputCRC);
+//					debug( "[ {}.{} ] [ {} ] Compressed size [ {} ] Method [ {} ]",
+//						   className, methodName, inputName, inputCompressed, inputMethod);
+//					debug( "[ {}.{} ] [ {} ] Created [ {} ] Accessed [ {} ] Modified [ {} ]",
+//						   className, methodName, inputName, inputCreation, inputAccess, inputModified);
 
 					// Archive type actions are processed using streams,
 					// while non-archive type actions do a full read of the entry

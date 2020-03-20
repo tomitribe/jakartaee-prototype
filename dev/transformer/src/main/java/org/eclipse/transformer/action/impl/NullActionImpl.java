@@ -24,15 +24,17 @@ import java.io.File;
 import org.eclipse.transformer.TransformException;
 import org.eclipse.transformer.action.ActionType;
 import org.eclipse.transformer.util.ByteData;
+import org.slf4j.Logger;
 
 public class NullActionImpl extends ActionImpl {
 
 	public NullActionImpl(
-			InputBufferImpl buffer,
-			SelectionRuleImpl selectionRule,
-			SignatureRuleImpl signatureRule) {
+		Logger logger,
+		InputBufferImpl buffer,
+		SelectionRuleImpl selectionRule,
+		SignatureRuleImpl signatureRule) {
 
-		super(buffer, selectionRule, signatureRule);
+		super(logger, buffer, selectionRule, signatureRule);
 	}
 
 	//

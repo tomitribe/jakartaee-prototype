@@ -25,14 +25,11 @@ import java.util.Set;
 import org.eclipse.transformer.TransformProperties;
 import org.eclipse.transformer.action.SelectionRule;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SelectionRuleImpl implements SelectionRule {
-    
-    static Logger logger = LoggerFactory.getLogger(SelectionRuleImpl.class);
 
-	public SelectionRuleImpl(
-		Set<String> includes, Set<String> excludes) {
+	public SelectionRuleImpl(Logger logger, Set<String> includes, Set<String> excludes) {
+		this.logger = logger;
 
 		this.included = new HashSet<String>(includes);
 		this.includedExact = new HashSet<String>();
@@ -53,6 +50,18 @@ public class SelectionRuleImpl implements SelectionRule {
 		TransformProperties.processSelections(
 			this.excluded,
 			this.excludedExact, this.excludedHead, this.excludedTail, this.excludedAny );
+	}
+
+	//
+	
+	private final Logger logger;
+
+	public Logger getLogger() {
+		return logger;
+	}
+
+	public void debug(String message, Object... parms) {
+		getLogger().debug(message, parms);
 	}
 
 	//
@@ -80,34 +89,34 @@ public class SelectionRuleImpl implements SelectionRule {
 	@Override
 	public boolean selectIncluded(String resourceName) {
 		if ( included.isEmpty() ) {
-			logger.debug("Include [ %s ]: %s\n", resourceName, "No includes");
+			debug("Include [ {} ]: {}", resourceName, "No includes");
 			return true;
 
 		} else if ( includedExact.contains(resourceName) ) {
-			logger.debug("Include [ %s ]: %s\n", resourceName, "Exact include");
+			debug("Include [ {} ]: {}", resourceName, "Exact include");
 			return true;
 
 		} else {
 			for ( String tail : includedHead ) {
 				if ( resourceName.endsWith(tail) ) {
-					logger.debug("Include [ %s ]: %s (%s)\n", resourceName, "Match tail", tail);
+					debug("Include [ {} ]: {} ({})", resourceName, "Match tail", tail);
 					return true;
 				}
 			}
 			for ( String head : includedTail ) {
 				if ( resourceName.startsWith(head) ) {
-					logger.debug("Include [ %s ]: %s (%s)\n", resourceName, "Match head", head);
+					debug("Include [ {} ]: {} ({})", resourceName, "Match head", head);
 					return true;
 				}
 			}
 			for ( String middle : includedAny ) {
 				if ( resourceName.contains(middle) ) {
-					logger.debug("Include [ %s ]: %s (%s)\n", resourceName, "Match middle", middle);
+					debug("Include [ {} ]: {} ({})", resourceName, "Match middle", middle);
 					return true;
 				}
 			}
 
-			logger.debug("Do not include [ %s ]\n", resourceName);
+			debug("Do not include [ {} ]", resourceName);
 			return false;
 		}
 	}
@@ -115,34 +124,34 @@ public class SelectionRuleImpl implements SelectionRule {
 	@Override
 	public boolean rejectExcluded(String resourceName ) {
 		if ( excluded.isEmpty() ) {
-			logger.debug("Do not exclude[ %s ]: %s\n", resourceName, "No excludes");
+			debug("Do not exclude[ {} ]: {}", resourceName, "No excludes");
 			return false;
 
 		} else if ( excludedExact.contains(resourceName) ) {
-			logger.debug("Exclude [ %s ]: %s\n", resourceName, "Exact exclude");
+			debug("Exclude [ {} ]: {}", resourceName, "Exact exclude");
 			return true;
 
 		} else {
 			for ( String tail : excludedHead ) {
 				if ( resourceName.endsWith(tail) ) {
-					logger.debug("Exclude[ %s ]: %s (%s)\n", resourceName, "Match tail", tail);
+					debug("Exclude[ {} ]: {} ({})", resourceName, "Match tail", tail);
 					return true;
 				}
 			}
 			for ( String head : excludedTail ) {
 				if ( resourceName.startsWith(head) ) {
-					logger.debug("Exclude[ %s ]: %s (%s)\n", resourceName, "Match head", head);
+					debug("Exclude[ {} ]: {} ({})", resourceName, "Match head", head);
 					return true;
 				}
 			}
 			for ( String middle : excludedAny ) {
 				if ( resourceName.contains(middle) ) {
-					logger.debug("Exclude[ %s ]: %s (%s)\n", resourceName, "Match middle", middle);
+					debug("Exclude[ {} ]: {} ({})", resourceName, "Match middle", middle);
 					return true;
 				}
 			}
 
-			logger.debug("Do not exclude[ %s ]\n", resourceName);
+			debug("Do not exclude [ {} ]", resourceName);
 			return false;
 		}
 	}
