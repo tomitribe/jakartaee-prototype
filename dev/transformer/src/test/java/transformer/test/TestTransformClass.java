@@ -36,19 +36,14 @@ import java.util.Set;
 
 import org.eclipse.transformer.TransformException;
 import org.eclipse.transformer.TransformProperties;
-import org.eclipse.transformer.action.BundleData;
 import org.eclipse.transformer.action.impl.ClassActionImpl;
 import org.eclipse.transformer.action.impl.ClassChangesImpl;
-import org.eclipse.transformer.action.impl.InputBufferImpl;
 import org.eclipse.transformer.action.impl.JarActionImpl;
-import org.eclipse.transformer.action.impl.SelectionRuleImpl;
 import org.eclipse.transformer.action.impl.ServiceLoaderConfigActionImpl;
-import org.eclipse.transformer.action.impl.SignatureRuleImpl;
 import org.eclipse.transformer.util.FileUtils;
 import org.eclipse.transformer.util.InputStreamData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
 import org.eclipse.transformer.Transformer;
 
 import transformer.test.data.Sample_InjectAPI_Jakarta;

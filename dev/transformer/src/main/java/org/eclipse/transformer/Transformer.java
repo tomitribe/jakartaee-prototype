@@ -614,7 +614,7 @@ public class Transformer {
 
     //
 
-    public TransformOptions getTransformOptions() {
+    public TransformOptions createTransformOptions() {
         return new TransformOptions();
     }
 
@@ -646,7 +646,7 @@ public class Transformer {
 
         //
 
-    	protected void setLogging() throws TransformException {
+    	public void setLogging() throws TransformException {
     		logger = new TransformerLoggerFactory(Transformer.this).createLogger(); // throws TransformException
 
             if ( hasOption(AppOption.LOG_TERSE) ) {
@@ -656,7 +656,7 @@ public class Transformer {
             }
     	}
 
-        public void info(String message, Object... parms) {
+        protected void info(String message, Object... parms) {
         	getLogger().info(message, parms);
         }
 
@@ -1133,7 +1133,7 @@ public class Transformer {
             return SUCCESS_RC; // TODO: Is this the correct return value?
         }
 
-        TransformOptions options = new TransformOptions();
+        TransformOptions options = createTransformOptions();
 
         try {
         	options.setLogging();

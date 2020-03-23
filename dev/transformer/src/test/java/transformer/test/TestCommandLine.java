@@ -32,9 +32,10 @@ import org.eclipse.transformer.Transformer;
 import org.eclipse.transformer.Transformer.TransformOptions;
 
 class TestCommandLine {
-    
-    String currentDirectory = ".";
-    final String DATA_DIR = "src/test/data/";
+
+    private static final String DATA_DIR = "src/test/data/";
+
+    private String currentDirectory = ".";
 
     @BeforeEach
     public void setUp() {
@@ -62,21 +63,22 @@ class TestCommandLine {
 
         Transformer t = new Transformer(System.out, System.err);
 
-        String[] args = new String[] { inputFileName, "-o"};
+        String[] args = new String[] { inputFileName, "-o" };
 
         t.setArgs(args);
         t.setParsedArgs();
 
-        TransformOptions options = t.getTransformOptions();
+        TransformOptions options = t.createTransformOptions();
+        options.setLogging();
 
-        // SET INPUT
         assertTrue(options.setInput(), "options.setInput() failed");
-        assertEquals(inputFileName, options.getInputFileName(), 
+        assertEquals(
+        	inputFileName, options.getInputFileName(), 
         	"input file name is not correct [" + options.getInputFileName() + "]");
 
-        // SET OUTPUT
         assertTrue(options.setOutput(), "options.setOutput() failed");
-        assertEquals(outputFileName, options.getOutputFileName(), 
+        assertEquals(
+        	outputFileName, options.getOutputFileName(), 
         	"output file name is not correct [" + options.getOutputFileName() + "]");
 
         assertTrue(options.setRules(), "options.setRules() failed");
