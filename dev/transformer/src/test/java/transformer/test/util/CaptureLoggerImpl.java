@@ -1,14 +1,24 @@
 package transformer.test.util;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.event.Level;
 
 public class CaptureLoggerImpl implements Logger {
-	public static final boolean CAPTURE_INACTIVE= true;
+	public static final boolean CAPTURE_INACTIVE = true;
+
+	public CaptureLoggerImpl(String baseLoggerName, boolean captureInactive) {
+		this ( LoggerFactory.getLogger(baseLoggerName), captureInactive );
+	}
+
+	public CaptureLoggerImpl(String baseLoggerName) {
+		this ( LoggerFactory.getLogger(baseLoggerName) );
+	}
 
 	public CaptureLoggerImpl(Logger baseLogger) {
 		this(baseLogger, !CAPTURE_INACTIVE);
@@ -94,6 +104,57 @@ public class CaptureLoggerImpl implements Logger {
 		public final String[] parms;
 		public final String thrownMessage;
 
+		private String printString;
+
+		private boolean append(Object object, boolean isFirst, StringBuilder builder) {
+			if ( object == null ) {
+				return false;
+			}
+			if ( !isFirst ) {
+				builder.append(" ");
+			}
+			builder.append("[ ");
+			builder.append(object);
+			builder.append(" ]");
+			return true;
+		}
+
+		public String toString() {
+			if ( printString == null ) {
+				boolean isFirst = true;
+
+				StringBuilder builder = new StringBuilder();
+
+				boolean didAdd = append(level, isFirst, builder);
+				if ( didAdd ) {
+					isFirst = false;
+				}
+				didAdd = append(marker, isFirst, builder);
+				if ( didAdd ) {
+					isFirst = false;
+				}
+				didAdd = append(threadName, isFirst, builder);
+				if ( didAdd ) {
+					isFirst = false;
+				}
+				append(Long.valueOf(timeStamp), isFirst, builder);
+				isFirst = false;
+
+				append(message, isFirst, builder);
+				if ( parms != null ) {
+					for ( String parm : parms ) {
+						append(parm, isFirst, builder);
+					}
+				}
+
+				append(thrownMessage, isFirst, builder);
+
+				printString = builder.toString();
+			}
+
+			return printString;
+		}
+
 		public LogEvent(Level level, Marker marker, Throwable th, String message, Object... rawParms) {
 			this.level = level;
 			this.marker = marker;
@@ -129,7 +190,7 @@ public class CaptureLoggerImpl implements Logger {
 	}
 
 	public List<? extends LogEvent> consumeCapturedEvents() {
-		List<? extends LogEvent> events = capturedEvents;
+		List<? extends LogEvent> events = new ArrayList<LogEvent>(capturedEvents);
 		capturedEvents.clear();
 		return events;
 	}

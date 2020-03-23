@@ -46,27 +46,9 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TestTransformManifest {
+import transformer.test.util.CaptureLoggerImpl;
 
-	public InputBufferImpl createBuffer() {
-		return new InputBufferImpl();
-	}
-
-	public SelectionRuleImpl createSelectionRule(
-		Set<String> useIncludes,
-		Set<String> useExcludes) {
-
-		return new SelectionRuleImpl(useIncludes, useExcludes );
-	}
-
-	public SignatureRuleImpl createSignatureRule(
-		Map<String, String> usePackageRenames,
-		Map<String, String> usePackageVersions,
-		Map<String, BundleData> bundleData,
-		Map<String, String> directStrings) {
-
-		return new SignatureRuleImpl(usePackageRenames, usePackageVersions, bundleData, directStrings );
-	}
+public class TestTransformManifest extends CaptureTest {
 
 	//
 
@@ -170,12 +152,17 @@ public class TestTransformManifest {
 
 	public ManifestActionImpl getJakartaManifestAction() {
 		if ( jakartaManifestAction == null ) {
-	
+			CaptureLoggerImpl useLogger = getCaptureLogger();
+
 			jakartaManifestAction = new ManifestActionImpl(
+				useLogger,
 				new InputBufferImpl(),
-				new SelectionRuleImpl( getIncludes(), getExcludes() ),
+				new SelectionRuleImpl( useLogger, getIncludes(), getExcludes() ),
 				new SignatureRuleImpl(
-					getPackageRenames(), getPackageVersions(), getBundleUpdates(), getDirectStrings() ),
+					useLogger,
+					getPackageRenames(), getPackageVersions(),
+					getBundleUpdates(),
+					getDirectStrings() ),
 				ManifestActionImpl.IS_MANIFEST );
 		}
 		return jakartaManifestAction;
@@ -185,11 +172,13 @@ public class TestTransformManifest {
 
 	public ManifestActionImpl getJakartaFeatureAction() {
 		if ( jakartaFeatureAction == null ) {
+			CaptureLoggerImpl useLogger = getCaptureLogger();
 
 			jakartaFeatureAction = new ManifestActionImpl(
+				useLogger,
 				new InputBufferImpl(),
-				new SelectionRuleImpl( getIncludes(), getExcludes() ),
-				new SignatureRuleImpl( getPackageRenames(), getPackageVersions(), null, null ),
+				new SelectionRuleImpl( useLogger, getIncludes(), getExcludes() ),
+				new SignatureRuleImpl( useLogger, getPackageRenames(), getPackageVersions(), null, null ),
 				ManifestActionImpl.IS_FEATURE );
 		}
 
@@ -471,12 +460,13 @@ public class TestTransformManifest {
 	
 	protected ManifestActionImpl_Test getManifestAction() {
 		if ( manifestAction_test == null ) {
+			CaptureLoggerImpl useLogger = getCaptureLogger();
 
 			manifestAction_test = new ManifestActionImpl_Test(
-				LoggerFactory.getLogger("Test"),
+				useLogger,
 				new InputBufferImpl(),
-				new SelectionRuleImpl( getIncludes(), getExcludes() ), 
-				new SignatureRuleImpl( getPackageRenames(), getPackageVersions(), null, null ),
+				new SelectionRuleImpl( useLogger, getIncludes(), getExcludes() ), 
+				new SignatureRuleImpl( useLogger, getPackageRenames(), getPackageVersions(), null, null ),
 				ManifestActionImpl.IS_MANIFEST );
 		}
 
