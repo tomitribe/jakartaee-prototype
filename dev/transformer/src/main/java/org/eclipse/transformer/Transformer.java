@@ -26,7 +26,6 @@ import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -43,6 +42,7 @@ import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.Option.Builder;
+import org.eclipse.transformer.TransformerLoggerFactory.LoggerProperty;
 import org.eclipse.transformer.action.ActionType;
 import org.eclipse.transformer.action.BundleData;
 import org.eclipse.transformer.action.impl.ActionImpl;
@@ -384,7 +384,7 @@ public class Transformer {
 
     public void systemPrint(PrintStream output, String message, Object... parms) {
     	if ( parms.length != 0 ) {
-    		message = MessageFormat.format(message, parms);
+    		message = String.format(message, parms);
     	}
     	output.println(message);
     }
@@ -510,7 +510,7 @@ public class Transformer {
         String rulesReference = getOptionValue(ruleOption);
 
         if ( rulesReference == null ) {
-        	info("Skipping option [ %s ]", ruleOption);
+        	dual_info("Skipping option [ %s ]", ruleOption);
         	return FileUtils.createProperties();
         } else {
         	return loadExternalProperties(ruleOption, rulesReference);
@@ -531,13 +531,13 @@ public class Transformer {
     protected UTF8Properties loadDefaultProperties(AppOption ruleOption, String defaultReference)
         	throws IOException {
 
-    	info("Using internal [ %s ]: [ %s ]", ruleOption, defaultReference);
+    	dual_info("Using internal [ %s ]: [ %s ]", ruleOption, defaultReference);
     	URL rulesUrl = getClass().getResource(defaultReference);
     	if ( rulesUrl == null ) {
-    		info("Default [ %s ] were not found [ %s ]", AppOption.RULES_SELECTIONS, defaultReference);
+    		dual_info("Default [ %s ] were not found [ %s ]", AppOption.RULES_SELECTIONS, defaultReference);
     		return null;
     	} else {
-    		info("Default [ %s ] URL [ %s ]", ruleOption, rulesUrl);
+    		dual_info("Default [ %s ] URL [ %s ]", ruleOption, rulesUrl);
     	}
     	return FileUtils.loadProperties(rulesUrl);
     }
@@ -551,10 +551,10 @@ public class Transformer {
     protected UTF8Properties loadExternalProperties(String referenceName, String externalReference)
         throws URISyntaxException, IOException {
 
-    	info("Using external [ %s ]: [ %s ]", referenceName, externalReference);
+    	dual_info("Using external [ %s ]: [ %s ]", referenceName, externalReference);
     	URI currentDirectoryUri = IO.work.toURI();
     	URL rulesUrl = URIUtil.resolve(currentDirectoryUri, externalReference).toURL();
-    	info("External [ %s ] URL [ %s ]", referenceName, rulesUrl);
+    	dual_info("External [ %s ] URL [ %s ]", referenceName, rulesUrl);
 
     	return FileUtils.loadProperties(rulesUrl);
     }
@@ -578,37 +578,59 @@ public class Transformer {
     protected void error(String message, Throwable th, Object... parms) {
     	Logger useLogger = getLogger();
     	if ( useLogger.isErrorEnabled() ) {
-    		message = MessageFormat.format(message, parms);
+    		message = String.format(message, parms);
     		useLogger.error(message, th);
     	}
     }
 
     //
 
+	public boolean toSysOut;
+	public boolean toSysErr;
+
+	protected void detectLogFile() {
+		toSysOut = TransformerLoggerFactory.logToSysOut();
+		if ( toSysOut ) {
+			outputPrint("Logging is to System.out\n");
+		}
+
+		toSysErr = TransformerLoggerFactory.logToSysErr();
+		if ( toSysOut ) {
+			outputPrint("Logging is to System.err\n");
+		}
+
+		outputPrint("Log file [ " + System.getProperty(LoggerProperty.LOG_FILE.getPropertyName()) + " ]");
+	}
+
     public void dual_info(String message, Object... parms) {
     	if ( parms.length != 0 ) {
-    		message = MessageFormat.format(message, parms);
+    		message = String.format(message, parms);
     	}
-    	systemPrint( getSystemOut(), message );
+    	if ( !toSysOut && !toSysErr ) {
+    		systemPrint( getSystemOut(), message );
+    	}
     	info(message);
     }
 
     protected void dual_error(String message, Object... parms) {
     	if ( parms.length != 0 ) {
-    		message = MessageFormat.format(message, parms);
+    		message = String.format(message, parms);
     	}
-    	systemPrint( getSystemErr(), message );
+    	if ( !toSysOut && !toSysErr ) {
+    		systemPrint( getSystemErr(), message );
+    	}
     	info(message);
     }
 
     protected void dual_error(String message, Throwable th, Object... parms) {
     	if ( parms.length != 0 ) {
-    		message = MessageFormat.format(message, parms);
+    		message = String.format(message, parms);
     	}
-    	PrintStream useOutput = getSystemErr();
-    	systemPrint(useOutput, message);
-    	th.printStackTrace(useOutput);
-
+    	if ( !toSysOut && !toSysErr ) {
+    		PrintStream useOutput = getSystemErr();
+    		systemPrint(useOutput, message);
+    		th.printStackTrace(useOutput);
+    	}
     	getLogger().error(message, th);
     }
 
@@ -667,7 +689,7 @@ public class Transformer {
         protected void error(String message, Throwable th, Object... parms) {
         	Logger useLogger = getLogger();
         	if ( useLogger.isErrorEnabled() ) {
-        		message = MessageFormat.format(message, parms);
+        		message = String.format(message, parms);
         		useLogger.error(message, th);
         	}
         }
@@ -706,7 +728,7 @@ public class Transformer {
         	if ( selectionProperties != null ) {
         		TransformProperties.setSelections(includes, excludes, selectionProperties);
         	} else {
-        		info("All resources will be selected");
+        		dual_info("All resources will be selected");
         	}
 
         	if ( renameProperties != null ) {
@@ -716,21 +738,21 @@ public class Transformer {
         		}
         		packageRenames = renames;
         	} else {
-        		info("No package renames are available");
+        		dual_info("No package renames are available");
         		packageRenames = null;
         	}
 
         	if ( versionProperties != null ) {
         		packageVersions = TransformProperties.getPackageVersions(versionProperties);
         	} else {
-        		info("Package versions will not be updated");
+        		dual_info("Package versions will not be updated");
         	}
 
         	if ( updateProperties != null ) {
         		bundleUpdates = TransformProperties.getBundleUpdates(updateProperties);
         		// throws IllegalArgumentException
         	} else {
-        		info("Bundle identities will not be updated");
+        		dual_info("Bundle identities will not be updated");
         	}
 
         	directStrings = TransformProperties.getDirectStrings(directProperties);
@@ -751,9 +773,10 @@ public class Transformer {
 
     	    for ( String entry : versionsMap.keySet() ) {
     	        if ( !renamesMap.containsValue(entry) ) {
-    	            error("Version rule key [ " + entry + "] from [ " 
-    	                   + getRuleFileName(AppOption.RULES_VERSIONS, DEFAULT_VERSIONS_REFERENCE) + " ] not found in rename rules [ " 
-    	                   + getRuleFileName(AppOption.RULES_RENAMES, DEFAULT_RENAMES_REFERENCE) +" ]");
+    	            dual_error(
+    	            	"Version rule key [ " + entry + "]" +
+    	                " from [ " + getRuleFileName(AppOption.RULES_VERSIONS, DEFAULT_VERSIONS_REFERENCE) + " ]" +
+    	            	" not found in rename rules [ " + getRuleFileName(AppOption.RULES_RENAMES, DEFAULT_RENAMES_REFERENCE) +" ]");
     	            return false;
     	        }
     	    }
@@ -870,7 +893,7 @@ public class Transformer {
         public boolean setInput() {
         	String useInputName = getInputFileNameFromCommandLine();
             if ( useInputName == null ) {
-                error("No input file was specified");
+                dual_error("No input file was specified");
                 return false;
             }
 
@@ -879,12 +902,12 @@ public class Transformer {
             inputPath = inputFile.getAbsolutePath();
 
             if ( !inputFile.exists() ) {
-                error("Input does not exist [ %s ] [ %s ]", inputName, inputPath);
+                dual_error("Input does not exist [ %s ] [ %s ]", inputName, inputPath);
                 return false;
             }
 
-            info("Input     [ %s ]", inputName);
-            info("          [ %s ]", inputPath);
+            dual_info("Input     [ %s ]", inputName);
+            dual_info("          [ %s ]", inputPath);
             return true;
         }
 
@@ -929,7 +952,7 @@ public class Transformer {
             if ( putIntoDirectory = (inputFile.isFile() && useOutputFile.isDirectory()) ) {
             	useOutputName = useOutputName + '/' + inputName;
             	if ( isVerbose ) {
-            		info("Output generated using input name and output directory [ %s ]", useOutputName);
+            		dual_info("Output generated using input name and output directory [ %s ]", useOutputName);
             	}
 
             	useOutputFile = new File(useOutputName);
@@ -951,25 +974,25 @@ public class Transformer {
             	}
             }
 
-            info("Output    [ %s ] (%s)", useOutputName, outputCase);
-            info("          [ %s ]", useOutputPath);
+            dual_info("Output    [ %s ] (%s)", useOutputName, outputCase);
+            dual_info("          [ %s ]", useOutputPath);
 
             allowOverwrite = hasOption(AppOption.OVERWRITE);
             if ( allowOverwrite) {
-            	info("Overwrite of output is enabled");
+            	dual_info("Overwrite of output is enabled");
             }
 
             if ( useOutputFile.exists() ) {
             	if ( allowOverwrite ) {
-                    info("Output exists and will be overwritten [ %s ]", useOutputPath);
+                    dual_info("Output exists and will be overwritten [ %s ]", useOutputPath);
             	} else {
-            		error("Output already exists [ %s ]", useOutputPath);
+            		dual_error("Output already exists [ %s ]", useOutputPath);
             		return false;
             	}
             } else {
             	if ( allowOverwrite ) {
             		if ( isVerbose ) {
-            			info("Overwritten specified, but output [ %s ] does not exist", useOutputPath);
+            			dual_info("Overwritten specified, but output [ %s ] does not exist", useOutputPath);
             		}
             	}
             }
@@ -1080,21 +1103,21 @@ public class Transformer {
         	if ( actionName != null ) {
         		for ( ActionImpl action : getRootAction().getActions() ) {
         			if ( action.getActionType().matches(actionName) ) {
-        				info("Forced action [ %s ] [ %s ]", actionName, action.getName());
+        				dual_info("Forced action [ %s ] [ %s ]", actionName, action.getName());
         				acceptedAction = action;
         				return true;
         			}
         		}
-        		error("No match for forced action [ %s ]", actionName);
+        		dual_error("No match for forced action [ %s ]", actionName);
         		return false;
 
         	} else {
         		acceptedAction = getRootAction().acceptAction(inputName,  inputFile);
         		if ( acceptedAction == null ) {
-        			error("No action selected for input [ %s ]", inputName);
+        			dual_error("No action selected for input [ %s ]", inputName);
         			return false;
         		} else {
-        			info("Action selected for input [ %s ]: %s", inputName, acceptedAction.getName());
+        			dual_info("Action selected for input [ %s ]: %s", inputName, acceptedAction.getName());
         			return true;
         		}
         	}
@@ -1106,13 +1129,19 @@ public class Transformer {
         	acceptedAction.apply(inputName, inputFile, outputFile);
 
         	if ( isTerse ) {
-        		acceptedAction.getChanges().displayTerse( getSystemOut(), inputPath, outputPath );
+        		if ( !toSysOut && !toSysErr ) {
+        			acceptedAction.getChanges().displayTerse( getSystemOut(), inputPath, outputPath );
+        		}
         		acceptedAction.getChanges().displayTerse( getLogger(), inputPath, outputPath );
         	} else if ( isVerbose ) {
-        		acceptedAction.getChanges().displayVerbose( getSystemOut(), inputPath, outputPath );
+        		if ( !toSysOut && !toSysErr ) {
+        			acceptedAction.getChanges().displayVerbose( getSystemOut(), inputPath, outputPath );
+        		}
         		acceptedAction.getChanges().displayVerbose( getLogger(), inputPath, outputPath );
     		} else {
-        		acceptedAction.getChanges().display( getSystemOut(), inputPath, outputPath );
+        		if ( !toSysOut && !toSysErr ) {
+        			acceptedAction.getChanges().display( getSystemOut(), inputPath, outputPath );
+        		}
         		acceptedAction.getChanges().display( getLogger(), inputPath, outputPath );
     		}
         }
@@ -1122,7 +1151,7 @@ public class Transformer {
         try {
             setParsedArgs();
         } catch ( ParseException e ) {
-            error("Exception parsing command line arguments: %s", e);
+            errorPrint("Exception parsing command line arguments: %s", e);
             help( getSystemOut() );
             return PARSE_ERROR_RC;
         }
@@ -1138,9 +1167,10 @@ public class Transformer {
         try {
         	options.setLogging();
         } catch ( Exception e ) {
-            error("Logger settings error: %s", e);
+            errorPrint("Logger settings error: %s", e);
             return LOGGER_SETTINGS_ERROR_RC;
         }
+        detectLogFile();
 
         if ( !options.setInput() ) { 
             return TRANSFORM_ERROR_RC;
@@ -1154,11 +1184,11 @@ public class Transformer {
         try {
         	loadedRules = options.setRules();
         } catch ( Exception e ) {
-            error("Exception loading rules: %s", e);
+            dual_error("Exception loading rules: %s", e);
             return RULES_ERROR_RC;
         }
         if ( !loadedRules ) {
-        	error("Transformation rules cannot be used");
+        	dual_error("Transformation rules cannot be used");
         	return RULES_ERROR_RC;
         }
         if ( options.isVerbose ) {
@@ -1166,17 +1196,17 @@ public class Transformer {
         }
 
         if ( !options.acceptAction() ) {
-        	info("No action selected");
+        	dual_error("No action selected");
         	return FILE_TYPE_ERROR_RC;
         }
 
         try {
         	options.transform(); // throws JakartaTransformException
         } catch ( TransformException e ) {
-            error("Transform failure: %s", e);
+            dual_error("Transform failure: %s", e);
             return TRANSFORM_ERROR_RC;
         } catch ( Throwable th) {
-        	error("Unexpected failure: %s", th);
+        	dual_error("Unexpected failure: %s", th);
             return TRANSFORM_ERROR_RC;
         }
 

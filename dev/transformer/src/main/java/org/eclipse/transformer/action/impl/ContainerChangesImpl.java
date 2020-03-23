@@ -20,7 +20,6 @@
 package org.eclipse.transformer.action.impl;
 
 import java.io.PrintStream;
-import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -281,18 +280,20 @@ public class ContainerChangesImpl extends ChangesImpl implements ContainerChange
 		"[ %22s ] [ %6s ] %10s [ %6s ] %8s [ %6s ]%s";
 
 	private String formatData(Object... parms) {
-		return MessageFormat.format(DATA_LINE, parms);
+		return String.format(DATA_LINE, parms);
 	}
 
 	protected void displayChanges(PrintStream stream) {
-		stream.printf( formatData(
+		stream.print( formatData(
 			"All Resources", getAllResources(),
 			"Unselected", getAllUnselected(),
 			"Selected", getAllSelected(),
 			"\n" ) );
 
-		stream.printf( DASH_LINE );
-		stream.printf( formatData(
+		stream.print(SMALL_DASH_LINE);
+		stream.print("\n");
+		
+		stream.print( formatData(
 			"All Actions", getAllSelected(),
 			"Unchanged", getAllUnchanged(),
 			"Changed", getAllChanged(),
@@ -301,7 +302,7 @@ public class ContainerChangesImpl extends ChangesImpl implements ContainerChange
 		for ( String actionName : getActionNames() ) {
 			int useUnchangedByAction = getUnchanged(actionName); 
 			int useChangedByAction = getChanged(actionName);
-			stream.printf( formatData(
+			stream.print( formatData(
 				actionName, useUnchangedByAction + useChangedByAction,
 				"Unchanged", useUnchangedByAction,
 				"Changed", useChangedByAction,
@@ -316,7 +317,7 @@ public class ContainerChangesImpl extends ChangesImpl implements ContainerChange
 			"Selected", getAllSelected(),
 			"" ) );
 
-		logger.info( DASH_LINE );
+		logger.info( SMALL_DASH_LINE );
 		logger.info( formatData(
 			"All Actions", getAllSelected(),
 			"Unchanged", getAllUnchanged(),
@@ -357,22 +358,30 @@ public class ContainerChangesImpl extends ChangesImpl implements ContainerChange
     	// [ ... ]
 		// ================================================================================
 
-		stream.printf( DASH_LINE );
+		stream.print(DASH_LINE);
+		stream.print("\n");
 
 		stream.printf( "[ Input  ] [ %s ]\n           [ %s ]\n", getInputResourceName(), inputPath );
 		stream.printf( "[ Output ] [ %s ]\n           [ %s ]\n", getOutputResourceName(), outputPath );
-		stream.printf( DASH_LINE );
+		stream.print(DASH_LINE);
+		stream.print("\n");
 
 		stream.printf( "[ Immediate changes: ]\n");
-		stream.printf( SMALL_DASH_LINE );
-		displayChanges(stream);
-		stream.printf( DASH_LINE );
+		stream.print(SMALL_DASH_LINE);
+		stream.print("\n");
 
+		displayChanges(stream);
+		stream.print(DASH_LINE);
+		stream.print("\n");
+		
 		if ( allNestedChanges != null ) {
-			stream.printf( "[ Nested changes: ]\n");
-			stream.printf( SMALL_DASH_LINE );
+			stream.printf("[ Nested changes: ]\n");
+			stream.printf(SMALL_DASH_LINE);
+			stream.print("\n");
+			
 			allNestedChanges.displayChanges(stream);
-			stream.printf( DASH_LINE );
+			stream.printf(DASH_LINE);
+			stream.print("\n");
 		}
 	}
     
@@ -414,23 +423,23 @@ public class ContainerChangesImpl extends ChangesImpl implements ContainerChange
 			stream.printf("Input [ %s ]: %s\n", inputPath, getChangeTag() );
 		}
 
-		stream.printf( formatData(
+		stream.print( formatData(
 			"All Resources", getAllResources(),
 			"Unselected", getAllUnselected(),
 			"Selected", getAllSelected(),
 			"\n" ) );
-		stream.printf( formatData(
+		stream.print( formatData(
 			"All Actions", getAllSelected(),
 			"Unchanged", getAllUnchanged(),
 			"Changed", getAllChanged(),
 			"\n" ) );
 		if ( allNestedChanges != null ) {
-			stream.printf( formatData(
+			stream.print( formatData(
 				"Nested Resources", allNestedChanges.getAllResources(),
 				"Unselected", allNestedChanges.getAllUnselected(),
 				"Selected", allNestedChanges.getAllSelected(),
 				"\n" ) );
-			stream.printf( formatData(
+			stream.print( formatData(
 				"Nested Actions", allNestedChanges.getAllSelected(),
 				"Unchanged", allNestedChanges.getAllUnchanged(),
 				"Changed", allNestedChanges.getAllChanged(),

@@ -21,7 +21,6 @@ package org.eclipse.transformer.action.impl;
 
 import java.io.DataInput;
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -209,7 +208,7 @@ public class ClassActionImpl extends ActionImpl {
 	private String debugDumpLine(StringBuilder builder, byte[] bytes, int offset, int width) {
 		for ( int byteNo = 0; byteNo < width; byteNo++ ) {
 			byte nextByte = bytes[ offset + byteNo ];
-			builder.append( MessageFormat.format("%02x ", nextByte) );
+			builder.append( String.format("%02x ", nextByte) );
 		}
 		String line = builder.toString();
 		builder.setLength(0);
@@ -1069,7 +1068,7 @@ public class ClassActionImpl extends ActionImpl {
 
 		int numConstants = constants.size();
 		for ( int constantNo = 1; constantNo < numConstants; constantNo++ ) {
-		    debug( MessageFormat.format(
+		    debug( String.format(
 		    	"Constant [ %3s ] [ %16s ] [ %s ]", 
 		        constantNo, constants.tag(constantNo), constants.entry(constantNo) ) );
 

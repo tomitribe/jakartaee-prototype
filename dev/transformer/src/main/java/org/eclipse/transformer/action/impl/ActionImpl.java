@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.MessageFormat;
 import java.util.Map;
 
 import org.eclipse.transformer.TransformException;
@@ -116,7 +115,7 @@ public abstract class ActionImpl implements Action {
 
 		if ( parms.length != 0 ) {
 			message = message.replace("{}", "%s");
-			message = MessageFormat.format(message, parms);
+			message = String.format(message, parms);
 		}
 
 		useLogger.error(message, th);

@@ -20,7 +20,6 @@
 package transformer.test.util;
 
 import java.io.PrintWriter;
-import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -145,15 +144,14 @@ public class BiDiMapImpl<Holder, Held> implements BiDiMap<Holder, Held> {
         boolean addedHolderToHeld = recordHeldToHolder(holder, held);
 
         if ( addedHeldToHolder != addedHolderToHeld ) {
-        	System.out.println(
-        		MessageFormat.format(
-        			"[ {0} ] Holder [ {1} ] Held [ {2} ] Added to holder [ {3} ] Added to held [ {4} ]",
-                    new Object[] {
-                        getHashText(),
-                        holder,
-                        held,
-                        Boolean.valueOf(addedHeldToHolder),
-                        Boolean.valueOf(addedHolderToHeld) }) );
+            System.out.println(
+                String.format(
+                    "[ %s ] Holder [ %s ] Held [ %s ] Added to holder [ %s ] Added to held [ %s ]",
+                    getHashText(),
+                    holder,
+                    held,
+                    Boolean.valueOf(addedHeldToHolder),
+                    Boolean.valueOf(addedHolderToHeld) ) );
         }
 
         return addedHeldToHolder;

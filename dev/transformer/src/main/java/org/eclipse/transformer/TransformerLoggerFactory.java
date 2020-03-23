@@ -106,8 +106,26 @@ public class TransformerLoggerFactory {
 		return settings;
 	}
 
-	protected void verbose(String message, Object...parms) {
+	protected void verboseOutput(String message, Object...parms) {
 		if ( settings.isVerbose ) {
+			transformer.outputPrint(message, parms);
+		}
+	}
+	
+	protected void normalOutput(String message, Object...parms) {
+		if ( !settings.isVerbose && !settings.isTerse ) {
+			transformer.outputPrint(message, parms);
+		}
+	}
+	
+	protected void nonTerseOutput(String message, Object...parms) {
+		if ( !settings.isTerse ) {
+			transformer.outputPrint(message, parms);
+		}
+	}
+
+	protected void terseOutput(String message, Object...parms) {
+		if ( settings.isTerse ) {
 			transformer.outputPrint(message, parms);
 		}
 	}
@@ -188,7 +206,7 @@ public class TransformerLoggerFactory {
 			} catch ( Exception e ) {
 				throw new TransformException("Failed to load logging properties [ " + settings.propertyFileName + " ]", e);
 			}
-			
+
 			for ( Entry<Object, Object> propertyEntry : properties.entrySet() ) {
 				String propertyName = propertyEntry.getKey().toString();
 				String propertyValue = propertyEntry.getValue().toString();
@@ -199,7 +217,7 @@ public class TransformerLoggerFactory {
 		if ( settings.isTerse ) {
 			// Don't report; in terse mode!
 		} else if ( settings.isVerbose ) {
-			verbose("Verbose output requested");
+			nonTerseOutput("Verbose output requested");
 		} else {
 			// Don't use of default logging mode
 		}
@@ -215,7 +233,7 @@ public class TransformerLoggerFactory {
 			logNameCase = "Assigned";
 			logName = settings.logName;
 		}
-		verbose("Logger name [ %s ] (%s)", logName, logNameCase);
+		nonTerseOutput("Logger name [ %s ] (%s)", logName, logNameCase);
 
 		return logName;
 	}
@@ -259,16 +277,14 @@ public class TransformerLoggerFactory {
 
 		String completedPropertyName = completePropertyName(propertyName);
 		if ( completedPropertyName != null ) {
-			verbose(
-				"Transformer parameters set logging system property [ %s ] as [ %s ] to [ %s ]",
+			verboseOutput(
+				"Transformer logging property adjusted from [ %s ] to [ %s ]",
 				propertyName, completedPropertyName, propertyValue);
 		} else {
 			completedPropertyName = propertyName;
-			verbose(
-				"Transformer parameters set logging system property [ %s ] to [ %s ]",
-				completedPropertyName, propertyValue);
 		}
-		System.setProperty(propertyName, propertyValue);
+
+		setLoggingProperty(completedPropertyName, propertyValue);
 	}
 
 	public enum LoggerProperty {
@@ -297,11 +313,30 @@ public class TransformerLoggerFactory {
 		}
 	}
 
-	protected void setLoggingProperty(String propertyName, String propertyValue) {
-		System.setProperty(propertyName, propertyValue);
+	protected void setLoggingProperty(String propertyName, String newPropertyValue) {
+		String oldPropertyValue = System.getProperty(propertyName);
 
-		verbose(
-			"Set logging system property [ %s ] to [ %s ]",
-			propertyName, propertyValue);
+		if ( oldPropertyValue != null ) {
+			nonTerseOutput(
+				"Blocked assignment of logging property [ %s ] to [ %s ] by prior value [ %s ]",
+				propertyName, newPropertyValue, oldPropertyValue);
+
+		} else {
+			System.setProperty(propertyName, newPropertyValue);
+
+			nonTerseOutput(
+				"Assigning logging property [ %s ] to [ %s ]",
+				propertyName, newPropertyValue);
+		}
+	}
+
+	public static boolean logToSysOut() {
+		String logFile = System.getProperty( LoggerProperty.LOG_FILE.getPropertyName() );
+		return ( (logFile != null) && logFile.equals("System.out") );
+	}
+
+	public static boolean logToSysErr() {
+		String logFile = System.getProperty( LoggerProperty.LOG_FILE.getPropertyName() );
+		return ( (logFile == null) || logFile.equals("System.err") );
 	}
 }
