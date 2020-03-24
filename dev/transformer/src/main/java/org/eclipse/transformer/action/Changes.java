@@ -21,6 +21,8 @@ package org.eclipse.transformer.action;
 
 import java.io.PrintStream;
 
+import org.slf4j.Logger;
+
 public interface Changes {
 	String getInputResourceName();
 	void setInputResourceName(String inputResourceName);
@@ -40,5 +42,12 @@ public interface Changes {
 
 	void clearChanges();
 
-	void displayChanges(PrintStream printStream, String inputPath, String outputPath);
+	void displayVerbose(PrintStream printStream, String inputPath, String outputPath);
+	void displayVerbose(Logger logger, String inputPath, String outputPath);
+
+	void display(PrintStream printStream, String inputPath, String outputPath);
+	void display(Logger logger, String inputPath, String outputPath);
+
+	void displayTerse(PrintStream printStream, String inputPath, String outputPath);
+	void displayTerse(Logger logger, String inputPath, String outputPath);
 }

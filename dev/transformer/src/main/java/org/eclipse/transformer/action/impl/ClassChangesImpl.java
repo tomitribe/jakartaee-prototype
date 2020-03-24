@@ -21,6 +21,8 @@ package org.eclipse.transformer.action.impl;
 
 import java.io.PrintStream;
 
+import org.slf4j.Logger;
+
 public class ClassChangesImpl extends ChangesImpl {
 	@Override
 	public void clearChanges() {
@@ -171,7 +173,7 @@ public class ClassChangesImpl extends ChangesImpl {
 	//
 
 	@Override
-	public void displayChanges(PrintStream printStream, String inputPath, String outputPath) {
+	public void displayVerbose(PrintStream printStream, String inputPath, String outputPath) {
 		printStream.printf(
 			"Input name [ %s ] as [ %s ]\n",
 			getInputResourceName(), inputPath );
@@ -195,5 +197,36 @@ public class ClassChangesImpl extends ChangesImpl {
 		printStream.printf( "Modified fields     [ %s ]\n", getModifiedFields() );
 		printStream.printf( "Modified methods    [ %s ]\n", getModifiedMethods() );
 		printStream.printf( "Modified constants  [ %s ]\n", getModifiedConstants() );	
+	}
+
+	@Override
+	public void displayVerbose(Logger logger, String inputPath, String outputPath) {
+		if ( !logger.isInfoEnabled() ) {
+			return;
+		}
+
+		logger.info(
+			"Input name [ {} ] as [ {} ]",
+			getInputResourceName(), inputPath );
+		
+		logger.info(
+			"Output name [ {} ] as [ {} ]",
+			getOutputResourceName(), outputPath );
+
+		logger.info(
+			"Class name [ {} ] [ {} ]",
+			getInputClassName(), getOutputClassName() );
+
+		String useInputSuperName = getInputSuperName();
+		if ( useInputSuperName != null ) {
+			logger.info(
+				"Super class name [ {} ] [ {} ]",
+				useInputSuperName, getOutputSuperName() );
+		}
+
+		logger.info( "Modified interfaces [ {} ]", getModifiedInterfaces() );
+		logger.info( "Modified fields     [ {} ]", getModifiedFields() );
+		logger.info( "Modified methods    [ {} ]", getModifiedMethods() );
+		logger.info( "Modified constants  [ {} ]", getModifiedConstants() );	
 	}
 }

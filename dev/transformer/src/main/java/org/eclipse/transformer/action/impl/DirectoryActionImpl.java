@@ -25,15 +25,17 @@ import org.eclipse.transformer.TransformException;
 import org.eclipse.transformer.action.Action;
 import org.eclipse.transformer.action.ActionType;
 import org.eclipse.transformer.action.ContainerChanges;
+import org.slf4j.Logger;
 
 public class DirectoryActionImpl extends ContainerActionImpl {
 
-    public DirectoryActionImpl(LoggerImpl logger,
-                               InputBufferImpl buffer,
-                               SelectionRuleImpl selectionRule,
-                               SignatureRuleImpl signatureRule) {
+    public DirectoryActionImpl(
+        Logger logger,
+    	InputBufferImpl buffer,
+    	SelectionRuleImpl selectionRule,
+    	SignatureRuleImpl signatureRule) {
 
-            super(logger, buffer, selectionRule, signatureRule);
+    	super(logger, buffer, selectionRule, signatureRule);
     }
 
 	//

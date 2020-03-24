@@ -20,10 +20,11 @@
 package org.eclipse.transformer.action.impl;
 
 import org.eclipse.transformer.action.ActionType;
+import org.slf4j.Logger;
 
 public class EarActionImpl extends ContainerActionImpl {
 	public EarActionImpl(
-		LoggerImpl logger,
+		Logger logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {

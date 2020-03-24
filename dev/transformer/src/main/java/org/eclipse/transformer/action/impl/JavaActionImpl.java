@@ -33,11 +33,12 @@ import java.util.Map;
 import org.eclipse.transformer.TransformException;
 import org.eclipse.transformer.action.ActionType;
 import org.eclipse.transformer.util.ByteData;
+import org.slf4j.Logger;
 
 public class JavaActionImpl extends ActionImpl {
 
 	public JavaActionImpl(
-		LoggerImpl logger,
+		Logger logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
@@ -141,7 +142,8 @@ public class JavaActionImpl extends ActionImpl {
 		// if ( outputName == null ) {
 			outputName = inputName;
 		// } else {
-		//     log("Class name [ %s ]\n        -> [ %s ]\n", inputName, outputName);
+		//     info("Input class name  [ {} ]", inputName);
+		//     info("Output class name [ {} ]", outputName);
 		// }
 		setResourceNames(inputName, outputName);
 
@@ -150,7 +152,7 @@ public class JavaActionImpl extends ActionImpl {
 		try {
 			inputReader = new InputStreamReader(inputStream, "UTF-8");
 		} catch ( UnsupportedEncodingException e ) {
-			error("Strange: UTF-8 is an unrecognized encoding for reading [ %s ]\n", e, inputName);
+			error("Strange: UTF-8 is an unrecognized encoding for reading [ {} ]", e, inputName);
 			return null;
 		}
 
@@ -161,7 +163,7 @@ public class JavaActionImpl extends ActionImpl {
 		try {
 			outputWriter = new OutputStreamWriter(outputStream, "UTF-8");
 		} catch ( UnsupportedEncodingException e ) {
-			error("Strange: UTF-8 is an unrecognized encoding for writing [ %s ]\n", e, inputName);
+			error("Strange: UTF-8 is an unrecognized encoding for writing [ {} ]", e, inputName);
 			return null;
 		}
 
@@ -170,14 +172,14 @@ public class JavaActionImpl extends ActionImpl {
 		try {
 			transform(reader, writer); // throws IOException
 		} catch ( IOException e ) {
-			error("Failed to transform [ %s ]\n", e, inputName);
+			error("Failed to transform [ {} ]", e, inputName);
 			return null;
 		}
 
 		try {
 			writer.flush(); // throws
 		} catch ( IOException e ) {
-			error("Failed to flush [ %s ]\n", e, inputName);
+			error("Failed to flush [ {} ]", e, inputName);
 			return null;
 		}
 

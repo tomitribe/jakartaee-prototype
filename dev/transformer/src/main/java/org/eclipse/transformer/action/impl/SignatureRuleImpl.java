@@ -19,7 +19,6 @@
 
 package org.eclipse.transformer.action.impl;
 
-import java.io.PrintStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,6 +27,7 @@ import java.util.Set;
 
 import org.eclipse.transformer.action.BundleData;
 import org.eclipse.transformer.action.SignatureRule;
+import org.slf4j.Logger;
 
 import aQute.bnd.signatures.ArrayTypeSignature;
 import aQute.bnd.signatures.BaseType;
@@ -45,8 +45,9 @@ import aQute.bnd.signatures.TypeParameter;
 import aQute.bnd.signatures.TypeVariableSignature;
 
 public class SignatureRuleImpl implements SignatureRule {
+
 	public SignatureRuleImpl(
-		LoggerImpl logger,
+		Logger logger,
 
 		Map<String, String> renames,
 		Map<String, String> versions,
@@ -110,39 +111,15 @@ public class SignatureRuleImpl implements SignatureRule {
 
 	//
 	
-	private final LoggerImpl logger;
+	private final Logger logger;
 
-	public LoggerImpl getLogger() {
+	public Logger getLogger() {
 		return logger;
 	}
 
-	public PrintStream getLogStream() {
-		return getLogger().getLogStream();
+	public void debug(String message, Object... parms) {
+		getLogger().debug(message, parms);
 	}
-
-	public boolean getIsTerse() {
-		return getLogger().getIsTerse();
-	}
-
-	public boolean getIsVerbose() {
-		return getLogger().getIsVerbose();
-	}
-
-	public void log(String text, Object... parms) {
-		getLogger().log(text, parms);
-	}
-
-	public void verbose(String text, Object... parms) {
-		getLogger().verbose(text, parms);
-	}
-
-    public void error(String text, Object... parms) {
-		getLogger().error(text, parms);
-    }
-
-    public void error(String text, Throwable th, Object... parms) {
-		getLogger().error(text, th, parms);
-    }
 
 	//
 
@@ -296,7 +273,7 @@ public class SignatureRuleImpl implements SignatureRule {
 	    try {
 	        return transformBinaryType(inputConstant, allowSimpleSubstitution);
 	    } catch ( Throwable th ) {
-	        verbose("Failed to parse constant as resource reference [ %s ]: %s", inputConstant, th.getMessage());
+	        debug("Failed to parse constant as resource reference [ {} ]: {}", inputConstant, th.getMessage());
 	        return null;
 	    }
 	}
@@ -383,7 +360,7 @@ public class SignatureRuleImpl implements SignatureRule {
 		try {
 			return transformDescriptor(inputConstant, allowSimpleSubstitution);
 		} catch ( Throwable th ) {
-			verbose("Failed to parse constant as descriptor [ %s ]: %s", inputConstant, th.getMessage());
+			debug("Failed to parse constant as descriptor [ {} ]: {}", inputConstant, th.getMessage());
 			return null;
 		}
 	}

@@ -20,11 +20,12 @@
 package org.eclipse.transformer.action.impl;
 
 import org.eclipse.transformer.action.ActionType;
+import org.slf4j.Logger;
 
 public class ZipActionImpl extends ContainerActionImpl {
 
 	public ZipActionImpl(
-		LoggerImpl logger,
+		Logger logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {

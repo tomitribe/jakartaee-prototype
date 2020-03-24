@@ -34,6 +34,7 @@ import org.eclipse.transformer.action.ActionType;
 import org.eclipse.transformer.action.BundleData;
 import org.eclipse.transformer.util.ByteData;
 import org.eclipse.transformer.util.ManifestWriter;
+import org.slf4j.Logger;
 
 import aQute.bnd.header.Attrs;
 import aQute.bnd.header.OSGiHeader;
@@ -50,7 +51,7 @@ public class ManifestActionImpl extends ActionImpl {
 	public static final boolean IS_FEATURE = !IS_MANIFEST;	
 
 	public static ManifestActionImpl newManifestAction(
-		LoggerImpl logger,
+		Logger logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
@@ -59,7 +60,7 @@ public class ManifestActionImpl extends ActionImpl {
 	}
 
 	public static ManifestActionImpl newFeatureAction(
-		LoggerImpl logger,
+		Logger logger,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
@@ -68,11 +69,11 @@ public class ManifestActionImpl extends ActionImpl {
 	}
 
 	public ManifestActionImpl(
-			LoggerImpl logger,
-			InputBufferImpl buffer,
-			SelectionRuleImpl selectionRule,
-			SignatureRuleImpl signatureRule,
-			boolean isManifest) {
+		Logger logger,
+		InputBufferImpl buffer,
+		SelectionRuleImpl selectionRule,
+		SignatureRuleImpl signatureRule,
+		boolean isManifest) {
 
 		super(logger, buffer, selectionRule, signatureRule);
 
@@ -116,7 +117,7 @@ public class ManifestActionImpl extends ActionImpl {
 		String className = getClass().getSimpleName();
 		String methodName = "apply";
 
-		verbose("[ %s.%s ]: [ %s ] Initial bytes [ %s ]\n", className, methodName, initialName, initialCount);
+		debug("[ {}.{} ]: [ {} ] Initial bytes [ {} ]", className, methodName, initialName, initialCount);
 
 		clearChanges();
 		setResourceNames(initialName, initialName);
@@ -127,7 +128,7 @@ public class ManifestActionImpl extends ActionImpl {
 		try {
 			initialManifest = new Manifest( initialData.asStream() );
 		} catch ( IOException e ) {
-			error("Failed to parse manifest [ %s ]\n", e, initialName);
+			error("Failed to parse manifest [ {} ]", e, initialName);
 			return null;
 		}
 
@@ -135,12 +136,12 @@ public class ManifestActionImpl extends ActionImpl {
 
 		transform(initialName, initialManifest, finalManifest);
 
-		log("[ %s.%s ]: [ %s ] Replacements [ %s ]\n",
+		info("[ {}.{} ]: [ {} ] Replacements [ {} ]",
 			getClass().getSimpleName(), "transform",
 			initialName, getChanges().getReplacements());
 
 		if ( !hasNonResourceNameChanges() ) {
-			verbose("[ %s.%s ]: [ %s ] Null transform", className, methodName, initialName);
+			debug("[ {}.{} ]: [ {} ] Null transform", className, methodName, initialName);
 			return null;
 		}
 
@@ -148,12 +149,12 @@ public class ManifestActionImpl extends ActionImpl {
 		try {
 			write(finalManifest, outputStream); // throws IOException
 		} catch ( IOException e ) {
-			error("Failed to write manifest [ %s ]\n", e, initialName);
+			error("Failed to write manifest [ {} ]", e, initialName);
 			return null;
 		}
 
 		byte[] finalBytes = outputStream.toByteArray();
-		verbose("[ %s.%s ]: [ %s ] Active transform; final bytes [ %s ]\n", className, methodName, initialName, finalBytes.length);
+		debug("[ {}.{} ]: [ {} ] Active transform; final bytes [ {} ]", className, methodName, initialName, finalBytes.length);
 
 		return new ByteData(initialName, finalBytes); 
 	}
@@ -202,8 +203,8 @@ public class ManifestActionImpl extends ActionImpl {
 		String inputName, String entryName,
 		Attributes initialAttributes, Attributes finalAttributes) {
 
-		verbose(
-			"Transforming [ %s ]: [ %s ] Attributes [ %d ]\n",
+		debug(
+			"Transforming [ {} ]: [ {} ] Attributes [ {} ]",
 			inputName, entryName, initialAttributes.size() );		
 
 		int replacements = 0;
@@ -228,8 +229,8 @@ public class ManifestActionImpl extends ActionImpl {
 			finalAttributes.put(untypedName, finalValue);
 		}
 
-		verbose(
-			"Transformed [ %s ]: [ %s ] Attributes [ %d ] Replacements [ %d ]\n",
+		debug(
+			"Transformed [ {} ]: [ {} ] Attributes [ {} ] Replacements [ {} ]",
 			inputName, entryName, finalAttributes.size(), replacements );
 
 		return replacements;
@@ -272,7 +273,7 @@ public class ManifestActionImpl extends ActionImpl {
 				boolean continuedLine = false;
 				for ( Map.Entry<String, Attrs> parmEntry : parms.entrySet() ) {
 					if ( continuedLine ) {
-						writer.append(",\r\n ");
+						writer.append(",\r ");
 					}
 
 					// bnd might have added ~ characters if there are duplicates in 
@@ -301,7 +302,7 @@ public class ManifestActionImpl extends ActionImpl {
 				}
 			}
 
-			writer.append("\r\n");
+			writer.append("\r");
 		}
 
 		writer.flush();
@@ -421,7 +422,7 @@ public class ManifestActionImpl extends ActionImpl {
 	 * @return String with version numbers of first package replaced by the newVersion.
 	 */
 	protected String replacePackageVersion(String text, String newVersion) {
-	    //verbose("replacePackageVersion: ( %s )\n",  text );
+	    //debug("replacePackageVersion: ( {} )",  text );
 
 	    String packageText = getPackageAttributeText(text);
 
@@ -431,7 +432,7 @@ public class ManifestActionImpl extends ActionImpl {
 	        return text;
 	    }
 
-	    //verbose("replacePackageVersion: (packageText: %s )\n", packageText);
+	    //debug("replacePackageVersion: (packageText: {} )", packageText);
 
 	    final String VERSION = "version";
 	    final int VERSION_LEN = 7;
@@ -464,13 +465,13 @@ public class ManifestActionImpl extends ActionImpl {
 	            if ( Character.isWhitespace(ch)) {
 	                continue;
 	            }
-	            error("Syntax error found non-white-space character before equals sign in version {%s}\n", packageText);
+	            error("Syntax error found non-white-space character before equals sign in version [{}]", packageText);
 	            return text;   // Syntax error - returning original text
 	        }
 
 	        // Skip white space past the equals sign
 	        if ( Character.isWhitespace(ch) ) {
-	            // verbose("ch is \'%s\' and is whitespace.\n", ch);
+	            // debug("ch is \'{}\' and is whitespace.", ch);
 	            continue;
 	        }
 
@@ -481,13 +482,13 @@ public class ManifestActionImpl extends ActionImpl {
 
 	                versionEndIndex = packageText.indexOf('\"', i+1);
 	                if (versionEndIndex == -1) {
-	                    error("Syntax error, package version does not have closing quotation mark\n");
+	                    error("Syntax error, package version does not have closing quotation mark");
 	                    return text; // Syntax error - returning original text
 	                }
 	                versionEndIndex--; // just before the 2nd quotation mark
 
-	                //verbose("versionBeginIndex = [%s]\n", versionBeginIndex);
-	                //verbose("versionEndIndex = [%s]\n", versionEndIndex);
+	                //debug("versionBeginIndex = [{}]", versionBeginIndex);
+	                //debug("versionEndIndex = [{}]", versionEndIndex);
 	                foundQuotationMark = true; // not necessary, just leave loop
 	                break;
 	            }
@@ -496,19 +497,19 @@ public class ManifestActionImpl extends ActionImpl {
 	                continue;
 	            }
 
-	            error("Syntax error found non-white-space character after equals sign  in version {%s}\n", packageText);
+	            error("Syntax error found non-white-space character after equals sign  in version [{}]", packageText);
 	            return text;   // Syntax error - returning original text
 	        }
 	    }
 
 	    //String oldVersion = packageText.substring(versionBeginIndex, versionEndIndex+1);
-	    //verbose("old version[ %s ] new version[ %s]\n", oldVersion, newVersion);
+	    //debug("old version[{}] new version[{}]", oldVersion, newVersion);
 
 	    String head = text.substring(0, versionBeginIndex);
 	    String tail = text.substring(versionEndIndex+1);
 
 	    String newText = head + newVersion + tail;
-	    //verbose("Old [%s] New [%s]\n", text , newText);
+	    //debug("Old [{}] New [{}]", text , newText);
 
 	    return newText;
 	}
@@ -528,7 +529,7 @@ public class ManifestActionImpl extends ActionImpl {
 	 * @return
 	 */
 	protected String getPackageAttributeText(String text) {
-		//verbose("getPackageAttributeText ENTER[ text: %s]\n", text);
+		//debug("getPackageAttributeText ENTER[ text: {}]", text);
 
 		if ( text == null ) {
 			return null;
@@ -539,7 +540,7 @@ public class ManifestActionImpl extends ActionImpl {
 		}
 
 		int commaIndex = text.indexOf(',');
-		verbose("Comma index: [%d]\n", commaIndex);
+		debug("Comma index: [{}]", commaIndex);
 		// If there is no comma, then the whole text is the packageAttributeText
 		if ( commaIndex == -1 ) {
 			return text;
@@ -549,7 +550,7 @@ public class ManifestActionImpl extends ActionImpl {
 		// Need to test whether the comma is within quotes - thus not the true end of the packageText.
 		// If an odd number of quotes are found, then the comma is in quotes and we need to find the next comma.
 		String packageText = text.substring(0, commaIndex+1);   
-		verbose("packageText [ %s ]\n", packageText);
+		debug("packageText [ {} ]", packageText);
 
 		while (!isPackageDelimitingComma(text, packageText, commaIndex)) {
 		    commaIndex = text.indexOf(',', packageText.length());
@@ -566,7 +567,7 @@ public class ManifestActionImpl extends ActionImpl {
 		    }
 		}
 
-		verbose("getPackageAttributeText returning: [ %s ]\n", packageText);
+		debug("getPackageAttributeText returning: [ {} ]", packageText);
 		return packageText;
 	}
 
@@ -676,7 +677,7 @@ public class ManifestActionImpl extends ActionImpl {
 
 		String initialSymbolicName = initialMainAttributes.getValue(SYMBOLIC_NAME_PROPERTY_NAME);
 		if ( initialSymbolicName == null ) {
-			verbose("Input [ %s ] has no bundle symbolic name", inputName);
+			debug("Input [ {} ] has no bundle symbolic name", inputName);
 			return false;
 		}
 		
@@ -707,7 +708,7 @@ public class ManifestActionImpl extends ActionImpl {
 			isWildcard = false;
 			matchCase = "identity update";
 		}
-		verbose("Input [ %s ] symbolic name [ %s ] has %s\n", inputName, initialSymbolicName, matchCase);
+		debug("Input [ {} ] symbolic name [ {} ] has {}", inputName, initialSymbolicName, matchCase);
 		if ( !matched ) {
 			return false;
 		}
@@ -730,7 +731,7 @@ public class ManifestActionImpl extends ActionImpl {
 		}
 		
 		finalMainAttributes.putValue(SYMBOLIC_NAME_PROPERTY_NAME, finalSymbolicName);
-		log("Bundle symbolic name: %s\n                  --> %s\n", initialSymbolicName, finalSymbolicName);
+		info("Bundle symbolic name: {} --> {}", initialSymbolicName, finalSymbolicName);
 
 		if ( !isWildcard ) {
 			String initialVersion = initialMainAttributes.getValue(VERSION_PROPERTY_NAME);
@@ -738,7 +739,7 @@ public class ManifestActionImpl extends ActionImpl {
 				String finalVersion = bundleUpdate.getVersion();
 				if ( (finalVersion != null) && !finalVersion.isEmpty() ) {
 					finalMainAttributes.putValue(VERSION_PROPERTY_NAME, finalVersion);
-					log("Bundle version      : %s\n                  --> %s\n", initialVersion, finalVersion);
+					info("Bundle version: {} --> {}", initialVersion, finalVersion);
 				}
 			}
 		}
@@ -748,7 +749,7 @@ public class ManifestActionImpl extends ActionImpl {
 			String finalName = bundleUpdate.updateName(initialName);
 			if ( (finalName != null) && !finalName.isEmpty() ) {
 				finalMainAttributes.putValue(NAME_PROPERTY_NAME, finalName);
-				log("Bundle name         : %s\n                  --> %s\n", initialName, finalName);
+				info("Bundle name: {} --> {}", initialName, finalName);
 			}
 		}
 
@@ -757,7 +758,7 @@ public class ManifestActionImpl extends ActionImpl {
 			String finalDescription = bundleUpdate.updateDescription(initialDescription);
 			if ( (finalDescription != null) && !finalDescription.isEmpty() ) {
 				finalMainAttributes.putValue(DESCRIPTION_PROPERTY_NAME, finalDescription);
-				log("Bundle description  : %s\n                  --> %s\n", initialDescription, finalDescription);
+				info("Bundle description: {} --> {}", initialDescription, finalDescription);
 			}
 		}
 

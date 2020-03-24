@@ -19,19 +19,16 @@
 
 package org.eclipse.transformer.action.impl;
 
-import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.transformer.TransformProperties;
 import org.eclipse.transformer.action.SelectionRule;
+import org.slf4j.Logger;
 
 public class SelectionRuleImpl implements SelectionRule {
 
-	public SelectionRuleImpl(
-		LoggerImpl logger,
-		Set<String> includes, Set<String> excludes) {
-
+	public SelectionRuleImpl(Logger logger, Set<String> includes, Set<String> excludes) {
 		this.logger = logger;
 
 		this.included = new HashSet<String>(includes);
@@ -56,40 +53,16 @@ public class SelectionRuleImpl implements SelectionRule {
 	}
 
 	//
+	
+	private final Logger logger;
 
-	private final LoggerImpl logger;
-
-	public LoggerImpl getLogger() {
+	public Logger getLogger() {
 		return logger;
 	}
 
-	public PrintStream getLogStream() {
-		return getLogger().getLogStream();
+	public void debug(String message, Object... parms) {
+		getLogger().debug(message, parms);
 	}
-
-	public boolean getIsTerse() {
-		return getLogger().getIsTerse();
-	}
-
-	public boolean getIsVerbose() {
-		return getLogger().getIsVerbose();
-	}
-
-	public void log(String text, Object... parms) {
-		getLogger().log(text, parms);
-	}
-
-	public void verbose(String text, Object... parms) {
-		getLogger().verbose(text, parms);
-	}
-
-    public void error(String message, Object... parms) {
-    	getLogger().error(message, parms);
-    }
-
-    public void error(String message, Throwable th, Object... parms) {
-    	getLogger().error(message, th, parms);
-    }
 
 	//
 
@@ -116,34 +89,34 @@ public class SelectionRuleImpl implements SelectionRule {
 	@Override
 	public boolean selectIncluded(String resourceName) {
 		if ( included.isEmpty() ) {
-			verbose("Include [ %s ]: %s\n", resourceName, "No includes");
+			debug("Include [ {} ]: {}", resourceName, "No includes");
 			return true;
 
 		} else if ( includedExact.contains(resourceName) ) {
-			verbose("Include [ %s ]: %s\n", resourceName, "Exact include");
+			debug("Include [ {} ]: {}", resourceName, "Exact include");
 			return true;
 
 		} else {
 			for ( String tail : includedHead ) {
 				if ( resourceName.endsWith(tail) ) {
-					verbose("Include [ %s ]: %s (%s)\n", resourceName, "Match tail", tail);
+					debug("Include [ {} ]: {} ({})", resourceName, "Match tail", tail);
 					return true;
 				}
 			}
 			for ( String head : includedTail ) {
 				if ( resourceName.startsWith(head) ) {
-					verbose("Include [ %s ]: %s (%s)\n", resourceName, "Match head", head);
+					debug("Include [ {} ]: {} ({})", resourceName, "Match head", head);
 					return true;
 				}
 			}
 			for ( String middle : includedAny ) {
 				if ( resourceName.contains(middle) ) {
-					verbose("Include [ %s ]: %s (%s)\n", resourceName, "Match middle", middle);
+					debug("Include [ {} ]: {} ({})", resourceName, "Match middle", middle);
 					return true;
 				}
 			}
 
-			verbose("Do not include [ %s ]\n", resourceName);
+			debug("Do not include [ {} ]", resourceName);
 			return false;
 		}
 	}
@@ -151,34 +124,34 @@ public class SelectionRuleImpl implements SelectionRule {
 	@Override
 	public boolean rejectExcluded(String resourceName ) {
 		if ( excluded.isEmpty() ) {
-			verbose("Do not exclude[ %s ]: %s\n", resourceName, "No excludes");
+			debug("Do not exclude[ {} ]: {}", resourceName, "No excludes");
 			return false;
 
 		} else if ( excludedExact.contains(resourceName) ) {
-			verbose("Exclude [ %s ]: %s\n", resourceName, "Exact exclude");
+			debug("Exclude [ {} ]: {}", resourceName, "Exact exclude");
 			return true;
 
 		} else {
 			for ( String tail : excludedHead ) {
 				if ( resourceName.endsWith(tail) ) {
-					verbose("Exclude[ %s ]: %s (%s)\n", resourceName, "Match tail", tail);
+					debug("Exclude[ {} ]: {} ({})", resourceName, "Match tail", tail);
 					return true;
 				}
 			}
 			for ( String head : excludedTail ) {
 				if ( resourceName.startsWith(head) ) {
-					verbose("Exclude[ %s ]: %s (%s)\n", resourceName, "Match head", head);
+					debug("Exclude[ {} ]: {} ({})", resourceName, "Match head", head);
 					return true;
 				}
 			}
 			for ( String middle : excludedAny ) {
 				if ( resourceName.contains(middle) ) {
-					verbose("Exclude[ %s ]: %s (%s)\n", resourceName, "Match middle", middle);
+					debug("Exclude[ {} ]: {} ({})", resourceName, "Match middle", middle);
 					return true;
 				}
 			}
 
-			verbose("Do not exclude[ %s ]\n", resourceName);
+			debug("Do not exclude [ {} ]", resourceName);
 			return false;
 		}
 	}
