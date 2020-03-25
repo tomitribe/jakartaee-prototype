@@ -240,7 +240,7 @@ public class Transformer {
     public static final String DEFAULT_RENAMES_REFERENCE = "jakarta-renames.properties";
     public static final String DEFAULT_VERSIONS_REFERENCE = "jakarta-versions.properties";
     public static final String DEFAULT_BUNDLES_REFERENCE = "jakarta-bundles.properties";
-    public static final String DEFAULT_SPECIFIC_XML_FILE_MAP_REFERENCE = "jakarta-specificXmlFileMap.properties";
+    public static final String DEFAULT_SPECIFIC_XML_FILE_MAP_REFERENCE = "jakarta-xml.properties";
 
     public static enum AppOption {
         USAGE  ("u", "usage",    "Display usage",

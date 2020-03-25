@@ -162,7 +162,7 @@ public abstract class ActionImpl implements Action {
 
     //
 
-    private final SignatureRuleImpl signatureRule;
+    protected final SignatureRuleImpl signatureRule;
 
 	public SignatureRuleImpl getSignatureRule() {
 		return signatureRule;

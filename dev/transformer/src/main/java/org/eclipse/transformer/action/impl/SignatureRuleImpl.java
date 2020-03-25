@@ -272,11 +272,31 @@ public class SignatureRuleImpl implements SignatureRule {
 			return text;
 		}
 	}
-
-    public String replaceText(String inputFileName, String text) {
 	
-        String fileName = FileUtils.getFileNameFromFullyQualifiedFileName(inputFileName);    
-        Map<String, String> substitutions = this.specificXmlFileUpdates.get(fileName);
+	public Map<String, String> getXmlRuleFileName(String inputFileName) {
+        String fileName = FileUtils.getFileNameFromFullyQualifiedFileName(inputFileName); 
+        
+        if (fileName.toLowerCase().endsWith(".xml")) {
+            for (String key : specificXmlFileUpdates.keySet()) {
+                
+                // Performance consideration:  don't do regular expression "matches" call unnecessarily
+                if ((key.indexOf('?') != -1) || (key.indexOf('*') != -1)) {
+                    if (fileName.matches(key.replace("?", ".?").replace("*", ".*?"))) {
+                        return specificXmlFileUpdates.get(key);
+                    }
+                } else {
+                    if (fileName.equals(key)) {
+                        return specificXmlFileUpdates.get(key);
+                    }
+                }
+            }
+        }
+        return null;
+	}
+	
+    public String replaceText(String inputFileName, String text) { 
+        
+        Map<String, String> substitutions = getXmlRuleFileName(inputFileName);       
         
         String initialText = text;
 
