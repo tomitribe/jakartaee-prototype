@@ -191,6 +191,10 @@ public abstract class ActionImpl implements Action {
 	public String replaceEmbeddedPackages(String embeddingText) {
 		return getSignatureRule().replacePackages(embeddingText);
 	}
+	
+	public String replaceText(String inputFileName, String text) {
+	       return getSignatureRule().replaceText(inputFileName, text);
+	}
 
 	public String transformConstantAsBinaryType(String inputConstant) {
 		return getSignatureRule().transformConstantAsBinaryType(inputConstant);

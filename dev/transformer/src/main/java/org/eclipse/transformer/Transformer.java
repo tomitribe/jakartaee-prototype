@@ -60,6 +60,7 @@ import org.eclipse.transformer.action.impl.SelectionRuleImpl;
 import org.eclipse.transformer.action.impl.ServiceLoaderConfigActionImpl;
 import org.eclipse.transformer.action.impl.SignatureRuleImpl;
 import org.eclipse.transformer.action.impl.WarActionImpl;
+import org.eclipse.transformer.action.impl.XmlActionImpl;
 import org.eclipse.transformer.action.impl.ZipActionImpl;
 import org.eclipse.transformer.util.FileUtils;
 
@@ -239,6 +240,7 @@ public class Transformer {
     public static final String DEFAULT_RENAMES_REFERENCE = "jakarta-renames.properties";
     public static final String DEFAULT_VERSIONS_REFERENCE = "jakarta-versions.properties";
     public static final String DEFAULT_BUNDLES_REFERENCE = "jakarta-bundles.properties";
+    public static final String DEFAULT_SPECIFIC_XML_FILE_MAP_REFERENCE = "jakarta-specificXmlFileMap.properties";
 
     public static enum AppOption {
         USAGE  ("u", "usage",    "Display usage",
@@ -285,6 +287,10 @@ public class Transformer {
         RULES_DIRECT("td", "direct", "Transformation direct string replacements",
             OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
             !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
+        
+        RULES_SPECIFIC_XML_FILES("tf", "direct", "Map of XML filenames to property files",
+                OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
+                !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
 
         INVERT("i", "invert", "Invert transformation rules",
            	!OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
@@ -651,6 +657,7 @@ public class Transformer {
     	public Map<String, String> packageRenames;
     	public Map<String, String> packageVersions;
     	public Map<String, BundleData> bundleUpdates;
+    	public Map<String, Map<String,String>> specificXmlFileUpdates;   // file name, (property, value)
     	public Map<String, String> directStrings;
 
     	public CompositeActionImpl rootAction;
@@ -719,6 +726,7 @@ public class Transformer {
     		UTF8Properties versionProperties = loadProperties(AppOption.RULES_VERSIONS, DEFAULT_VERSIONS_REFERENCE);
     		UTF8Properties updateProperties = loadProperties(AppOption.RULES_BUNDLES, DEFAULT_BUNDLES_REFERENCE);
     		UTF8Properties directProperties = loadProperties(AppOption.RULES_DIRECT);
+    		UTF8Properties xmlFileMapProperties = loadProperties(AppOption.RULES_SPECIFIC_XML_FILES, DEFAULT_SPECIFIC_XML_FILE_MAP_REFERENCE);
 
         	invert = hasOption(AppOption.INVERT);
 
@@ -753,6 +761,21 @@ public class Transformer {
         		// throws IllegalArgumentException
         	} else {
         		dual_info("Bundle identities will not be updated");
+        	}
+        	
+        	if ( xmlFileMapProperties != null ) {
+        	    Map<String, String> xmlFileMap = TransformProperties.convertPropertiesToMap(xmlFileMapProperties); // throws IllegalArgumentException
+        	    Map<String, String> substitutionsMap;
+        	    specificXmlFileUpdates = new HashMap<String, Map<String, String>>();
+        	    for(String xmlFileName : xmlFileMap.keySet()) {
+        	        // Load DEFAULT properties directly - no command line option to specify location of properties file.
+        	        // Properties file locations are specified in "xmlFileMap"
+        	        UTF8Properties substitutions = loadDefaultProperties(AppOption.RULES_SPECIFIC_XML_FILES, xmlFileMap.get(xmlFileName));
+        	        substitutionsMap = TransformProperties.convertPropertiesToMap(substitutions); // throws IllegalArgumentException
+        	        specificXmlFileUpdates.put(xmlFileName, substitutionsMap);
+        	    }
+        	} else {
+        	    dual_info("No specific-xml-file properties will be updated");
         	}
 
         	directStrings = TransformProperties.getDirectStrings(directProperties);
@@ -883,9 +906,12 @@ public class Transformer {
     	protected SignatureRuleImpl getSignatureRule() {
     		if ( signatureRules == null ) {
     			signatureRules =  new SignatureRuleImpl(
-    				logger,
-        			packageRenames, packageVersions, bundleUpdates,
-        			directStrings);
+    				                            logger,
+        			                            packageRenames, 
+        			                            packageVersions, 
+        			                            bundleUpdates,
+        			                            specificXmlFileUpdates,
+        			                            directStrings);
     		}
     		return signatureRules;
     	}
@@ -1032,6 +1058,9 @@ public class Transformer {
         		EarActionImpl earAction =
                 	useRootAction.addUsing( EarActionImpl::new );
 
+        		XmlActionImpl xmlAction =
+                        useRootAction.addUsing( XmlActionImpl::new );
+        		
         		ZipActionImpl zipAction =
         			useRootAction.addUsing( ZipActionImpl::new );
 
@@ -1050,6 +1079,7 @@ public class Transformer {
         		directoryAction.addAction(warAction);
         		directoryAction.addAction(rarAction);
         		directoryAction.addAction(earAction);
+        		directoryAction.addAction(xmlAction);
         		directoryAction.addAction(nullAction);
 
         		jarAction.addAction(classAction);
@@ -1057,6 +1087,7 @@ public class Transformer {
         		jarAction.addAction(serviceConfigAction);
         		jarAction.addAction(manifestAction);
         		jarAction.addAction(featureAction);
+        		jarAction.addAction(xmlAction);
         		jarAction.addAction(nullAction);
 
         		warAction.addAction(classAction);
@@ -1065,6 +1096,7 @@ public class Transformer {
         		warAction.addAction(manifestAction);
         		warAction.addAction(featureAction);
         		warAction.addAction(jarAction);
+        		warAction.addAction(xmlAction);
         		warAction.addAction(nullAction);
 
         		rarAction.addAction(classAction);
@@ -1073,12 +1105,14 @@ public class Transformer {
         		rarAction.addAction(manifestAction);
         		rarAction.addAction(featureAction);
         		rarAction.addAction(jarAction);
+        		rarAction.addAction(xmlAction);
         		rarAction.addAction(nullAction);
 
         		earAction.addAction(manifestAction);
         		earAction.addAction(jarAction);
         		earAction.addAction(warAction);
         		earAction.addAction(rarAction);
+        		earAction.addAction(xmlAction);
         		earAction.addAction(nullAction);
 
         		zipAction.addAction(classAction);
@@ -1090,6 +1124,7 @@ public class Transformer {
         		zipAction.addAction(warAction);
         		zipAction.addAction(rarAction);
         		zipAction.addAction(earAction);
+        		zipAction.addAction(xmlAction);
         		zipAction.addAction(nullAction);
 
         		rootAction = useRootAction;
