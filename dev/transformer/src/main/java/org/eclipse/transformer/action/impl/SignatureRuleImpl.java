@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.eclipse.transformer.action.BundleData;
 import org.eclipse.transformer.action.SignatureRule;
+import org.eclipse.transformer.util.FileUtils;
 import org.slf4j.Logger;
 
 import aQute.bnd.signatures.ArrayTypeSignature;
@@ -45,13 +46,14 @@ import aQute.bnd.signatures.TypeParameter;
 import aQute.bnd.signatures.TypeVariableSignature;
 
 public class SignatureRuleImpl implements SignatureRule {
-
+    
 	public SignatureRuleImpl(
 		Logger logger,
 
 		Map<String, String> renames,
 		Map<String, String> versions,
 		Map<String, BundleData> bundleUpdates,
+		Map<String, Map<String, String>> specificXmlFileUpdates,
 		Map<String, String> directStrings) {
 
 		this.logger = logger;
@@ -90,6 +92,15 @@ public class SignatureRuleImpl implements SignatureRule {
 			useBundleUpdates = Collections.emptyMap();
 		}
 		this.bundleUpdates = useBundleUpdates;
+		
+        Map<String, Map<String, String>> mapOfMaps;
+
+        if (specificXmlFileUpdates != null ) {
+            mapOfMaps = new HashMap<String, Map<String, String>>(specificXmlFileUpdates);
+        } else {
+            mapOfMaps = Collections.emptyMap();
+        }
+        this.specificXmlFileUpdates = mapOfMaps;		
 
 		Map<String, String> useDirectStrings;
 		if ( directStrings == null ) {
@@ -130,6 +141,10 @@ public class SignatureRuleImpl implements SignatureRule {
 		return bundleUpdates.get(symbolicName);
 	}
 
+	// 
+    
+    public final Map<String, Map<String, String>> specificXmlFileUpdates;
+	
 	//
 
 	private final Map<String, String> directStrings;
@@ -199,7 +214,7 @@ public class SignatureRuleImpl implements SignatureRule {
 	public String replacePackages(String text) {
 	    return replacePackages(text, this.dottedPackageRenames);
 	}
-	   
+
 	/**
 	 * Replace all embedded packages of specified text with replacement
 	 * packages.
@@ -257,7 +272,66 @@ public class SignatureRuleImpl implements SignatureRule {
 			return text;
 		}
 	}
+	
+	public Map<String, String> getXmlRuleFileName(String inputFileName) {
+        String fileName = FileUtils.getFileNameFromFullyQualifiedFileName(inputFileName); 
+        
+        if (fileName.toLowerCase().endsWith(".xml")) {
+            for (String key : specificXmlFileUpdates.keySet()) {
+                
+                // Performance consideration:  don't do regular expression "matches" call unnecessarily
+                if ((key.indexOf('?') != -1) || (key.indexOf('*') != -1)) {
+                    if (fileName.matches(key.replace("?", ".?").replace("*", ".*?"))) {
+                        return specificXmlFileUpdates.get(key);
+                    }
+                } else {
+                    if (fileName.equals(key)) {
+                        return specificXmlFileUpdates.get(key);
+                    }
+                }
+            }
+        }
+        return null;
+	}
+	
+    public String replaceText(String inputFileName, String text) { 
+        
+        Map<String, String> substitutions = getXmlRuleFileName(inputFileName);       
+        
+        String initialText = text;
 
+        for ( Map.Entry<String, String> entry : substitutions.entrySet() ) {
+            String key = entry.getKey();
+            int keyLen = key.length();
+
+            int textLimit = text.length() - keyLen;
+
+            int lastMatchEnd = 0;
+            while ( lastMatchEnd <= textLimit ) {
+                int matchStart = text.indexOf(key, lastMatchEnd);
+                if ( matchStart == -1 ) {
+                    break;
+                }
+
+                String value = entry.getValue();
+                int valueLen = value.length();
+
+                String head = text.substring(0, matchStart);
+                String tail = text.substring(matchStart + keyLen);
+                text = head + value + tail;
+
+                lastMatchEnd = matchStart + valueLen;
+                textLimit += (valueLen - keyLen);
+            }
+        }
+
+        if ( initialText == text) {
+            return null;
+        } else {
+            return text;
+        }
+    }	
+	
     //
 
 	private final Map<String, String> changedBinaryTypes;

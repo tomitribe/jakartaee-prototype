@@ -162,7 +162,7 @@ public abstract class ActionImpl implements Action {
 
     //
 
-    private final SignatureRuleImpl signatureRule;
+    protected final SignatureRuleImpl signatureRule;
 
 	public SignatureRuleImpl getSignatureRule() {
 		return signatureRule;
@@ -190,6 +190,10 @@ public abstract class ActionImpl implements Action {
 
 	public String replaceEmbeddedPackages(String embeddingText) {
 		return getSignatureRule().replacePackages(embeddingText);
+	}
+	
+	public String replaceText(String inputFileName, String text) {
+	       return getSignatureRule().replaceText(inputFileName, text);
 	}
 
 	public String transformConstantAsBinaryType(String inputConstant) {

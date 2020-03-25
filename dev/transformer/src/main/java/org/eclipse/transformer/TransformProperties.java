@@ -145,6 +145,16 @@ public class TransformProperties {
 		return bundleUpdates;
 	}
 	
+	public static Map<String, String> convertPropertiesToMap(UTF8Properties properties) {
+	    Map<String, String> map = new HashMap<String, String>( properties.size() );
+	    for ( Map.Entry<Object, Object> fileEntry : properties.entrySet() ) {
+	        map.put(
+	                (String) fileEntry.getKey(),
+	                (String) fileEntry.getValue());
+	    }
+	    return map;
+	}
+	
 	//
 	
     /**

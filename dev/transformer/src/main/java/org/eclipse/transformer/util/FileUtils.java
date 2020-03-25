@@ -221,4 +221,12 @@ public class FileUtils {
 	public static UTF8Properties createProperties() {
 		return new UTF8Properties();
 	}
+	
+	public static String getFileNameFromFullyQualifiedFileName(String fqFileName) {
+	    int index = fqFileName.lastIndexOf(SLASH);
+	    if (index != -1) {
+	        return fqFileName.substring(index+1);
+	    }
+	    return fqFileName;
+	}
 }

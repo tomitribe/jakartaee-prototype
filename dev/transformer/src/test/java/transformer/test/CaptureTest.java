@@ -64,6 +64,7 @@ public class CaptureTest {
 			useLogger,
 			usePackageRenames, usePackageVersions,
 			bundleData,
+			null,
 			directStrings );
 	}
 }

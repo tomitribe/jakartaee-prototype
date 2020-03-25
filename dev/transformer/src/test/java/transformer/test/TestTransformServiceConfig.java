@@ -60,6 +60,7 @@ public class TestTransformServiceConfig extends CaptureTest {
 			useLogger,
 			usePackageRenames, usePackageVersions,
 			bundleData,
+			null,
 			directStrings );
 	}
 

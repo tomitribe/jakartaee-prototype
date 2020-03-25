@@ -162,6 +162,7 @@ public class TestTransformManifest extends CaptureTest {
 					useLogger,
 					getPackageRenames(), getPackageVersions(),
 					getBundleUpdates(),
+					null,
 					getDirectStrings() ),
 				ManifestActionImpl.IS_MANIFEST );
 		}
@@ -178,7 +179,7 @@ public class TestTransformManifest extends CaptureTest {
 				useLogger,
 				new InputBufferImpl(),
 				new SelectionRuleImpl( useLogger, getIncludes(), getExcludes() ),
-				new SignatureRuleImpl( useLogger, getPackageRenames(), getPackageVersions(), null, null ),
+				new SignatureRuleImpl( useLogger, getPackageRenames(), getPackageVersions(), null, null, null ),
 				ManifestActionImpl.IS_FEATURE );
 		}
 
@@ -466,7 +467,7 @@ public class TestTransformManifest extends CaptureTest {
 				useLogger,
 				new InputBufferImpl(),
 				new SelectionRuleImpl( useLogger, getIncludes(), getExcludes() ), 
-				new SignatureRuleImpl( useLogger, getPackageRenames(), getPackageVersions(), null, null ),
+				new SignatureRuleImpl( useLogger, getPackageRenames(), getPackageVersions(), null, null, null ),
 				ManifestActionImpl.IS_MANIFEST );
 		}
 
