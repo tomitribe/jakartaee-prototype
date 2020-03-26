@@ -771,8 +771,12 @@ public class Transformer {
         	        // Load DEFAULT properties directly - no command line option to specify location of properties file.
         	        // Properties file locations are specified in "xmlFileMap"
         	        UTF8Properties substitutions = loadDefaultProperties(AppOption.RULES_SPECIFIC_XML_FILES, xmlFileMap.get(xmlFileName));
-        	        substitutionsMap = TransformProperties.convertPropertiesToMap(substitutions); // throws IllegalArgumentException
-        	        specificXmlFileUpdates.put(xmlFileName, substitutionsMap);
+        	        if ( substitutions != null ) {
+        	           substitutionsMap = TransformProperties.convertPropertiesToMap(substitutions); // throws IllegalArgumentException
+        	           specificXmlFileUpdates.put(xmlFileName, substitutionsMap);
+        	        } else {
+        	            dual_info("{} will not be updated", xmlFileName);
+        	        }
         	    }
         	} else {
         	    dual_info("No specific-xml-file properties will be updated");

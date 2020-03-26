@@ -95,21 +95,26 @@ public class SignatureRuleImpl implements SignatureRule {
 		}
 		this.bundleUpdates = useBundleUpdates;	
         
-        Map<String,  Map<String, String>> specificXmlMap = new HashMap<String,  Map<String, String>>();
-        Map<Pattern, Map<String, String>> wildCardXmlMap = new HashMap<Pattern, Map<String, String>>();
-        for ( Map.Entry<String, Map<String, String>>entry : specificXmlFileUpdates.entrySet() ) {
-            String key = entry.getKey();  
+		if ( specificXmlFileUpdates != null ) {
+		    Map<String,  Map<String, String>> specificXmlMap = new HashMap<String,  Map<String, String>>();
+		    Map<Pattern, Map<String, String>> wildCardXmlMap = new HashMap<Pattern, Map<String, String>>();
+		    for ( Map.Entry<String, Map<String, String>>entry : specificXmlFileUpdates.entrySet() ) {
+		        String key = entry.getKey();  
 
-            if ((key.indexOf('?') != -1) || (key.indexOf('*') != -1)) {
-                key = key.replace("?", ".?").replace("*", ".*?");
-                Pattern p = Pattern.compile(key);
-                wildCardXmlMap.put(p, entry.getValue());
-            } else {
-                specificXmlMap.put(key, entry.getValue());
-            }
-        }
-        this.specificXmlFileUpdates = specificXmlMap;
-        this.wildCardXmlFileUpdates = wildCardXmlMap;
+		        if ((key.indexOf('?') != -1) || (key.indexOf('*') != -1)) {
+		            key = key.replace("?", ".?").replace("*", ".*?");
+		            Pattern p = Pattern.compile(key);
+		            wildCardXmlMap.put(p, entry.getValue());
+		        } else {
+		            specificXmlMap.put(key, entry.getValue());
+		        }
+		    }
+		    this.specificXmlFileUpdates = specificXmlMap;
+		    this.wildCardXmlFileUpdates = wildCardXmlMap;
+		} else {
+		    this.specificXmlFileUpdates = null;
+		    this.wildCardXmlFileUpdates = null;
+		}
 
 		Map<String, String> useDirectStrings;
 		if ( directStrings == null ) {
