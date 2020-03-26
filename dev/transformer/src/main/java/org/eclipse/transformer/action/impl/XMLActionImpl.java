@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -33,10 +35,11 @@ import org.eclipse.transformer.TransformException;
 import org.eclipse.transformer.action.ActionType;
 import org.eclipse.transformer.util.ByteData;
 import org.slf4j.Logger;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.ext.DefaultHandler2;
 
 public class XMLActionImpl extends ActionImpl {
 
@@ -124,24 +127,112 @@ public class XMLActionImpl extends ActionImpl {
 			parser = getParserFactory().newSAXParser();
 			// 'newSAXParser' throws ParserConfigurationException, SAXException
 		} catch ( Exception e ) {
+			e.printStackTrace(System.out);
 			throw new TransformException("Failed to obtain parser for [ " + inputName + " ]", e);
 		}
 
 		try {
 			parser.parse(input, handler); // throws SAXException, IOException
 		} catch ( Exception e ) {
+			e.printStackTrace(System.out);
 			throw new TransformException("Failed to parse [ " + inputName + " ]", e);
 		}
 	}
 
 	//
 
-	public class XMLContentHandler extends DefaultHandler {
+	
+
+	public class XMLContentHandler extends DefaultHandler2 {
+		@Override // DefaultHandler2
+		public void attributeDecl(String arg0, String arg1, String arg2, String arg3, String arg4) throws SAXException {
+			super.attributeDecl(arg0, arg1, arg2, arg3, arg4);
+		}
+
+		@Override // DefaultHandler2
+		public void elementDecl(String arg0, String arg1) throws SAXException {
+			super.elementDecl(arg0, arg1);
+		}
+
+		//
+
+		@Override // DefaultHandler2
+		public void internalEntityDecl(String arg0, String arg1) throws SAXException {
+			super.internalEntityDecl(arg0, arg1);
+		}
+
+		@Override // DefaultHandler2
+		public void externalEntityDecl(String arg0, String arg1, String arg2) throws SAXException {
+			super.externalEntityDecl(arg0, arg1, arg2);
+		}
+
+		@Override // DefaultHandler2
+		public InputSource resolveEntity(String arg0, String arg1, String arg2, String arg3)
+			throws SAXException, IOException {
+			return super.resolveEntity(arg0, arg1, arg2, arg3);
+		}
+
+		@Override // DefaultHandler2
+		public InputSource resolveEntity(String arg0, String arg1) throws SAXException, IOException {
+			return super.resolveEntity(arg0, arg1);
+		}
+
+		//
+
+		@Override // DefaultHandler2
+		public InputSource getExternalSubset(String arg0, String arg1) throws SAXException, IOException {
+			return super.getExternalSubset(arg0, arg1);
+		}
+
+		//
+
+		@Override // DefaultHandler2
+		public void comment(char[] arg0, int arg1, int arg2) throws SAXException {
+			super.comment(arg0, arg1, arg2);
+		}
+
+		@Override // DefaultHandler2
+		public void startCDATA() throws SAXException {
+			super.startCDATA();
+		}
+
+		@Override // DefaultHandler2
+		public void endCDATA() throws SAXException {
+			super.endCDATA();
+		}
+
+		@Override // DefaultHandler2
+		public void startDTD(String arg0, String arg1, String arg2) throws SAXException {
+			super.startDTD(arg0, arg1, arg2);
+		}
+
+		@Override // DefaultHandler2
+		public void endDTD() throws SAXException {
+			// 			super.endDTD();
+		}
+
+		@Override // DefaultHandler2
+		public void startEntity(String arg0) throws SAXException {
+			super.startEntity(arg0);
+		}
+
+		@Override // DefaultHandler2
+		public void endEntity(String arg0) throws SAXException {
+			super.endEntity(arg0);
+		}
+
+		//
+
 		public XMLContentHandler(String inputName, InputSource inputSource, OutputStream outputStream) {
 			this.inputName = inputName;
-			this.charset = Charset.forName( inputSource.getEncoding() );
+
+			String encoding = inputSource.getEncoding();
+			this.charset = ( (encoding == null) ? null : Charset.forName(encoding) );
+
 			this.publicId = inputSource.getPublicId();
 			this.systemId = inputSource.getSystemId();
+
+			this.xmlTables = getSignatureRule().selectXMLTables(inputName);
 
 			this.outputStream = outputStream;
 
@@ -151,12 +242,12 @@ public class XMLActionImpl extends ActionImpl {
 		//
 
 		private final String inputName;
-		
+
 		private final String publicId;
 		private final String systemId;
 		private Charset charset;
 
-		private final OutputStream outputStream;
+		//
 
 		public String getInputName() {
 			return inputName;
@@ -175,6 +266,47 @@ public class XMLActionImpl extends ActionImpl {
 		}
 
 		//
+
+		private final List<Map<String, String>> xmlTables;
+
+		public List<Map<String, String>> getXMLTables() {
+			return xmlTables;
+		}
+
+		public String xmlSubstitute(String initialValue) {
+			boolean didChange;
+
+			String finalValue = replaceEmbeddedPackages(initialValue);
+
+			if ( finalValue != null ) {
+				didChange = true;
+				debug( "XML action on [ {} ] replaces [ {} ] with [ {} ] using package renames",
+				       getInputName(), initialValue, finalValue );
+			} else {
+				didChange = false;
+				finalValue = initialValue;
+			}
+
+			if ( xmlTables != null ) {
+				finalValue = getSignatureRule().xmlSubstitute(finalValue, xmlTables);
+
+				if ( !initialValue.equals(finalValue) ) {
+					didChange = true;
+					debug( "XML action on [ {} ] replaces [ {} ] with [ {} ] using direct updates",
+					       getInputName(), initialValue, finalValue );
+				}
+			}
+
+			if ( didChange ) {
+				addReplacement();
+			}
+
+			return finalValue;
+		}
+
+		//
+
+		private final OutputStream outputStream;
 
 		public OutputStream getOutputStream() {
 			return outputStream;
@@ -244,23 +376,27 @@ public class XMLActionImpl extends ActionImpl {
 
 		//
 
-		@Override
+		@Override // DefaultHandler
 		public void startDocument() throws SAXException {
-			String charsetName = getCharset().name();
+			Charset useCharset = getCharset();
+			if ( useCharset == null ) {
+				useCharset = getUTF8();
+			}
+			String charsetName = useCharset.name();
 			emitLineUTF8("<?xml version = \"1.0\" encoding = \""+ charsetName + "\"?>\n");
 		}
 
-//		@Override
+//		@Override // DefaultHandler
 //		public void endDocument() throws SAXException {
 //			super.endDocument();
 //		}
 //
-//		@Override
+//		@Override // DefaultHandler
 //		public void setDocumentLocator(Locator locator) {
 //			super.setDocumentLocator(locator);
 //		}
 
-		@Override
+		@Override // DefaultHandler
 		public void processingInstruction(String target, String data) throws SAXException {
 			append("<?");
 			append(target);
@@ -273,19 +409,21 @@ public class XMLActionImpl extends ActionImpl {
 
 		//
 
-//		@Override
+//		@Override // DefaultHandler
 //		public void startPrefixMapping(String prefix, String uri) throws SAXException {
 //			super.startPrefixMapping(prefix, uri);
 //		}
 //
-//		@Override
+//		@Override // DefaultHandler
 //		public void endPrefixMapping(String prefix) throws SAXException {
 //			super.endPrefixMapping(prefix);
 //		}
 
 		//
 
-		@Override
+		// TODO: Should element qualified names be updated?
+
+		@Override // DefaultHandler
 		public void startElement(String qualifiedName, String arg1, String arg2, Attributes attributes) throws SAXException {
 		      append('<');
 		      append(qualifiedName);
@@ -296,7 +434,7 @@ public class XMLActionImpl extends ActionImpl {
 		            append(' ');
 		            append( attributes.getQName(loopIndex) );
 		            append("=\"");
-		            append( attributes.getValue(loopIndex) );
+		            append( xmlSubstitute( attributes.getValue(loopIndex) ) );
 		            append('"');
 		         }
 		      }
@@ -306,34 +444,30 @@ public class XMLActionImpl extends ActionImpl {
 		      emit();
 		}
 
-		@Override
+		// TODO: Should element qualified names be updated?
+
+		@Override // DefaultHandler
 		public void endElement(String qualifiedName, String arg1, String arg2) throws SAXException {
 		      append("</");
 		      append(qualifiedName);
 		      append('>');
 		}
 
-		@Override
+		@Override // DefaultHandler
 		public void characters(char[] chars, int start, int length) throws SAXException {
 		      String initialText = new String(chars, start, length);
-	
-		      String finalText = XMLActionImpl.this.replaceEmbeddedPackages(initialText);
-		      if ( finalText == null ) {
-		    	  finalText = initialText;
-		    	  XMLActionImpl.this.addReplacement();
-		      }
-
+			      String finalText = xmlSubstitute(initialText);
 		      append(finalText);
 		}
 
-		@Override
+		@Override // DefaultHandler
 		public void ignorableWhitespace(char[] whitespace, int start, int length) throws SAXException {
 			append(whitespace, start, length);
 		}
 
-//		@Override
-//		public void skippedEntity(String name) throws SAXException {
-//			super.skippedEntity(name);
-//		}
+		@Override // DefaultHandler
+		public void skippedEntity(String name) throws SAXException {
+			super.skippedEntity(name);
+		}
 	}
 }

@@ -30,40 +30,13 @@ import java.util.Set;
 
 import org.eclipse.transformer.TransformException;
 import org.eclipse.transformer.TransformProperties;
-import org.eclipse.transformer.action.BundleData;
-import org.eclipse.transformer.action.impl.SelectionRuleImpl;
 import org.eclipse.transformer.action.impl.ServiceLoaderConfigActionImpl;
-import org.eclipse.transformer.action.impl.SignatureRuleImpl;
 import org.eclipse.transformer.util.InputStreamData;
 import org.junit.jupiter.api.Test;
 
 import transformer.test.util.CaptureLoggerImpl;
 
 public class TestTransformServiceConfig extends CaptureTest {
-
-	public SelectionRuleImpl createSelectionRule(
-		CaptureLoggerImpl useLogger,
-		Set<String> useIncludes,
-		Set<String> useExcludes) {
-
-		return new SelectionRuleImpl( useLogger, useIncludes, useExcludes );
-	}
-
-	public SignatureRuleImpl createSignatureRule(
-		CaptureLoggerImpl useLogger,
-		Map<String, String> usePackageRenames,
-		Map<String, String> usePackageVersions,
-		Map<String, BundleData> bundleData,
-		Map<String, String> directStrings) {
-
-		return new SignatureRuleImpl(
-			useLogger,
-			usePackageRenames, usePackageVersions,
-			bundleData,
-			directStrings );
-	}
-
-	//
 
 	public static final String JAVAX_OTHER_READER_SERVICE_PATH = "transformer/test/data/META-INF/services/javax.other.Reader";
 	public static final String[] JAVAX_OTHER_READER_LINES = { "javax.other.ReaderImpl" };
@@ -131,7 +104,7 @@ public class TestTransformServiceConfig extends CaptureTest {
 				useLogger,
 				createBuffer(),
 				createSelectionRule( useLogger, getIncludes(), getExcludes() ),
-				createSignatureRule( useLogger, getPackageRenames(), null, null, null ) );
+				createSignatureRule( useLogger, getPackageRenames() ) );
 		}
 		return jakartaServiceAction;
 	}
@@ -146,7 +119,7 @@ public class TestTransformServiceConfig extends CaptureTest {
 				useLogger,
 				createBuffer(),
 				createSelectionRule( useLogger, getIncludes(), getExcludes() ),
-				createSignatureRule( useLogger, invertedRenames, null, null, null ) );
+				createSignatureRule( useLogger, invertedRenames ) );
 		}
 		return javaxServiceAction;
 	}

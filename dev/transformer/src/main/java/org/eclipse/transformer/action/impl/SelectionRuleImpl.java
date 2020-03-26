@@ -19,6 +19,7 @@
 
 package org.eclipse.transformer.action.impl;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,25 +32,42 @@ public class SelectionRuleImpl implements SelectionRule {
 	public SelectionRuleImpl(Logger logger, Set<String> includes, Set<String> excludes) {
 		this.logger = logger;
 
-		this.included = new HashSet<String>(includes);
-		this.includedExact = new HashSet<String>();
-		this.includedHead = new HashSet<String>();
-		this.includedTail = new HashSet<String>();
-		this.includedAny = new HashSet<String>();
+		if ( (includes == null) || includes.isEmpty() ) {
+			this.included = Collections.emptySet();
+			this.includedExact = Collections.emptySet();
+			this.includedHead = Collections.emptySet();
+			this.includedTail = Collections.emptySet();
+			this.includedAny = Collections.emptySet();
+		} else {
+			this.included = new HashSet<String>(includes);
+			this.includedExact = new HashSet<String>();
+			this.includedHead = new HashSet<String>();
+			this.includedTail = new HashSet<String>();
+			this.includedAny = new HashSet<String>();
 
-		TransformProperties.processSelections(
-			this.included,
-			this.includedExact, this.includedHead, this.includedTail, this.includedAny );
+			TransformProperties.processSelections(
+				this.included,
+				this.includedExact, this.includedHead, this.includedTail, this.includedAny );
+		}
 
-		this.excluded = new HashSet<String>(excludes);
-		this.excludedExact = new HashSet<String>();
-		this.excludedHead = new HashSet<String>();
-		this.excludedTail = new HashSet<String>();
-		this.excludedAny = new HashSet<String>();
+		if ( (excludes == null) || excludes.isEmpty() ) {
+			this.excluded = Collections.emptySet();
+			this.excludedExact = Collections.emptySet();
+			this.excludedHead = Collections.emptySet();
+			this.excludedTail = Collections.emptySet();
+			this.excludedAny = Collections.emptySet();
 
-		TransformProperties.processSelections(
-			this.excluded,
-			this.excludedExact, this.excludedHead, this.excludedTail, this.excludedAny );
+		} else {
+			this.excluded = new HashSet<String>(excludes);
+			this.excludedExact = new HashSet<String>();
+			this.excludedHead = new HashSet<String>();
+			this.excludedTail = new HashSet<String>();
+			this.excludedAny = new HashSet<String>();
+
+			TransformProperties.processSelections(
+				this.excluded,
+				this.excludedExact, this.excludedHead, this.excludedTail, this.excludedAny );
+		}
 	}
 
 	//

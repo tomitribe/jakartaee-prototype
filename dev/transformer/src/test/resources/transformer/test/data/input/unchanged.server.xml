@@ -1,0 +1,4 @@
+<server description="Simple unchanged server configuration">
+  <!-- comment -->
+  <applicationManager autoExpand="true"/>
+</server>

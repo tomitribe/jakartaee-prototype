@@ -19,9 +19,11 @@
 
 package org.eclipse.transformer.action.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -52,28 +54,36 @@ public class SignatureRuleImpl implements SignatureRule {
 		Map<String, String> renames,
 		Map<String, String> versions,
 		Map<String, BundleData> bundleUpdates,
-		Map<String, String> directStrings) {
+		Map<String, String> directStrings,
+		Map<String, String> universalXMLTable,
+		Map<String, Map<String, String>> xmlTables) {
 
 		this.logger = logger;
 
-		Map<String, String> useRenames = new HashMap<String, String>( renames.size() );
-		Map<String, String> useBinaryRenames = new HashMap<String, String>( renames.size() );
+		if ( (renames == null) || renames.isEmpty() ) {
+			this.dottedPackageRenames = Collections.emptyMap();
+			this.slashedPackageRenames = Collections.emptyMap();
 
-		for ( Map.Entry<String, String> renameEntry : renames.entrySet() ) {
-			// System.out.println("Binary conversion from [ " + renameEntry.getKey() + " ] to [ " + renameEntry.getValue() + " ]");
-			String initialName = renameEntry.getKey();
-			String finalName = renameEntry.getValue();
+		} else {
+			Map<String, String> useRenames = new HashMap<String, String>( renames.size() );
+			Map<String, String> useBinaryRenames = new HashMap<String, String>( renames.size() );
 
-			useRenames.put(initialName, finalName);
+			for ( Map.Entry<String, String> renameEntry : renames.entrySet() ) {
+				// System.out.println("Binary conversion from [ " + renameEntry.getKey() + " ] to [ " + renameEntry.getValue() + " ]");
+				String initialName = renameEntry.getKey();
+				String finalName = renameEntry.getValue();
 
-			String initialBinaryName = initialName.replace('.',  '/');
-			String finalBinaryName = finalName.replace('.',  '/');
+				useRenames.put(initialName, finalName);
 
-			useBinaryRenames.put(initialBinaryName, finalBinaryName);
+				String initialBinaryName = initialName.replace('.',  '/');
+				String finalBinaryName = finalName.replace('.',  '/');
+
+				useBinaryRenames.put(initialBinaryName, finalBinaryName);
+			}
+
+			this.dottedPackageRenames = useRenames;
+			this.slashedPackageRenames = useBinaryRenames;
 		}
-
-		this.dottedPackageRenames = useRenames;
-		this.slashedPackageRenames = useBinaryRenames;
 
 		Map<String, String> useVersions;
 		if (versions != null ) {
@@ -107,10 +117,29 @@ public class SignatureRuleImpl implements SignatureRule {
 
 		this.unchangedDescriptors = new HashSet<>();
 		this.changedDescriptors = new HashMap<>();
+
+		Map<String, String> useUniversalXMLTable;
+		if ( universalXMLTable == null ) {
+			useUniversalXMLTable = Collections.emptyMap();
+		} else {
+			useUniversalXMLTable = new HashMap<String, String>(universalXMLTable);
+		}
+		this.universalXMLTable = useUniversalXMLTable;
+
+		Map<String, Map<String, String>> useXMLTables;
+		if ( xmlTables == null ) {
+			useXMLTables = Collections.emptyMap();
+		} else {
+			useXMLTables = new HashMap<String, Map<String, String>>( xmlTables.size() );
+			for ( Map.Entry<String, Map<String, String>> tableEntry : xmlTables.entrySet() ) {
+				useXMLTables.put( tableEntry.getKey(), new HashMap<String, String>( tableEntry.getValue() ) );
+			}
+		}
+		this.xmlTables = useXMLTables;
 	}
 
 	//
-	
+
 	private final Logger logger;
 
 	public Logger getLogger() {
@@ -783,5 +812,70 @@ public class SignatureRuleImpl implements SignatureRule {
 		} else {
 			return null;
 		}
+	}
+
+	//
+
+	private final Map<String, String> universalXMLTable;
+	private final Map<String, Map<String, String>> xmlTables;
+	
+	public boolean xmlTargetMatch(String inputName, String targetName) {
+		return ( inputName.endsWith(targetName) || inputName.startsWith(targetName) );
+	}
+
+	public boolean xmlSelect(String inputName) {
+		if ( !universalXMLTable.isEmpty() ) {
+			return true;
+		}
+
+		for ( String targetName : xmlTables.keySet() ) {
+			if ( xmlTargetMatch(inputName, targetName) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public List<Map<String, String>> selectXMLTables(String inputName) {
+		List<Map<String, String>> targetTables = null;
+
+		if ( !universalXMLTable.isEmpty() ) {
+			targetTables = new ArrayList<Map<String, String>>();
+			targetTables.add(universalXMLTable);
+		}
+
+		for ( Map.Entry<String, Map<String, String>> tableEntry: xmlTables.entrySet() ) {
+			if ( xmlTargetMatch( inputName, tableEntry.getKey() ) ) {
+				if ( targetTables == null ) {
+					targetTables = new ArrayList<Map<String, String>>();
+				}
+				targetTables.add( tableEntry.getValue() );
+			}
+		}
+
+		return targetTables; 
+	}
+
+	public String xmlSubstitute(String input, List<Map<String, String>> targetTables) {
+		for ( Map<String, String> targetTable : targetTables ) {
+			for ( Map.Entry<String, String> targetEntry : targetTable.entrySet() ) {
+				// input = xmlSubstitute(input, targetEntry.getKey(), targetEntry.getValue() );
+				input = input.replace( targetEntry.getKey(), targetEntry.getValue() );
+			}
+			// input = xmlSubstitute(input, targetTable);
+		}
+		return input;
+	}
+
+	public String xmlSubstitute(String input, Map<String, String> targetTable) {
+		for ( Map.Entry<String, String> targetEntry : targetTable.entrySet() ) {
+			// input = xmlSubstitute(input, targetEntry.getKey(), targetEntry.getValue() );
+			input = input.replace(targetEntry.getKey(), targetEntry.getValue() );
+		}
+		return input;
+	}
+
+	public String xmlSubstitute(String input, String initialValue, String finalValue) {
+		return input.replace(initialValue, finalValue);
 	}
 }

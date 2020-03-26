@@ -1,0 +1,8 @@
+<server description="Simple servlet and JSP server configuration">
+  <featureManager>
+    <feature>servlet-4.0</feature>
+    <feature>jsp-2.3</feature>
+  </featureManager>
+
+  <applicationManager autoExpand="true"/>
+</server>

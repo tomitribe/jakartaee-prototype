@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2020 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package transformer.test;
 
 import java.util.Collections;
@@ -54,16 +72,31 @@ public class CaptureTest {
 	}
 
 	public SignatureRuleImpl createSignatureRule(
+			Logger useLogger,
+			Map<String, String> usePackageRenames) {
+
+		return new SignatureRuleImpl(
+			useLogger,
+			usePackageRenames, null,
+			null,
+			null,
+			null, null);
+	}
+
+	public SignatureRuleImpl createSignatureRule(
 		Logger useLogger,
 		Map<String, String> usePackageRenames,
 		Map<String, String> usePackageVersions,
 		Map<String, BundleData> bundleData,
-		Map<String, String> directStrings) {
+		Map<String, String> directStrings,
+		Map<String, String> universalXMLTable,
+		Map<String, Map<String, String>> xmlTables) {
 
 		return new SignatureRuleImpl(
 			useLogger,
 			usePackageRenames, usePackageVersions,
 			bundleData,
-			directStrings );
+			directStrings,
+			universalXMLTable, xmlTables);
 	}
 }

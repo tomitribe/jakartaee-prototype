@@ -111,12 +111,64 @@ public class TransformProperties {
 		return packageRenames;
 	}
 
-	public static Map<String, String> getDirectStrings(UTF8Properties directProperties) {
+	public static Map<String, String> asMap(UTF8Properties directProperties) {
 		Map<String, String> directStrings = new HashMap<String, String>( directProperties.size() );
 		for ( Map.Entry<Object, Object> directEntry : directProperties.entrySet() ) {
 			directStrings.put( (String) directEntry.getKey(), (String) directEntry.getValue() );
 		}
 		return directStrings;
+	}
+
+	public static void populateXMLTables(
+		Map<String, String> flatXMLMap,
+		Map<String, String> universalXMLTable,
+		Map<String, Map<String, String>> xmlTables) {
+
+		for ( Map.Entry<String, String> xmlEntry : flatXMLMap.entrySet() ) {
+			String composedKey = xmlEntry.getKey();
+			String[] keyParts = parseXMLKey(composedKey);
+			String targetFile = keyParts[0];
+			String initialValue = keyParts[1];
+			String finalValue = xmlEntry.getValue();
+			
+			if ( targetFile == null ) {
+				universalXMLTable.put(initialValue, finalValue);
+
+			} else {
+				Map<String, String> xmlTable = xmlTables.get(targetFile);
+				if ( xmlTable == null ) {
+					xmlTable = new HashMap<String, String>();
+					xmlTables.put(targetFile, xmlTable);
+				}
+				xmlTable.put(initialValue, finalValue);
+			}
+		}
+	}
+
+	public static String[] parseXMLKey(String key) {
+		int colonOffset = key.indexOf(':');
+		if ( colonOffset == -1 ) {
+			return new String[] { null, key };
+		} else {
+			return new String[] { key.substring(0, colonOffset), key.substring(colonOffset + 1) } ;
+		}
+	}
+	
+	public static Map<String, String> invertXML(Map<String, String> properties) {
+		Map<String, String> inverseProperties = new HashMap<>( properties.size() );
+		for ( Map.Entry<String, String> entry : properties.entrySet() ) {
+			String[] keyParts = parseXMLKey( entry.getKey() );
+			String targetFile = keyParts[0];
+			String initialValue = keyParts[1];
+			String finalValue = entry.getValue();
+
+			String inverseInitialValue = ( (targetFile == null) ? finalValue : targetFile + ':' + finalValue );
+			String inverseFinalValue = initialValue;
+
+			inverseProperties.put(inverseInitialValue, inverseFinalValue);
+		}
+
+		return inverseProperties;
 	}
 
 	public static Map<String, String> invert(Map<String, String> properties) {

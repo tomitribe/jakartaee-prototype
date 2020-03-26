@@ -37,7 +37,7 @@ public class TestUtils {
 
 	public static void verify(String tag, String[] expected, List<String> actual) {
 		int actualLen = actual.size();
-		
+
 		int minLength = expected.length;
 		if ( minLength > actualLen ) {
 			minLength = actualLen;
@@ -48,6 +48,21 @@ public class TestUtils {
 		}
 
 		Assertions.assertEquals(expected.length, actual.size(), "String [ " + tag + " ] length mismatch");
+	}
+
+	public static void verify(String tag, List<String> expected, List<String> actual) {
+		int actualLen = actual.size();
+		int expectedLen = expected.size();
+
+		Assertions.assertEquals(
+			expectedLen, actualLen,
+			"[ " + tag + " ] line count mismatch");
+
+		for ( int lineNo = 0; lineNo < expectedLen; lineNo++ ) {
+			Assertions.assertEquals(
+				expected.get(lineNo), actual.get(lineNo),
+				"[ " + tag + " ] line mismatch at [ " + lineNo + " ]");
+		}
 	}
 
 	public static void filter(List<String> lines) {

@@ -135,7 +135,7 @@ public class TestTransformClass extends CaptureTest {
 				useLogger,
 				createBuffer(),
 				createSelectionRule( useLogger, getIncludes(), getExcludes() ),
-				createSignatureRule( useLogger, getPackageRenames(), null, null, null ) );
+				createSignatureRule( useLogger, getPackageRenames() ) );
 		}
 
 		return jakartaJarAction;
@@ -152,7 +152,7 @@ public class TestTransformClass extends CaptureTest {
 				useLogger,
 				createBuffer(),
 				createSelectionRule( useLogger, getIncludes(), getExcludes() ),
-				createSignatureRule( useLogger, invertedRenames, null, null, null ) );
+				createSignatureRule( useLogger, invertedRenames ) );
 		}
 
 		return javaxJarAction;
@@ -248,7 +248,7 @@ public class TestTransformClass extends CaptureTest {
 			useLogger,
 			createBuffer(),
 			createSelectionRule( useLogger, Collections.emptySet(), Collections.emptySet() ),
-			createSignatureRule( useLogger, getStandardRenames(), null, null, null ) );
+			createSignatureRule( useLogger, getStandardRenames() ) );
 		// 'getStandardRenames' throws IOException
 	}
 
@@ -310,7 +310,7 @@ public class TestTransformClass extends CaptureTest {
 			useLogger,
 			createBuffer(),
 			createSelectionRule( useLogger, Collections.emptySet(), Collections.emptySet() ),
-			createSignatureRule( useLogger, Collections.emptyMap(), null, null, getDirectStrings() ) );
+			createSignatureRule( useLogger, Collections.emptyMap() ) );
 	}
 
 	public static final String DIRECT_STRINGS_RESOURCE_NAME = "Sample_DirectStrings.class";

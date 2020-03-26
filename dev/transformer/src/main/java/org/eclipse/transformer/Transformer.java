@@ -239,6 +239,7 @@ public class Transformer {
     public static final String DEFAULT_RENAMES_REFERENCE = "jakarta-renames.properties";
     public static final String DEFAULT_VERSIONS_REFERENCE = "jakarta-versions.properties";
     public static final String DEFAULT_BUNDLES_REFERENCE = "jakarta-bundles.properties";
+    public static final String DEFAULT_XML_REFERENCE = "jakarta-xml.properties";
 
     public static enum AppOption {
         USAGE  ("u", "usage",    "Display usage",
@@ -283,6 +284,9 @@ public class Transformer {
             OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
             !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
         RULES_DIRECT("td", "direct", "Transformation direct string replacements",
+            OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
+            !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
+        RULES_XML("tx", "xml", "Transformation XML string replacements",
             OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
             !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
 
@@ -652,6 +656,8 @@ public class Transformer {
     	public Map<String, String> packageVersions;
     	public Map<String, BundleData> bundleUpdates;
     	public Map<String, String> directStrings;
+    	public Map<String, String> universalXMLTable;
+    	public Map<String, Map<String, String>> xmlTables;
 
     	public CompositeActionImpl rootAction;
     	public ActionImpl acceptedAction;
@@ -719,6 +725,7 @@ public class Transformer {
     		UTF8Properties versionProperties = loadProperties(AppOption.RULES_VERSIONS, DEFAULT_VERSIONS_REFERENCE);
     		UTF8Properties updateProperties = loadProperties(AppOption.RULES_BUNDLES, DEFAULT_BUNDLES_REFERENCE);
     		UTF8Properties directProperties = loadProperties(AppOption.RULES_DIRECT);
+    		UTF8Properties xmlProperties = loadProperties(AppOption.RULES_XML, DEFAULT_XML_REFERENCE);
 
         	invert = hasOption(AppOption.INVERT);
 
@@ -755,7 +762,26 @@ public class Transformer {
         		dual_info("Bundle identities will not be updated");
         	}
 
-        	directStrings = TransformProperties.getDirectStrings(directProperties);
+        	directStrings = TransformProperties.asMap(directProperties);
+
+        	if ( xmlProperties != null ) {
+        		Map<String, String> flatXMLMap = TransformProperties.asMap(xmlProperties); 
+        		if ( invert ) {
+        			flatXMLMap = TransformProperties.invertXML(flatXMLMap);
+        		}
+
+        		Map<String, String> useUniversalXMLTable = new HashMap<String, String>();
+        		Map<String, Map<String, String>> useXMLTables = new HashMap<String, Map<String, String>>();
+
+        		TransformProperties.populateXMLTables(flatXMLMap, useUniversalXMLTable, useXMLTables);
+
+        		universalXMLTable = useUniversalXMLTable;
+        		xmlTables = useXMLTables;
+
+        	} else {
+        		dual_info("No XML substitions are available");
+        		packageRenames = null;
+        	}
 
         	if ( packageRenames != null ) {
         	    if ( packageVersions != null ) {
@@ -867,6 +893,28 @@ public class Transformer {
     				info( "  [ " + directEntry.getKey() + " ]: [ " + directEntry.getValue() + "]");
     			}
     		}
+
+      		info("Universal XML substitions:");
+    		if ( universalXMLTable.isEmpty() ) {
+    			info("  [ ** NONE ** ]");
+    		} else {
+    			for ( Map.Entry<String, String> xmlEntry : universalXMLTable.entrySet() ) {
+    				info( "  [ " + xmlEntry.getKey() + " ]: [ " + xmlEntry.getValue() + "]");
+    			}
+    		}
+
+      		info("Targetted XML substitions:");
+    		if ( xmlTables.isEmpty() ) {
+    			info("  [ ** NONE ** ]");
+    		} else {
+    			for ( Map.Entry<String, Map<String, String>> xmlTableEntry : xmlTables.entrySet() ) {
+        			info("  [ " + xmlTableEntry.getKey() + " ]");
+        			Map<String, String> xmlTable = xmlTableEntry.getValue();
+        			for ( Map.Entry<String, String> xmlEntry : xmlTable.entrySet() ) {
+        				info( "    [ " + xmlEntry.getKey() + " ]: [ " + xmlEntry.getValue() + "]");
+        			}
+    			}
+    		}
     	}
 
     	private SelectionRuleImpl selectionRules;
@@ -885,7 +933,9 @@ public class Transformer {
     			signatureRules =  new SignatureRuleImpl(
     				logger,
         			packageRenames, packageVersions, bundleUpdates,
-        			directStrings);
+        			directStrings,
+        			universalXMLTable,
+        			xmlTables);
     		}
     		return signatureRules;
     	}
