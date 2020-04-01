@@ -89,11 +89,11 @@ Class applications:
 
 Case name: XML simple string update
 Command line argument: -tf
-Rule content: Specifies simple string updates to XML files using two tiers of properties.  The first tier key-value pairs map file selection regular expressions to second tier property file names.  The second tier key-value pairs specifies simple string updates, mapping initial text values to final text values.
-Wildcard support: File selection key values may include a leading '?' or a leading '*'.
+Rule content: Specifies simple string updates to XML files using two tiers of properties.  The first tier key-value pairs map the XML file names you want to update to the second tier property file names.  The second tier property files contain key-value pairs which specify simple string updates.  The keys are the strings to be updated.  The values are the replacement strings.
+Wildcard support: XML file names (keys only) may include an * wildcard.
 
 Used by: XML action
 
 XML action applications:
 
-* Each XML file which matches one of the first tier values is updated by applying each of the selected second tier key-value pairs, performing simple text substitution on the raw text of the XML file. 
+* Each XML file which matches one of the first tier keys is updated by applying each of the selected second tier key-value pairs, performing simple text substitution on the raw text of the XML file. 
