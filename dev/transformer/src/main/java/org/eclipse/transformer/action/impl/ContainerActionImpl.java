@@ -161,7 +161,7 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 		ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
 
 		try {
-			apply(inputPath, zipInputStream, zipOutputStream); // *1 *3
+			apply(inputPath, zipInputStream, zipOutputStream);
 			// throws JakartaTransformException
 
 		} finally {
@@ -248,7 +248,7 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 						ZipEntry outputEntry = new ZipEntry(inputName);
 						zipOutputStream.putNextEntry(outputEntry); // throws IOException
 
-						acceptedAction.apply(inputName, zipInputStream, inputLength, zipOutputStream); // *2
+						acceptedAction.apply(inputName, zipInputStream, inputLength, zipOutputStream);
 						recordTransform(acceptedAction, inputName);
 						zipOutputStream.closeEntry(); // throws IOException
 
@@ -267,7 +267,7 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 						// TODO: Should more of the entry details be transferred?
 
 						ZipEntry outputEntry = new ZipEntry( acceptedAction.getChanges().getOutputResourceName() );
-						zipOutputStream.putNextEntry(outputEntry); // throws IOException // *4
+						zipOutputStream.putNextEntry(outputEntry); // throws IOException
 						FileUtils.transfer(outputData.stream, zipOutputStream, buffer); // throws IOException 
 						zipOutputStream.closeEntry(); // throws IOException
 					}
@@ -289,26 +289,4 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 			throw new TransformException(message, e);
 		}
 	}
-	
-//	[main] ERROR Transformer - Transform failure: %s
-//	org.eclipse.transformer.TransformException: Failure while processing [ com/sun/ts/tests/servlet/api/javax_servlet/singlethreadmodel/STMClientServlet$ThreadClient$TestThread.class ] from [ WEB-INF/lib/servlet_plu_singlethreadmodel.jar ]
-//	        at org.eclipse.transformer.action.impl.ContainerActionImpl.apply(ContainerActionImpl.java:289)
-//	        at org.eclipse.transformer.action.impl.ContainerActionImpl.apply(ContainerActionImpl.java:164)
-//	        at org.eclipse.transformer.action.impl.ContainerActionImpl.apply(ContainerActionImpl.java:251)
-//	        at org.eclipse.transformer.action.impl.ContainerActionImpl.apply(ContainerActionImpl.java:164)
-//	        at org.eclipse.transformer.action.impl.ActionImpl.apply(ActionImpl.java:491)
-//	        at org.eclipse.transformer.action.impl.DirectoryActionImpl.transform(DirectoryActionImpl.java:109)
-//	        at org.eclipse.transformer.action.impl.DirectoryActionImpl.transform(DirectoryActionImpl.java:99)
-//	        at org.eclipse.transformer.action.impl.DirectoryActionImpl.transform(DirectoryActionImpl.java:99)
-//	        at org.eclipse.transformer.action.impl.DirectoryActionImpl.transform(DirectoryActionImpl.java:99)
-//	        at org.eclipse.transformer.action.impl.DirectoryActionImpl.transform(DirectoryActionImpl.java:99)
-//	        at org.eclipse.transformer.action.impl.DirectoryActionImpl.transform(DirectoryActionImpl.java:99)
-//	        at org.eclipse.transformer.action.impl.DirectoryActionImpl.apply(DirectoryActionImpl.java:73)
-//	        at org.eclipse.transformer.Transformer$TransformOptions.transform(Transformer.java:1168)
-//	        at org.eclipse.transformer.Transformer.run(Transformer.java:1243)
-//	        at com.ibm.ws.jakarta.transformer.JakartaTransformer.main(JakartaTransformer.java:30)
-//	Caused by: java.util.zip.ZipException: duplicate entry: com/sun/ts/tests/servlet/api/javax_servlet/singlethreadmodel/STMClientServlet$ThreadClient$TestThread.class
-//	        at java.base/java.util.zip.ZipOutputStream.putNextEntry(ZipOutputStream.java:233)
-//	        at org.eclipse.transformer.action.impl.ContainerActionImpl.apply(ContainerActionImpl.java:270)
-//	        ... 14 more	
 }
