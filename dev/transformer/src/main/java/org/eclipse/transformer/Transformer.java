@@ -26,6 +26,7 @@ import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -535,12 +536,12 @@ public class Transformer {
     }
 
     protected UTF8Properties loadDefaultProperties(AppOption ruleOption, String defaultReference)
-        	throws IOException {
+        throws IOException {
 
     	dual_info("Using internal [ %s ]: [ %s ]", ruleOption, defaultReference);
     	URL rulesUrl = getClass().getResource(defaultReference);
     	if ( rulesUrl == null ) {
-    		dual_info("Default [ %s ] were not found [ %s ]", AppOption.RULES_SELECTIONS, defaultReference);
+    		dual_info("Default [ %s ] were not found [ %s ]", ruleOption, defaultReference);
     		return null;
     	} else {
     		dual_info("Default [ %s ] URL [ %s ]", ruleOption, rulesUrl);
@@ -628,10 +629,7 @@ public class Transformer {
     	info(message);
     }
 
-    protected void dual_error(String message, Throwable th, Object... parms) {
-    	if ( parms.length != 0 ) {
-    		message = String.format(message, parms);
-    	}
+    protected void dual_error(String message, Throwable th) {
     	if ( !toSysOut && !toSysErr ) {
     		PrintStream useOutput = getSystemErr();
     		systemPrint(useOutput, message);
@@ -733,8 +731,9 @@ public class Transformer {
         	includes = new HashSet<String>();
         	excludes = new HashSet<String>();
 
-        	if ( selectionProperties != null ) {
+        	if ( (selectionProperties != null) && !selectionProperties.isEmpty()  ) {
         		TransformProperties.setSelections(includes, excludes, selectionProperties);
+        		dual_info("Selection rules are in use");
         	} else {
         		dual_info("All resources will be selected");
         	}
@@ -745,6 +744,7 @@ public class Transformer {
         			renames = TransformProperties.invert(renames);
         		}
         		packageRenames = renames;
+        		dual_info("Package renames are in use");
         	} else {
         		dual_info("No package renames are available");
         		packageRenames = null;
@@ -752,6 +752,7 @@ public class Transformer {
 
         	if ( versionProperties != null ) {
         		packageVersions = TransformProperties.getPackageVersions(versionProperties);
+        		dual_info("Package versions will be updated");
         	} else {
         		dual_info("Package versions will not be updated");
         	}
@@ -759,30 +760,36 @@ public class Transformer {
         	if ( updateProperties != null ) {
         		bundleUpdates = TransformProperties.getBundleUpdates(updateProperties);
         		// throws IllegalArgumentException
+        		dual_info("Bundle identities will be updated");
         	} else {
         		dual_info("Bundle identities will not be updated");
         	}
-        	
+
         	if ( xmlFileMapProperties != null ) {
-        	    Map<String, String> xmlFileMap = TransformProperties.convertPropertiesToMap(xmlFileMapProperties); // throws IllegalArgumentException
-        	    Map<String, String> substitutionsMap;
+        	    Map<String, String> xmlFileMap =
+        	    	TransformProperties.convertPropertiesToMap(xmlFileMapProperties); // throws IllegalArgumentException
+
         	    specificXmlFileUpdates = new HashMap<String, Map<String, String>>();
         	    for(String xmlFileName : xmlFileMap.keySet()) {
-        	        // Load DEFAULT properties directly - no command line option to specify location of properties file.
-        	        // Properties file locations are specified in "xmlFileMap"
-        	        UTF8Properties substitutions = loadDefaultProperties(AppOption.RULES_SPECIFIC_XML_FILES, xmlFileMap.get(xmlFileName));
-        	        if ( substitutions != null ) {
-        	           substitutionsMap = TransformProperties.convertPropertiesToMap(substitutions); // throws IllegalArgumentException
-        	           specificXmlFileUpdates.put(xmlFileName, substitutionsMap);
-        	        } else {
-        	            dual_info("{} will not be updated", xmlFileName);
-        	        }
+        	        UTF8Properties substitutions = loadExternalProperties(AppOption.RULES_SPECIFIC_XML_FILES, xmlFileMap.get(xmlFileName));
+        	        Map<String, String> substitutionsMap =
+        	        	TransformProperties.convertPropertiesToMap(substitutions); // throws IllegalArgumentException
+        	        specificXmlFileUpdates.put(xmlFileName, substitutionsMap);
         	    }
+
+        	    dual_info("XML files will be updated");
+
         	} else {
-        	    dual_info("No specific-xml-file properties will be updated");
+        	    dual_info("XML files will not be updated");
         	}
 
-        	directStrings = TransformProperties.getDirectStrings(directProperties);
+        	if ( (directProperties != null) && !directProperties.isEmpty()  ) {
+            	directStrings = TransformProperties.getDirectStrings(directProperties);
+        	    dual_info("Java direct string updates will be performed");
+        	} else {
+        		directStrings = Collections.emptyMap();
+        	    dual_info("Java direct string updates will not be performed");
+        	}
 
         	if ( packageRenames != null ) {
         	    if ( packageVersions != null ) {
@@ -794,7 +801,7 @@ public class Transformer {
         	    return false;
         	}
     	}
-    	
+
     	protected boolean validateRules(Map<String, String> renamesMap, 
     	                                Map<String, String> versionsMap) {
 
@@ -1223,7 +1230,7 @@ public class Transformer {
         try {
         	loadedRules = options.setRules();
         } catch ( Exception e ) {
-            dual_error("Exception loading rules: %s", e);
+            dual_error("Exception loading rules:", e);
             return RULES_ERROR_RC;
         }
         if ( !loadedRules ) {
@@ -1242,10 +1249,10 @@ public class Transformer {
         try {
         	options.transform(); // throws JakartaTransformException
         } catch ( TransformException e ) {
-            dual_error("Transform failure: %s", e);
+            dual_error("Transform failure:", e);
             return TRANSFORM_ERROR_RC;
         } catch ( Throwable th) {
-        	dual_error("Unexpected failure: %s", th);
+        	dual_error("Unexpected failure:", th);
             return TRANSFORM_ERROR_RC;
         }
 

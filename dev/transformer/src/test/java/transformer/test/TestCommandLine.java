@@ -86,5 +86,6 @@ class TestCommandLine {
         assertEquals(actionClassName, options.acceptedAction.getClass().getName());
 
         options.transform();
-        assertTrue((new File(outputFileName)).exists(), "output file not created");            }
+        assertTrue( (new File(outputFileName)).exists(), "output file not created" );
+    }
 }
