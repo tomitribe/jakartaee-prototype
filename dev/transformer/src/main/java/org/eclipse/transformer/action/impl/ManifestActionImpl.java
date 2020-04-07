@@ -119,7 +119,6 @@ public class ManifestActionImpl extends ActionImpl {
 
 		debug("[ {}.{} ]: [ {} ] Initial bytes [ {} ]", className, methodName, initialName, initialCount);
 
-		clearChanges();
 		setResourceNames(initialName, initialName);
 
 		ByteData initialData = new ByteData(initialName, initialBytes, 0, initialCount);
@@ -138,7 +137,7 @@ public class ManifestActionImpl extends ActionImpl {
 
 		info("[ {}.{} ]: [ {} ] Replacements [ {} ]",
 			getClass().getSimpleName(), "transform",
-			initialName, getChanges().getReplacements());
+			initialName, getActiveChanges().getReplacements());
 
 		if ( !hasNonResourceNameChanges() ) {
 			debug("[ {}.{} ]: [ {} ] Null transform", className, methodName, initialName);

@@ -1242,19 +1242,19 @@ public class Transformer {
 
         	if ( isTerse ) {
         		if ( !toSysOut && !toSysErr ) {
-        			acceptedAction.getChanges().displayTerse( getSystemOut(), inputPath, outputPath );
+        			acceptedAction.getLastActiveChanges().displayTerse( getSystemOut(), inputPath, outputPath );
         		}
-        		acceptedAction.getChanges().displayTerse( getLogger(), inputPath, outputPath );
+        		acceptedAction.getLastActiveChanges().displayTerse( getLogger(), inputPath, outputPath );
         	} else if ( isVerbose ) {
         		if ( !toSysOut && !toSysErr ) {
-        			acceptedAction.getChanges().displayVerbose( getSystemOut(), inputPath, outputPath );
+        			acceptedAction.getLastActiveChanges().displayVerbose( getSystemOut(), inputPath, outputPath );
         		}
-        		acceptedAction.getChanges().displayVerbose( getLogger(), inputPath, outputPath );
+        		acceptedAction.getLastActiveChanges().displayVerbose( getLogger(), inputPath, outputPath );
     		} else {
         		if ( !toSysOut && !toSysErr ) {
-        			acceptedAction.getChanges().display( getSystemOut(), inputPath, outputPath );
+        			acceptedAction.getLastActiveChanges().display( getSystemOut(), inputPath, outputPath );
         		}
-        		acceptedAction.getChanges().display( getLogger(), inputPath, outputPath );
+        		acceptedAction.getLastActiveChanges().display( getLogger(), inputPath, outputPath );
     		}
         }
     }

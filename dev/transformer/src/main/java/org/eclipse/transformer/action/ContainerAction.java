@@ -24,7 +24,9 @@ import java.util.List;
 
 public interface ContainerAction extends Action {
 	@Override
-	ContainerChanges getChanges();
+	ContainerChanges getActiveChanges();
+	@Override
+	ContainerChanges getLastActiveChanges();
 
 	CompositeAction getAction();
 	List<? extends Action> getActions();

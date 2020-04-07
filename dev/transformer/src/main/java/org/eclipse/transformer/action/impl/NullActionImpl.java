@@ -64,7 +64,6 @@ public class NullActionImpl extends ActionImpl {
 	public ByteData apply(String inputName, byte[] inputBytes, int inputLength)
 		throws TransformException {
 
-		clearChanges();
 		setResourceNames(inputName, inputName);
 		return new ByteData(inputName, inputBytes, 0, inputLength);
 	}

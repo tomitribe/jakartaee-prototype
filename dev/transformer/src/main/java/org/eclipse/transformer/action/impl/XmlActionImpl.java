@@ -94,8 +94,6 @@ public class XmlActionImpl extends ActionImpl {
 	    if (XML_AS_PLAIN_TEXT ) {
 	        return applyAsPlainText(inputName, inputBytes, inputCount);
 	    }
-	    
-		clearChanges();
 
 		setResourceNames(inputName, inputName);
 
@@ -116,8 +114,6 @@ public class XmlActionImpl extends ActionImpl {
 	@SuppressWarnings("unused")
 	public ByteData applyAsPlainText(String inputName, byte[] inputBytes, int inputLength) 
 	    throws TransformException {
-
-	    clearChanges();
 
 	    String outputName = inputName;
 

@@ -135,8 +135,6 @@ public class JavaActionImpl extends ActionImpl {
 	public ByteData apply(String inputName, byte[] inputBytes, int inputLength) 
 		throws TransformException {
 
-		clearChanges();
-
 		String outputName = null; 
 		// String outputName = renameInput(inputName); // TODO
 		// if ( outputName == null ) {

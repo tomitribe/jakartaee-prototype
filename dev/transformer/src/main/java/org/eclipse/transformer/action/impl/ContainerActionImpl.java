@@ -106,8 +106,13 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 	}
 
 	@Override
-	public ContainerChangesImpl getChanges() {
-		return (ContainerChangesImpl) super.getChanges();
+	public ContainerChangesImpl getLastActiveChanges() {
+		return (ContainerChangesImpl) super.getLastActiveChanges();
+	}
+
+	@Override
+	public ContainerChangesImpl getActiveChanges() {
+		return (ContainerChangesImpl) super.getActiveChanges();
 	}
 
 	//
@@ -115,21 +120,21 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 	protected void recordUnaccepted(String resourceName) {
 		debug("Resource [ {} ]: Not accepted", resourceName);
 
-		getChanges().record();
+		getActiveChanges().record();
 	}
 
 	protected void recordUnselected(Action action, boolean hasChanges, String resourceName) {
 		debug( "Resource [ {} ] Action [ {} ]: Accepted but not selected",
 			   resourceName, action.getName() );
 
-		getChanges().record(action, hasChanges);
+		getActiveChanges().record(action, hasChanges);
 	}
 
 	protected void recordTransform(Action action, String resourceName) {
 		debug( "Resource [ {} ] Action [ {} ]: Changes [ {} ]",
 			   resourceName, action.getName(), action.hasChanges() );
 
-		getChanges().record(action);
+		getActiveChanges().record(action);
 	}
 
 	// Byte base container conversion is not supported.
@@ -151,25 +156,32 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 		String inputPath, InputStream inputStream, long inputCount,
 		OutputStream outputStream) throws TransformException {
 
-		setResourceNames(inputPath, inputPath);
-
-		// Use Zip streams instead of Jar streams.
-		//
-		// Jar streams automatically read and consume the manifest, which we don't want.
-
-		ZipInputStream zipInputStream = new ZipInputStream(inputStream);
-		ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
+		startRecording();
 
 		try {
-			apply(inputPath, zipInputStream, zipOutputStream); // *1 *3
-			// throws JakartaTransformException
+			setResourceNames(inputPath, inputPath);
+
+			// Use Zip streams instead of Jar streams.
+			//
+			// Jar streams automatically read and consume the manifest, which we don't want.
+
+			ZipInputStream zipInputStream = new ZipInputStream(inputStream);
+			ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
+
+			try {
+				apply(inputPath, zipInputStream, zipOutputStream); // *1 *3
+				// throws JakartaTransformException
+
+			} finally {
+				try {
+					zipOutputStream.finish(); // throws IOException
+				} catch ( IOException e ) {
+					throw new TransformException("Failed to complete output [ " + inputPath + " ]", e);
+				}
+			}
 
 		} finally {
-			try {
-				zipOutputStream.finish(); // throws IOException
-			} catch ( IOException e ) {
-				throw new TransformException("Failed to complete output [ " + inputPath + " ]", e);
-			}
+			stopRecording();
 		}
 	}
 
@@ -266,7 +278,7 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 
 						// TODO: Should more of the entry details be transferred?
 
-						ZipEntry outputEntry = new ZipEntry( acceptedAction.getChanges().getOutputResourceName() );
+						ZipEntry outputEntry = new ZipEntry( acceptedAction.getActiveChanges().getOutputResourceName() );
 						zipOutputStream.putNextEntry(outputEntry); // throws IOException // *4
 						FileUtils.transfer(outputData.stream, zipOutputStream, buffer); // throws IOException 
 						zipOutputStream.closeEntry(); // throws IOException
@@ -289,26 +301,4 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 			throw new TransformException(message, e);
 		}
 	}
-	
-//	[main] ERROR Transformer - Transform failure: %s
-//	org.eclipse.transformer.TransformException: Failure while processing [ com/sun/ts/tests/servlet/api/javax_servlet/singlethreadmodel/STMClientServlet$ThreadClient$TestThread.class ] from [ WEB-INF/lib/servlet_plu_singlethreadmodel.jar ]
-//	        at org.eclipse.transformer.action.impl.ContainerActionImpl.apply(ContainerActionImpl.java:289)
-//	        at org.eclipse.transformer.action.impl.ContainerActionImpl.apply(ContainerActionImpl.java:164)
-//	        at org.eclipse.transformer.action.impl.ContainerActionImpl.apply(ContainerActionImpl.java:251)
-//	        at org.eclipse.transformer.action.impl.ContainerActionImpl.apply(ContainerActionImpl.java:164)
-//	        at org.eclipse.transformer.action.impl.ActionImpl.apply(ActionImpl.java:491)
-//	        at org.eclipse.transformer.action.impl.DirectoryActionImpl.transform(DirectoryActionImpl.java:109)
-//	        at org.eclipse.transformer.action.impl.DirectoryActionImpl.transform(DirectoryActionImpl.java:99)
-//	        at org.eclipse.transformer.action.impl.DirectoryActionImpl.transform(DirectoryActionImpl.java:99)
-//	        at org.eclipse.transformer.action.impl.DirectoryActionImpl.transform(DirectoryActionImpl.java:99)
-//	        at org.eclipse.transformer.action.impl.DirectoryActionImpl.transform(DirectoryActionImpl.java:99)
-//	        at org.eclipse.transformer.action.impl.DirectoryActionImpl.transform(DirectoryActionImpl.java:99)
-//	        at org.eclipse.transformer.action.impl.DirectoryActionImpl.apply(DirectoryActionImpl.java:73)
-//	        at org.eclipse.transformer.Transformer$TransformOptions.transform(Transformer.java:1168)
-//	        at org.eclipse.transformer.Transformer.run(Transformer.java:1243)
-//	        at com.ibm.ws.jakarta.transformer.JakartaTransformer.main(JakartaTransformer.java:30)
-//	Caused by: java.util.zip.ZipException: duplicate entry: com/sun/ts/tests/servlet/api/javax_servlet/singlethreadmodel/STMClientServlet$ThreadClient$TestThread.class
-//	        at java.base/java.util.zip.ZipOutputStream.putNextEntry(ZipOutputStream.java:233)
-//	        at org.eclipse.transformer.action.impl.ContainerActionImpl.apply(ContainerActionImpl.java:270)
-//	        ... 14 more	
 }

@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.transformer.TransformException;
@@ -62,7 +64,10 @@ public abstract class ActionImpl implements Action {
 		this.selectionRule = selectionRule;
 		this.signatureRule = signatureRule;
 
-		this.changes = newChanges();
+		this.changes = new ArrayList<ChangesImpl>();
+		this.numActiveChanges = 0;
+		this.activeChanges = null;
+		this.lastActiveChanges = null;
 	}
 
 	//
@@ -296,48 +301,81 @@ public abstract class ActionImpl implements Action {
 		return new ChangesImpl();
 	}
 
-	protected final ChangesImpl changes;
+	protected final List<ChangesImpl> changes;
+	protected int numActiveChanges; 
+	protected ChangesImpl activeChanges;
+	protected ChangesImpl lastActiveChanges;
+
+	protected void startRecording() {
+		if ( numActiveChanges == changes.size() ) {
+			changes.add( activeChanges = newChanges() );
+		} else {
+			activeChanges = changes.get(numActiveChanges);
+			activeChanges.clearChanges();
+		}
+		numActiveChanges++;
+	}
+
+	protected void stopRecording() {
+		lastActiveChanges = activeChanges;
+
+		numActiveChanges--;
+		if ( numActiveChanges == 0) {
+			activeChanges = null;
+		} else {
+			activeChanges = changes.get(numActiveChanges);
+		}
+	}
+
+	//
 
 	@Override
-	public ChangesImpl getChanges() {
-		return changes;
+	public ChangesImpl getLastActiveChanges() {
+		return lastActiveChanges;
+	}
+
+	@Override
+	public ChangesImpl getActiveChanges() {
+		return activeChanges;
 	}
 
 	@Override
 	public void addReplacement() {
-		getChanges().addReplacement();
+		getActiveChanges().addReplacement();
 	}
 
 	@Override
 	public void addReplacements(int additions) {
-		getChanges().addReplacements(additions);
+		getActiveChanges().addReplacements(additions);
 	}
 
 	//
 
 	@Override
 	public boolean hasChanges() {
-		return getChanges().hasChanges();
+		return getActiveChanges().hasChanges();
 	}
 
 	@Override
 	public boolean hasResourceNameChange() {
-		return getChanges().hasResourceNameChange();
+		return getActiveChanges().hasResourceNameChange();
 	}
 
 	@Override
 	public boolean hasNonResourceNameChanges() {
-		return getChanges().hasNonResourceNameChanges();
-	}
-
-	protected void clearChanges() {
-		getChanges().clearChanges();
+		return getActiveChanges().hasNonResourceNameChanges();
 	}
 
 	protected void setResourceNames(String inputResourceName, String outputResourceName) {
-		ChangesImpl useChanges = getChanges();
+		ChangesImpl useChanges = getActiveChanges();
 		useChanges.setInputResourceName(inputResourceName);
 		useChanges.setOutputResourceName(outputResourceName);
+	}
+
+	//
+
+	public ChangesImpl geActiveChanges() {
+		return lastActiveChanges;
 	}
 
 	//
@@ -411,6 +449,17 @@ public abstract class ActionImpl implements Action {
 	public InputStreamData apply(String inputName, InputStream inputStream, int inputCount)
 		throws TransformException {
 
+		startRecording();
+		try {
+			return basicApply(inputName, inputStream, inputCount); // throws TransformException {
+		} finally {
+			stopRecording();
+		}
+	}
+	
+	public InputStreamData basicApply(String inputName, InputStream inputStream, int inputCount)
+		throws TransformException {
+
 		String className = getClass().getSimpleName();
 		String methodName = "apply";
 
@@ -444,6 +493,18 @@ public abstract class ActionImpl implements Action {
 		String inputName, InputStream inputStream, long inputCount,
 		OutputStream outputStream) throws TransformException {
 
+		startRecording();
+		try {
+			basicApply(inputName, inputStream, inputCount, outputStream); // throws TransformException
+		} finally {
+			stopRecording();
+		}
+	}
+
+	public void basicApply(
+		String inputName, InputStream inputStream, long inputCount,
+		OutputStream outputStream) throws TransformException {
+
 		int intInputCount = FileUtils.verifyArray(0, inputCount);
 
 		String className = getClass().getSimpleName();
@@ -473,8 +534,7 @@ public abstract class ActionImpl implements Action {
 		write(outputData, outputStream); // throws JakartaTransformException		
 	}
 
-	@Override
-	public abstract ByteData apply(String inputName, byte[] inputBytes, int inputLength) 
+	protected abstract ByteData apply(String inputName, byte[] inputBytes, int inputLength) 
 		throws TransformException;
 
     @Override

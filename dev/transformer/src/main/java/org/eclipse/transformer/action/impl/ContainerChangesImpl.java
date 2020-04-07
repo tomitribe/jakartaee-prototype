@@ -165,7 +165,7 @@ public class ContainerChangesImpl extends ChangesImpl implements ContainerChange
 	public void record(Action action) {
 		record( action.getName(), action.hasChanges() );
 
-		action.getChanges().addNestedInto(this);
+		action.getLastActiveChanges().addNestedInto(this);
 	}
 
 	@Override
