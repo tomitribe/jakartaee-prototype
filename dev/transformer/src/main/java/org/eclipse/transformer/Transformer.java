@@ -236,17 +236,11 @@ public class Transformer {
     public static final String INPUT_GROUP = "input";
     public static final String LOGGING_GROUP = "logging";
 
-    // public static final String DEFAULT_SELECTIONS_REFERENCE = "jakarta-selections.properties";
-    public static final String DEFAULT_RENAMES_REFERENCE = "jakarta-renames.properties";
-    public static final String DEFAULT_VERSIONS_REFERENCE = "jakarta-versions.properties";
-    public static final String DEFAULT_BUNDLES_REFERENCE = "jakarta-bundles.properties";
-    public static final String DEFAULT_SPECIFIC_XML_FILE_MAP_REFERENCE = "jakarta-xml.properties";
-
     public static enum AppOption {
-        USAGE  ("u", "usage",    "Display usage",
+        USAGE  ("u", "usage", "Display usage",
         	!OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
             !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
-        HELP   ("h", "help",    "Display help",
+        HELP   ("h", "help", "Display help",
             !OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
             !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
 
@@ -288,9 +282,9 @@ public class Transformer {
             OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
             !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
         
-        RULES_SPECIFIC_XML_FILES("tf", "direct", "Map of XML filenames to property files",
-                OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
-                !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
+        RULES_MASTER_XML("tf", "xml", "Map of XML filenames to property files",
+            OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
+            !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
 
         INVERT("i", "invert", "Invert transformation rules",
            	!OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
@@ -304,8 +298,8 @@ public class Transformer {
             !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
 
     	DRYRUN("d", "dryrun", "Dry run",
-                !OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
-                !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP);
+            !OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
+            !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP);
 
         private AppOption(
             String shortTag, String longTag, String description,
@@ -411,8 +405,37 @@ public class Transformer {
         return appOptions;
     }
 
+    private Class<?> ruleLoader;
+    private Map<AppOption, String> ruleDefaultRefs;
+
     private String[] args;
     private CommandLine parsedArgs;
+
+    /**
+     * Set default resource references for the several 'RULE" options.
+     * 
+     * Values are located relative to the option loader class.
+     *
+     * @param optionLoader The class relative to which to load the default resources.
+     * @param optionDefaults Table ot default resource references.
+     */
+    public void setOptionDefaults(Class<?> optionLoader, Map<AppOption, String> optionDefaults) {
+    	this.ruleLoader = optionLoader;
+    	this.ruleDefaultRefs = new HashMap<AppOption, String>(optionDefaults);
+    }
+
+    public Class<?> getRuleLoader() {
+    	return ruleLoader;
+    }
+    
+    public Map<AppOption, String> getRuleDefaultRefs() {
+    	return ruleDefaultRefs;
+    }
+
+    public String getDefaultReference(AppOption appOption) {
+    	Map<AppOption, String> useDefaultRefs = getRuleDefaultRefs();    	
+    	return ( (useDefaultRefs == null) ? null : getRuleDefaultRefs().get(appOption) );
+    }
 
     public void setArgs(String[] args) {
         this.args = args;
@@ -512,46 +535,62 @@ public class Transformer {
 
     //
 
+    /**
+     * Load properties for the specified rule option.
+     * 
+     * Answer an empty collection if the rule option was not provided.
+     *
+     * Options loading tries {@link #getOptionValue(AppOption)}, then
+     * tries {@link #getDefaultReference(AppOption)}.  If neither is
+     * set, an empty collection is returned.
+     *
+     * @param ruleOption The option for which to load properties.
+     *
+     * @return Properties loaded using the reference set for the option.
+     *
+     * @throws IOException Thrown if the load failed.
+     * @throws URISyntaxException Thrown if the load failed because a non-valid
+     *     URI was specified.
+     */
     protected UTF8Properties loadProperties(AppOption ruleOption) throws IOException, URISyntaxException {
         String rulesReference = getOptionValue(ruleOption);
 
         if ( rulesReference == null ) {
-        	dual_info("Skipping option [ %s ]", ruleOption);
-        	return FileUtils.createProperties();
+        	rulesReference = getDefaultReference(ruleOption);
+        	if ( rulesReference == null ) {
+            	dual_info("Skipping option [ %s ]", ruleOption);
+        		return FileUtils.createProperties();
+        	} else {
+        		return loadInternalProperties(ruleOption, rulesReference);
+        	}
         } else {
         	return loadExternalProperties(ruleOption, rulesReference);
         }
     }
 
-    protected UTF8Properties loadProperties(AppOption ruleOption, String defaultReference)
-    	throws IOException, URISyntaxException {
-
-        String rulesReference = getOptionValue(ruleOption);
-        if ( rulesReference != null ) {
-        	return loadExternalProperties(ruleOption, rulesReference);
-        } else {
-        	return loadDefaultProperties(ruleOption, defaultReference);
-        }
+    protected UTF8Properties loadInternalProperties(AppOption ruleOption, String resourceRef)
+            throws IOException {
+    	return loadInternalProperties( ruleOption.toString(), resourceRef );
     }
+    	
+    protected UTF8Properties loadInternalProperties(String ruleOption, String resourceRef)
+        throws IOException {
 
-    protected UTF8Properties loadDefaultProperties(AppOption ruleOption, String defaultReference)
-        	throws IOException {
-
-    	dual_info("Using internal [ %s ]: [ %s ]", ruleOption, defaultReference);
-    	URL rulesUrl = getClass().getResource(defaultReference);
+    	dual_info("Using internal [ %s ]: [ %s ]", ruleOption, resourceRef);
+    	URL rulesUrl = getRuleLoader().getResource(resourceRef);
     	if ( rulesUrl == null ) {
-    		dual_info("Default [ %s ] were not found [ %s ]", AppOption.RULES_SELECTIONS, defaultReference);
-    		return null;
+    		dual_info("Internal [ %s ] were not found [ %s ]", ruleOption, resourceRef);
+    		throw new IOException("Resource [ " + resourceRef + " ] not found on [ " + getRuleLoader() + " ]");
     	} else {
-    		dual_info("Default [ %s ] URL [ %s ]", ruleOption, rulesUrl);
+    		dual_info("Internal [ %s ] URL [ %s ]", ruleOption, rulesUrl);
     	}
     	return FileUtils.loadProperties(rulesUrl);
     }
 
-    protected UTF8Properties loadExternalProperties(AppOption ruleOption, String externalReference)
+    protected UTF8Properties loadExternalProperties(AppOption ruleOption, String resourceRef)
     	throws URISyntaxException, IOException {
 
-    	return loadExternalProperties( ruleOption.toString(), externalReference );
+    	return loadExternalProperties( ruleOption.toString(), resourceRef );
     }
 
     protected UTF8Properties loadExternalProperties(String referenceName, String externalReference)
@@ -628,10 +667,7 @@ public class Transformer {
     	info(message);
     }
 
-    protected void dual_error(String message, Throwable th, Object... parms) {
-    	if ( parms.length != 0 ) {
-    		message = String.format(message, parms);
-    	}
+    protected void dual_error(String message, Throwable th) {
     	if ( !toSysOut && !toSysErr ) {
     		PrintStream useOutput = getSystemErr();
     		systemPrint(useOutput, message);
@@ -657,7 +693,7 @@ public class Transformer {
     	public Map<String, String> packageRenames;
     	public Map<String, String> packageVersions;
     	public Map<String, BundleData> bundleUpdates;
-    	public Map<String, Map<String,String>> specificXmlFileUpdates;   // file name, (property, value)
+    	public Map<String, Map<String, String>> masterXmlUpdates; // ( pattern -> ( initial -> final ) )
     	public Map<String, String> directStrings;
 
     	public CompositeActionImpl rootAction;
@@ -722,106 +758,143 @@ public class Transformer {
 
     	public boolean setRules() throws IOException, URISyntaxException, IllegalArgumentException {
     		UTF8Properties selectionProperties = loadProperties(AppOption.RULES_SELECTIONS);
-    		UTF8Properties renameProperties = loadProperties(AppOption.RULES_RENAMES, DEFAULT_RENAMES_REFERENCE);
-    		UTF8Properties versionProperties = loadProperties(AppOption.RULES_VERSIONS, DEFAULT_VERSIONS_REFERENCE);
-    		UTF8Properties updateProperties = loadProperties(AppOption.RULES_BUNDLES, DEFAULT_BUNDLES_REFERENCE);
+    		UTF8Properties renameProperties = loadProperties(AppOption.RULES_RENAMES);
+    		UTF8Properties versionProperties = loadProperties(AppOption.RULES_VERSIONS);
+    		UTF8Properties updateProperties = loadProperties(AppOption.RULES_BUNDLES);
     		UTF8Properties directProperties = loadProperties(AppOption.RULES_DIRECT);
-    		UTF8Properties xmlFileMapProperties = loadProperties(AppOption.RULES_SPECIFIC_XML_FILES, DEFAULT_SPECIFIC_XML_FILE_MAP_REFERENCE);
+    		UTF8Properties xmlMasterProperties = loadProperties(AppOption.RULES_MASTER_XML);
 
         	invert = hasOption(AppOption.INVERT);
 
-        	includes = new HashSet<String>();
-        	excludes = new HashSet<String>();
-
-        	if ( selectionProperties != null ) {
+        	if ( !selectionProperties.isEmpty()  ) {
+            	includes = new HashSet<String>();
+            	excludes = new HashSet<String>();
         		TransformProperties.setSelections(includes, excludes, selectionProperties);
+        		dual_info("Selection rules are in use");
         	} else {
+            	includes = null;
+            	excludes = null;
         		dual_info("All resources will be selected");
         	}
 
-        	if ( renameProperties != null ) {
+        	if ( !renameProperties.isEmpty() ) {
         		Map<String, String> renames = TransformProperties.getPackageRenames(renameProperties);
         		if ( invert ) {
         			renames = TransformProperties.invert(renames);
         		}
         		packageRenames = renames;
+        		dual_info("Package renames are in use");
         	} else {
-        		dual_info("No package renames are available");
         		packageRenames = null;
+        		dual_info("No package renames are available");
         	}
 
-        	if ( versionProperties != null ) {
+        	if ( !versionProperties.isEmpty() ) {
         		packageVersions = TransformProperties.getPackageVersions(versionProperties);
+        		dual_info("Package versions will be updated");
         	} else {
+        		packageVersions = null;
         		dual_info("Package versions will not be updated");
         	}
 
-        	if ( updateProperties != null ) {
+        	if ( !updateProperties.isEmpty() ) {
         		bundleUpdates = TransformProperties.getBundleUpdates(updateProperties);
         		// throws IllegalArgumentException
+        		dual_info("Bundle identities will be updated");
         	} else {
+        		bundleUpdates = null;
         		dual_info("Bundle identities will not be updated");
         	}
-        	
-        	if ( xmlFileMapProperties != null ) {
-        	    Map<String, String> xmlFileMap = TransformProperties.convertPropertiesToMap(xmlFileMapProperties); // throws IllegalArgumentException
-        	    Map<String, String> substitutionsMap;
-        	    specificXmlFileUpdates = new HashMap<String, Map<String, String>>();
-        	    for(String xmlFileName : xmlFileMap.keySet()) {
-        	        // Load DEFAULT properties directly - no command line option to specify location of properties file.
-        	        // Properties file locations are specified in "xmlFileMap"
-        	        UTF8Properties substitutions = loadDefaultProperties(AppOption.RULES_SPECIFIC_XML_FILES, xmlFileMap.get(xmlFileName));
-        	        if ( substitutions != null ) {
-        	           substitutionsMap = TransformProperties.convertPropertiesToMap(substitutions); // throws IllegalArgumentException
-        	           specificXmlFileUpdates.put(xmlFileName, substitutionsMap);
-        	        } else {
-        	            dual_info("{} will not be updated", xmlFileName);
-        	        }
+
+        	if ( !xmlMasterProperties.isEmpty() ) {
+        		boolean useInternalXml = (getOptionValue(AppOption.RULES_MASTER_XML) == null); 
+
+        	    Map<String, String> xmlFileMap =
+        	    	TransformProperties.convertPropertiesToMap(xmlMasterProperties); // throws IllegalArgumentException
+
+        	    Map<String, Map<String, String>> masterUpdates = new HashMap<String, Map<String, String>>();
+        	    for ( Map.Entry<String, String> masterEntry : xmlFileMap.entrySet() ) {
+        	    	String select = masterEntry.getKey();
+        	    	String substitutionsRef = masterEntry.getValue();
+
+        	        UTF8Properties substitutions;
+        	    	if ( useInternalXml ) {
+        	    		substitutions = loadInternalProperties("Substitions matching [ " + select + " ]", substitutionsRef);
+        	    	} else {
+        	    		substitutions = loadExternalProperties("Substitions matching [ " + select + " ]", substitutionsRef);
+        	    	}
+        	        Map<String, String> substitutionsMap =
+        	        	TransformProperties.convertPropertiesToMap(substitutions); // throws IllegalArgumentException
+        	        masterUpdates.put(substitutionsRef, substitutionsMap);
         	    }
+
+        	    masterXmlUpdates = masterUpdates;
+        	    dual_info("XML files will be updated");
+
         	} else {
-        	    dual_info("No specific-xml-file properties will be updated");
+        	    masterXmlUpdates = null;
+        	    dual_info("XML files will not be updated");
         	}
 
-        	directStrings = TransformProperties.getDirectStrings(directProperties);
-
-        	if ( packageRenames != null ) {
-        	    if ( packageVersions != null ) {
-        	       return validateRules(packageRenames, packageVersions);
-        	    } else {
-        	        return true;  // Don't care if Package Versions is null
-        	    }
+        	if ( !directProperties.isEmpty() ) {
+            	directStrings = TransformProperties.getDirectStrings(directProperties);
+        	    dual_info("Java direct string updates will be performed");
         	} else {
-        	    return false;
+        		directStrings = null;
+        	    dual_info("Java direct string updates will not be performed");
         	}
+
+        	return validateRules(packageRenames, packageVersions);
     	}
-    	
+
     	protected boolean validateRules(Map<String, String> renamesMap, 
     	                                Map<String, String> versionsMap) {
+
+    	    if ( (versionsMap == null) || versionsMap.isEmpty() ) {
+    	    	return true; // Nothing to validate
+    	    }
+
+    	    if ( (renamesMap == null) || renamesMap.isEmpty() ) {
+    	    	String renamesRef = getRuleFileName(AppOption.RULES_RENAMES);
+    	    	String versionsRef = getRuleFileName(AppOption.RULES_VERSIONS);
+
+    	    	if ( renamesRef == null ) {
+    	    		dual_error(
+    	    			"Package version updates were specified in [ " + versionsRef + " ]" +
+    	    			"but no rename rules were specified.");
+    	    	} else {
+    	    		dual_error(
+    	    			"Package version updates were specified in [ " + versionsRef + " ]" +
+        	    		"but no rename rules were specified in [ " + renamesRef + " ]");
+    	    	}
+    	    	return false;
+    	    }
 
     	    for ( String entry : versionsMap.keySet() ) {
     	        if ( !renamesMap.containsValue(entry) ) {
     	            dual_error(
     	            	"Version rule key [ " + entry + "]" +
-    	                " from [ " + getRuleFileName(AppOption.RULES_VERSIONS, DEFAULT_VERSIONS_REFERENCE) + " ]" +
-    	            	" not found in rename rules [ " + getRuleFileName(AppOption.RULES_RENAMES, DEFAULT_RENAMES_REFERENCE) +" ]");
+    	                " from [ " + getRuleFileName(AppOption.RULES_VERSIONS) + " ]" +
+    	            	" not found in rename rules [ " + getRuleFileName(AppOption.RULES_RENAMES) +" ]");
     	            return false;
     	        }
     	    }
+
     	    return true;
     	}
     	      
-        protected String getRuleFileName(AppOption ruleOption, String defaultFileName) {
+        protected String getRuleFileName(AppOption ruleOption) {
             String rulesFileName = getOptionValue(ruleOption);
             if ( rulesFileName != null ) {
                 return rulesFileName;
             } else {
-                return defaultFileName;
+            	return getDefaultReference(ruleOption);
             }
         }
 
     	protected void logRules() {
     		info("Includes:");
-    		if ( includes.isEmpty() ) {
+    		if ( (includes == null) || includes.isEmpty() ) {
     			info("  [ ** NONE ** ]");
     		} else {
     			for ( String include : includes ) {
@@ -830,7 +903,7 @@ public class Transformer {
     		}
 
       		info("Excludes:");
-    		if ( excludes.isEmpty() ) {
+    		if ( (excludes == null) || excludes.isEmpty() ) {
     			info("  [ ** NONE ** ]");
     		} else {
     			for ( String exclude : excludes ) {
@@ -844,7 +917,7 @@ public class Transformer {
           		info("Package Renames:");
     		}
 
-    		if ( packageRenames.isEmpty() ) {
+    		if ( (packageRenames == null) || packageRenames.isEmpty() ) {
     			info("  [ ** NONE ** ]");
     		} else {
     			for ( Map.Entry<String, String> renameEntry : packageRenames.entrySet() ) {
@@ -853,7 +926,7 @@ public class Transformer {
     		}
 
     		info("Package Versions:");
-    		if ( packageVersions.isEmpty() ) {
+    		if ( (packageVersions == null) || packageVersions.isEmpty() ) {
     			info("  [ ** NONE ** ]");
     		} else {
     			for ( Map.Entry<String, String> versionEntry : packageVersions.entrySet() ) {
@@ -862,7 +935,7 @@ public class Transformer {
     		}
 
     		info("Bundle Updates:");
-    		if ( bundleUpdates.isEmpty() ) {
+    		if ( (bundleUpdates == null) || bundleUpdates.isEmpty() ) {
     			info("  [ ** NONE ** ]");
     		} else {
     			for ( Map.Entry<String, BundleData> updateEntry : bundleUpdates.entrySet() ) {
@@ -887,7 +960,7 @@ public class Transformer {
     		}
 
       		info("Direct strings:");
-    		if ( directStrings.isEmpty() ) {
+    		if ( (directStrings == null) || directStrings.isEmpty() ) {
     			info("  [ ** NONE ** ]");
     		} else {
     			for ( Map.Entry<String, String> directEntry : directStrings.entrySet() ) {
@@ -910,12 +983,12 @@ public class Transformer {
     	protected SignatureRuleImpl getSignatureRule() {
     		if ( signatureRules == null ) {
     			signatureRules =  new SignatureRuleImpl(
-    				                            logger,
-        			                            packageRenames, 
-        			                            packageVersions, 
-        			                            bundleUpdates,
-        			                            specificXmlFileUpdates,
-        			                            directStrings);
+    				logger,
+    				packageRenames, 
+    				packageVersions, 
+    				bundleUpdates,
+    				masterXmlUpdates,
+    				directStrings);
     		}
     		return signatureRules;
     	}
@@ -1223,7 +1296,7 @@ public class Transformer {
         try {
         	loadedRules = options.setRules();
         } catch ( Exception e ) {
-            dual_error("Exception loading rules: %s", e);
+            dual_error("Exception loading rules:", e);
             return RULES_ERROR_RC;
         }
         if ( !loadedRules ) {
@@ -1242,10 +1315,10 @@ public class Transformer {
         try {
         	options.transform(); // throws JakartaTransformException
         } catch ( TransformException e ) {
-            dual_error("Transform failure: %s", e);
+            dual_error("Transform failure:", e);
             return TRANSFORM_ERROR_RC;
         } catch ( Throwable th) {
-        	dual_error("Unexpected failure: %s", th);
+        	dual_error("Unexpected failure:", th);
             return TRANSFORM_ERROR_RC;
         }
 

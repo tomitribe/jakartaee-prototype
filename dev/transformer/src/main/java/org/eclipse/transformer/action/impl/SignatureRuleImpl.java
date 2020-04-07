@@ -55,32 +55,41 @@ public class SignatureRuleImpl implements SignatureRule {
 		Map<String, String> renames,
 		Map<String, String> versions,
 		Map<String, BundleData> bundleUpdates,
-		Map<String, Map<String, String>> specificXmlFileUpdates,
+		Map<String, Map<String, String>> masterXmlUpdates,
 		Map<String, String> directStrings) {
 
 		this.logger = logger;
 
-		Map<String, String> useRenames = new HashMap<String, String>( renames.size() );
-		Map<String, String> useBinaryRenames = new HashMap<String, String>( renames.size() );
+		Map<String, String> useRenames;
+		Map<String, String> useBinaryRenames;
 
-		for ( Map.Entry<String, String> renameEntry : renames.entrySet() ) {
-			// System.out.println("Binary conversion from [ " + renameEntry.getKey() + " ] to [ " + renameEntry.getValue() + " ]");
-			String initialName = renameEntry.getKey();
-			String finalName = renameEntry.getValue();
+		if ( (renames == null) || renames.isEmpty() ) {
+			useRenames = Collections.emptyMap();
+			useBinaryRenames = Collections.emptyMap();
 
-			useRenames.put(initialName, finalName);
+		} else {
+			 useRenames = new HashMap<String, String>( renames.size() );
+			 useBinaryRenames = new HashMap<String, String>( renames.size() );
 
-			String initialBinaryName = initialName.replace('.',  '/');
-			String finalBinaryName = finalName.replace('.',  '/');
+			 for ( Map.Entry<String, String> renameEntry : renames.entrySet() ) {
+				 // System.out.println("Binary conversion from [ " + renameEntry.getKey() + " ] to [ " + renameEntry.getValue() + " ]");
+				 String initialName = renameEntry.getKey();
+				 String finalName = renameEntry.getValue();
 
-			useBinaryRenames.put(initialBinaryName, finalBinaryName);
+				 useRenames.put(initialName, finalName);
+
+				 String initialBinaryName = initialName.replace('.',  '/');
+				 String finalBinaryName = finalName.replace('.',  '/');
+
+				 useBinaryRenames.put(initialBinaryName, finalBinaryName);
+			 }
 		}
 
 		this.dottedPackageRenames = useRenames;
 		this.slashedPackageRenames = useBinaryRenames;
 
 		Map<String, String> useVersions;
-		if (versions != null ) {
+		if ( (versions != null) && !versions.isEmpty() ) {
 			useVersions = new HashMap<String, String>(versions);
 		} else {
 		    useVersions = Collections.emptyMap();
@@ -88,17 +97,17 @@ public class SignatureRuleImpl implements SignatureRule {
 		this.packageVersions = useVersions;
 
 		Map<String, BundleData> useBundleUpdates;
-		if ( bundleUpdates != null ) {
+		if ( (bundleUpdates != null) && !bundleUpdates.isEmpty() ) {
 			useBundleUpdates = new HashMap<String, BundleData>(bundleUpdates);
 		} else {
 			useBundleUpdates = Collections.emptyMap();
 		}
 		this.bundleUpdates = useBundleUpdates;	
         
-		if ( specificXmlFileUpdates != null ) {
+		if ( (masterXmlUpdates != null) && !masterXmlUpdates.isEmpty() ) {
 		    Map<String,  Map<String, String>> specificXmlMap = new HashMap<String,  Map<String, String>>();
 		    Map<Pattern, Map<String, String>> wildCardXmlMap = new HashMap<Pattern, Map<String, String>>();
-		    for ( Map.Entry<String, Map<String, String>>entry : specificXmlFileUpdates.entrySet() ) {
+		    for ( Map.Entry<String, Map<String, String>> entry : masterXmlUpdates.entrySet() ) {
 		        String key = entry.getKey();  
 
 		        if ((key.indexOf('?') != -1) || (key.indexOf('*') != -1)) {
@@ -117,10 +126,10 @@ public class SignatureRuleImpl implements SignatureRule {
 		}
 
 		Map<String, String> useDirectStrings;
-		if ( directStrings == null ) {
+		if ( (directStrings == null) || directStrings.isEmpty() ) {
 			useDirectStrings = Collections.emptyMap();
 		} else {
-			useDirectStrings = new HashMap<String, String>( directStrings );
+			useDirectStrings = new HashMap<String, String>(directStrings);
 		}
 		this.directStrings = useDirectStrings;
 

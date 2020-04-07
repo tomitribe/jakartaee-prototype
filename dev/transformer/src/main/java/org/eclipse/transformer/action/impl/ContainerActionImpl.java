@@ -261,7 +261,7 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 						}
 
 						InputStreamData outputData =
-								acceptedAction.apply(inputName, zipInputStream, intInputLength);
+							acceptedAction.apply(inputName, zipInputStream, intInputLength);
 						recordTransform(acceptedAction, inputName);
 
 						// TODO: Should more of the entry details be transferred?

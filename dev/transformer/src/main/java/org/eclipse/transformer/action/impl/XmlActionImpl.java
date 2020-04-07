@@ -113,8 +113,9 @@ public class XmlActionImpl extends ActionImpl {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	public ByteData applyAsPlainText(String inputName, byte[] inputBytes, int inputLength) 
-	        throws TransformException {
+	    throws TransformException {
 
 	    clearChanges();
 

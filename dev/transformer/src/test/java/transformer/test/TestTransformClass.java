@@ -44,7 +44,8 @@ import org.eclipse.transformer.util.FileUtils;
 import org.eclipse.transformer.util.InputStreamData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.eclipse.transformer.Transformer;
+
+import com.ibm.ws.jakarta.transformer.JakartaTransformer;
 
 import transformer.test.data.Sample_InjectAPI_Jakarta;
 import transformer.test.data.Sample_InjectAPI_Javax;
@@ -222,8 +223,8 @@ public class TestTransformClass extends CaptureTest {
 	public static final String TRANSFORMER_RESOURCE_NAME = "com/ibm/ws/jakarta/transformer";
 
 	public static Map<String, String> getStandardRenames() throws IOException {
-		String transformerResourceName = Transformer.class.getPackage().getName().replace('.', '/');
-		String renamesResourceName = transformerResourceName + '/' + Transformer.DEFAULT_RENAMES_REFERENCE;
+		String transformerResourceName = JakartaTransformer.class.getPackage().getName().replace('.', '/');
+		String renamesResourceName = transformerResourceName + '/' + JakartaTransformer.DEFAULT_RENAMES_REFERENCE;
 
 		InputStream renamesInputStream = getResourceStream(renamesResourceName); // throws IOException
 		Reader renamesReader = new InputStreamReader(renamesInputStream);
