@@ -576,7 +576,7 @@ public class Transformer {
     protected UTF8Properties loadInternalProperties(String ruleOption, String resourceRef)
         throws IOException {
 
-    	dual_info("Using internal [ %s ]: [ %s ]", ruleOption, resourceRef);
+    	// dual_info("Using internal [ %s ]: [ %s ]", ruleOption, resourceRef);
     	URL rulesUrl = getRuleLoader().getResource(resourceRef);
     	if ( rulesUrl == null ) {
     		dual_info("Internal [ %s ] were not found [ %s ]", ruleOption, resourceRef);
@@ -596,7 +596,7 @@ public class Transformer {
     protected UTF8Properties loadExternalProperties(String referenceName, String externalReference)
         throws URISyntaxException, IOException {
 
-    	dual_info("Using external [ %s ]: [ %s ]", referenceName, externalReference);
+    	// dual_info("Using external [ %s ]: [ %s ]", referenceName, externalReference);
     	URI currentDirectoryUri = IO.work.toURI();
     	URL rulesUrl = URIUtil.resolve(currentDirectoryUri, externalReference).toURL();
     	dual_info("External [ %s ] URL [ %s ]", referenceName, rulesUrl);
@@ -1110,7 +1110,9 @@ public class Transformer {
         public CompositeActionImpl getRootAction() {
         	if ( rootAction == null ) {
         		CompositeActionImpl useRootAction = new CompositeActionImpl(
-                     getLogger(), getBuffer(), getSelectionRule(), getSignatureRule() );
+                     getLogger(), isTerse, isVerbose,
+                     getBuffer(),
+                     getSelectionRule(), getSignatureRule() );
 
         		DirectoryActionImpl directoryAction =
         			useRootAction.addUsing( DirectoryActionImpl::new );

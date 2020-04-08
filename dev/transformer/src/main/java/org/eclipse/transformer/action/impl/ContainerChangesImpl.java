@@ -163,7 +163,7 @@ public class ContainerChangesImpl extends ChangesImpl implements ContainerChange
 
 	@Override
 	public void record(Action action) {
-		record( action.getName(), action.hasChanges() );
+		record( action.getName(), action.hadChanges() );
 
 		action.getLastActiveChanges().addNestedInto(this);
 	}

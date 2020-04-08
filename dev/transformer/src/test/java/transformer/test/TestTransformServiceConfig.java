@@ -129,7 +129,7 @@ public class TestTransformServiceConfig extends CaptureTest {
 			CaptureLoggerImpl useLogger = getCaptureLogger();
 
 			jakartaServiceAction = new ServiceLoaderConfigActionImpl(
-				useLogger,
+				useLogger, false, false,
 				createBuffer(),
 				createSelectionRule( useLogger, getIncludes(), getExcludes() ),
 				createSignatureRule( useLogger, getPackageRenames(), null, null, null ) );
@@ -144,7 +144,7 @@ public class TestTransformServiceConfig extends CaptureTest {
 			Map<String, String> invertedRenames = TransformProperties.invert( getPackageRenames() );
 
 			javaxServiceAction = new ServiceLoaderConfigActionImpl(
-				useLogger,
+				useLogger, false, false,
 				createBuffer(),
 				createSelectionRule( useLogger, getIncludes(), getExcludes() ),
 				createSignatureRule( useLogger, invertedRenames, null, null, null ) );

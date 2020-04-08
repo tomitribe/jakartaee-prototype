@@ -204,13 +204,43 @@ public interface Action {
 	 */
 	void addReplacements(int additions);
 
+	//
+
+	/**
+	 * Tell if the current application of this action had changes.
+	 * 
+	 * @return True or false telling if the current application of this action
+	 *     had changes.
+	 */
+	boolean hasChanges();
+
+	/**
+	 * Tell if the current application of this action had changes other than
+	 * a resource name change.
+	 *
+	 * @return True or false telling if the current application of this action
+	 *     had changes other than resource name changes.
+	 */
+	boolean hasNonResourceNameChanges();
+
+	/**
+	 * Tell if the current application of this action changed the name of the
+	 * resource.
+	 *
+	 * @return True or false telling if the current application of this action
+	 *     changed the name of the resource.
+	 */
+	boolean hasResourceNameChange();
+
+	//
+	
 	/**
 	 * Tell if the last application of this action had changes.
 	 * 
 	 * @return True or false telling if the last application of this action
 	 *     had changes.
 	 */
-	boolean hasChanges();
+	boolean hadChanges();
 
 	/**
 	 * Tell if the last application of this action had changes other than
@@ -219,7 +249,7 @@ public interface Action {
 	 * @return True or false telling if the last application of this action
 	 *     had changes other than resource name changes.
 	 */
-	boolean hasNonResourceNameChanges();
+	boolean hadNonResourceNameChanges();
 
 	/**
 	 * Tell if the last application of this action changed the name of the
@@ -228,7 +258,7 @@ public interface Action {
 	 * @return True or false telling if the last application of this action
 	 *     changed the name of the resource.
 	 */
-	boolean hasResourceNameChange();
+	boolean hadResourceNameChange();
 
 	//
 
