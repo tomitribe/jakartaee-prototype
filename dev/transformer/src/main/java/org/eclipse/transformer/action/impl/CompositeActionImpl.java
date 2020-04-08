@@ -62,8 +62,13 @@ public class CompositeActionImpl extends ActionImpl implements CompositeAction {
 	}
 
 	@Override
-	public ChangesImpl getChanges() {
-		return ( (acceptedAction == null) ? null : acceptedAction.getChanges() );
+	public ChangesImpl getLastActiveChanges() {
+		return ( (acceptedAction == null) ? null : acceptedAction.getLastActiveChanges() );
+	}
+
+	@Override
+	public ChangesImpl getActiveChanges() {
+		return ( (acceptedAction == null) ? null : acceptedAction.getActiveChanges() );
 	}
 
 	@Override

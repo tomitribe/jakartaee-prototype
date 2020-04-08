@@ -28,6 +28,8 @@ import org.eclipse.transformer.action.impl.ManifestActionImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.ibm.ws.jakarta.transformer.JakartaTransformer;
+
 import org.eclipse.transformer.Transformer;
 import org.eclipse.transformer.Transformer.TransformOptions;
 
@@ -63,6 +65,8 @@ class TestCommandLine {
 
         Transformer t = new Transformer(System.out, System.err);
 
+        t.setOptionDefaults( JakartaTransformer.class, JakartaTransformer.getOptionDefaults() );
+
         String[] args = new String[] { inputFileName, "-o" };
 
         t.setArgs(args);
@@ -88,4 +92,8 @@ class TestCommandLine {
         options.transform();
         assertTrue( (new File(outputFileName)).exists(), "output file not created" );
     }
+    
+	// at org.eclipse.transformer.Transformer$TransformOptions.transform(Transformer.java:1255)
+	// at transformer.test.TestCommandLine.verifyAction(TestCommandLine.java:88)
+	// at transformer.test.TestCommandLine.testManifestActionAccepted(TestCommandLine.java:50)    
 }

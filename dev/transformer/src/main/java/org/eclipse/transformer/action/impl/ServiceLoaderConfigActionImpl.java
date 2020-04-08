@@ -82,16 +82,21 @@ public class ServiceLoaderConfigActionImpl extends ActionImpl {
 	}
 
 	@Override
-	public ServiceLoaderConfigChangesImpl getChanges() {
-		return (ServiceLoaderConfigChangesImpl) super.getChanges();
+	public ServiceLoaderConfigChangesImpl getLastActiveChanges() {
+		return (ServiceLoaderConfigChangesImpl) super.getLastActiveChanges();
+	}
+
+	@Override
+	public ServiceLoaderConfigChangesImpl getActiveChanges() {
+		return (ServiceLoaderConfigChangesImpl) super.getActiveChanges();
 	}
 
 	protected void addUnchangedProvider() {
-		getChanges().addUnchangedProvider();
+		getActiveChanges().addUnchangedProvider();
 	}
 
 	protected void addChangedProvider() {
-		getChanges().addChangedProvider();
+		getActiveChanges().addChangedProvider();
 	}
 
 	//
@@ -111,8 +116,6 @@ public class ServiceLoaderConfigActionImpl extends ActionImpl {
 	@Override
 	public ByteData apply(String inputName, byte[] inputBytes, int inputLength) 
 		throws TransformException {
-
-		clearChanges();
 
 		String outputName = renameInput(inputName);
 		if ( outputName == null ) {

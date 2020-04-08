@@ -263,7 +263,7 @@ public class TestTransformClass extends CaptureTest {
 		InputStream inputStream = getResourceStream(resourceName); // throws IOException
 
 		InputStreamData outputStreamData = classAction.apply(resourceName, inputStream); // throws TransformException
-		display( classAction.getChanges() );
+		display( classAction.getLastActiveChanges() );
 
 		OutputStream outputStream = new FileOutputStream("build" + '/' + ANNOTATED_SERVLET_RESOURCE_NAME); // throws FileNotFoundException
 		try {
@@ -279,7 +279,7 @@ public class TestTransformClass extends CaptureTest {
 
 		System.out.println("Input super class [ " + classChanges.getInputSuperName() + " ]");
 		System.out.println("Output super class [ " + classChanges.getOutputSuperName() + " ]");
-		
+
 		System.out.println("Modified interfaces [ " + classChanges.getModifiedInterfaces() + " ]");
 		System.out.println("Modified fields [ " + classChanges.getModifiedFields() + " ]");
 		System.out.println("Modified methods [ " + classChanges.getModifiedMethods() + " ]");
@@ -327,10 +327,10 @@ public class TestTransformClass extends CaptureTest {
 
 		@SuppressWarnings("unused")
 		InputStreamData outputStreamData = classAction.apply(resourceName, inputStream); // throws TransformException
-		display( classAction.getChanges() );
+		display( classAction.getLastActiveChanges() );
 
 		int expectedChanges = 5;
-		int actualChanges = classAction.getChanges().getModifiedConstants(); 
+		int actualChanges = classAction.getLastActiveChanges().getModifiedConstants(); 
 		Assertions.assertEquals(
 			expectedChanges, actualChanges, 
 			"Incorrect count of constant changes");

@@ -106,8 +106,13 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 	}
 
 	@Override
-	public ContainerChangesImpl getChanges() {
-		return (ContainerChangesImpl) super.getChanges();
+	public ContainerChangesImpl getLastActiveChanges() {
+		return (ContainerChangesImpl) super.getLastActiveChanges();
+	}
+
+	@Override
+	public ContainerChangesImpl getActiveChanges() {
+		return (ContainerChangesImpl) super.getActiveChanges();
 	}
 
 	//
@@ -115,21 +120,21 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 	protected void recordUnaccepted(String resourceName) {
 		debug("Resource [ {} ]: Not accepted", resourceName);
 
-		getChanges().record();
+		getActiveChanges().record();
 	}
 
 	protected void recordUnselected(Action action, boolean hasChanges, String resourceName) {
 		debug( "Resource [ {} ] Action [ {} ]: Accepted but not selected",
 			   resourceName, action.getName() );
 
-		getChanges().record(action, hasChanges);
+		getActiveChanges().record(action, hasChanges);
 	}
 
 	protected void recordTransform(Action action, String resourceName) {
 		debug( "Resource [ {} ] Action [ {} ]: Changes [ {} ]",
 			   resourceName, action.getName(), action.hasChanges() );
 
-		getChanges().record(action);
+		getActiveChanges().record(action);
 	}
 
 	// Byte base container conversion is not supported.
@@ -151,25 +156,32 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 		String inputPath, InputStream inputStream, long inputCount,
 		OutputStream outputStream) throws TransformException {
 
-		setResourceNames(inputPath, inputPath);
-
-		// Use Zip streams instead of Jar streams.
-		//
-		// Jar streams automatically read and consume the manifest, which we don't want.
-
-		ZipInputStream zipInputStream = new ZipInputStream(inputStream);
-		ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
+		startRecording();
 
 		try {
-			apply(inputPath, zipInputStream, zipOutputStream);
-			// throws JakartaTransformException
+			setResourceNames(inputPath, inputPath);
+
+			// Use Zip streams instead of Jar streams.
+			//
+			// Jar streams automatically read and consume the manifest, which we don't want.
+
+			ZipInputStream zipInputStream = new ZipInputStream(inputStream);
+			ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
+
+			try {
+				apply(inputPath, zipInputStream, zipOutputStream);
+				// throws JakartaTransformException
+
+			} finally {
+				try {
+					zipOutputStream.finish(); // throws IOException
+				} catch ( IOException e ) {
+					throw new TransformException("Failed to complete output [ " + inputPath + " ]", e);
+				}
+			}
 
 		} finally {
-			try {
-				zipOutputStream.finish(); // throws IOException
-			} catch ( IOException e ) {
-				throw new TransformException("Failed to complete output [ " + inputPath + " ]", e);
-			}
+			stopRecording();
 		}
 	}
 
@@ -266,9 +278,9 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 
 						// TODO: Should more of the entry details be transferred?
 
-						ZipEntry outputEntry = new ZipEntry( acceptedAction.getChanges().getOutputResourceName() );
+						ZipEntry outputEntry = new ZipEntry( acceptedAction.getActiveChanges().getOutputResourceName() );
 						zipOutputStream.putNextEntry(outputEntry); // throws IOException
-						FileUtils.transfer(outputData.stream, zipOutputStream, buffer); // throws IOException 
+            FileUtils.transfer(outputData.stream, zipOutputStream, buffer); // throws IOException 
 						zipOutputStream.closeEntry(); // throws IOException
 					}
 				}

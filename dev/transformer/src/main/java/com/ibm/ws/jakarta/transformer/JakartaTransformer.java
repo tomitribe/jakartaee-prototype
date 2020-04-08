@@ -26,6 +26,7 @@ import org.eclipse.transformer.Transformer;
 import org.eclipse.transformer.Transformer.AppOption;
 
 public class JakartaTransformer {
+
     public static void main(String[] args) throws Exception {
         Transformer jTrans = new Transformer(System.out, System.err);
         jTrans.setOptionDefaults( JakartaTransformer.class, getOptionDefaults() );

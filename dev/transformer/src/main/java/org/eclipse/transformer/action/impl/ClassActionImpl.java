@@ -243,40 +243,45 @@ public class ClassActionImpl extends ActionImpl {
 	}
 
 	@Override
-	public ClassChangesImpl getChanges() {
-		return (ClassChangesImpl) super.getChanges();
+	public ClassChangesImpl getLastActiveChanges() {
+		return (ClassChangesImpl) super.getLastActiveChanges();
+	}
+
+	@Override
+	public ClassChangesImpl getActiveChanges() {
+		return (ClassChangesImpl) super.getActiveChanges();
 	}
 
 	protected void setClassNames(String inputClassName, String outputClassName) {
-		ClassChangesImpl useChanges = getChanges();
+		ClassChangesImpl useChanges = getActiveChanges();
 		useChanges.setInputClassName(inputClassName);
 		useChanges.setOutputClassName(outputClassName);
 	}
 
 	protected void setSuperClassNames(String inputSuperName, String outputSuperName) {
-		ClassChangesImpl useChanges = getChanges();
+		ClassChangesImpl useChanges = getActiveChanges();
 		useChanges.setInputSuperName(inputSuperName);
 		useChanges.setOutputSuperName(outputSuperName);
 	}	
 
 	protected void addModifiedInterface() {
-		getChanges().addModifiedInterface();
+		getActiveChanges().addModifiedInterface();
 	}
 
 	protected void addModifiedField() {
-		getChanges().addModifiedField();
+		getActiveChanges().addModifiedField();
 	}
 
 	protected void addModifiedMethod() {
-		getChanges().addModifiedMethod();
+		getActiveChanges().addModifiedMethod();
 	}
 
 	protected void addModifiedAttribute() {
-		getChanges().addModifiedAttribute();
+		getActiveChanges().addModifiedAttribute();
 	}
 
 	protected void setModifiedConstants(int modifiedConstants) {
-		getChanges().setModifiedConstants(modifiedConstants);
+		getActiveChanges().setModifiedConstants(modifiedConstants);
 	}
 
 	//
@@ -291,8 +296,6 @@ public class ClassActionImpl extends ActionImpl {
 	@Override
 	public ByteData apply(String inputName, byte[] inputBytes, int inputLength)
 		throws TransformException {
-
-		clearChanges();
 
 		debug("Read [ {} ] Bytes [ {} ]", inputName, inputLength);
 		debugDump(inputBytes, 0, inputLength);

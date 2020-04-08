@@ -25,7 +25,6 @@ import java.io.OutputStream;
 
 import org.eclipse.transformer.TransformException;
 import org.eclipse.transformer.action.impl.InputBufferImpl;
-import org.eclipse.transformer.util.ByteData;
 import org.eclipse.transformer.util.InputStreamData;
 
 public interface Action {
@@ -177,37 +176,21 @@ public interface Action {
 		String inputName, InputStream inputStream, long inputCount,
 		OutputStream outputStream) throws TransformException;
 
-	/**
-	 * Apply this action on an input bytes.
-	 *
-	 * Answer transformed bytes.  Answer null if no changes were made
-	 * by this action.
-	 *
-	 * @param inputName A name associated with the input data.
-	 * @param inputBytes Input data.
-	 * @param inputCount The count of input bytes.  This will often be
-	 *     different than the length of the input data array.
-	 *
-	 * @return Transformed bytes.  Null if this action made no changes to
-	 *     the input data.
-	 *
-	 * @throws TransformException Thrown if the transform failed. 
-	 */
-	ByteData apply(String inputName, byte[] inputBytes, int inputLength)
-		throws TransformException;
-
 	//
 
 	/**
-	 * Answer changes recorded during the most recent application
-	 * of this action.
+	 * Answer the last active changes.
 	 *
-	 * Each call to the same action instance obtains the same change instance.
-	 *  
-	 * @return The changes recorded during the most recent application
-	 *     of this action.
+	 * @return The last active changes.
 	 */
-	Changes getChanges();
+	Changes getLastActiveChanges();
+
+	/**
+	 * Answer the current active changes.
+	 *
+	 * @return The current active changes.
+	 */
+	Changes getActiveChanges();
 
 	/**
 	 * Record a single replacement to the changes of this action.

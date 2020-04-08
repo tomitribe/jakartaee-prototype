@@ -69,8 +69,13 @@ public class DirectoryActionImpl extends ContainerActionImpl {
 	public void apply(String inputPath, File inputFile, File outputFile)
 		throws TransformException {
 
-	    setResourceNames(inputPath, inputPath);
-        transform(".", inputFile, outputFile);
+    	startRecording();
+    	try {
+    		setResourceNames(inputPath, inputPath);
+    		transform(".", inputFile, outputFile);
+    	} finally {
+    		stopRecording();
+    	}
 	}
 
 	protected void transform(
