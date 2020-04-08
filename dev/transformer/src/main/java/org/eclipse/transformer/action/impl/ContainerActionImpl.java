@@ -169,7 +169,7 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 			ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
 
 			try {
-				apply(inputPath, zipInputStream, zipOutputStream); // *1 *3
+				apply(inputPath, zipInputStream, zipOutputStream);
 				// throws JakartaTransformException
 
 			} finally {
@@ -260,7 +260,7 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 						ZipEntry outputEntry = new ZipEntry(inputName);
 						zipOutputStream.putNextEntry(outputEntry); // throws IOException
 
-						acceptedAction.apply(inputName, zipInputStream, inputLength, zipOutputStream); // *2
+						acceptedAction.apply(inputName, zipInputStream, inputLength, zipOutputStream);
 						recordTransform(acceptedAction, inputName);
 						zipOutputStream.closeEntry(); // throws IOException
 
@@ -279,8 +279,8 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 						// TODO: Should more of the entry details be transferred?
 
 						ZipEntry outputEntry = new ZipEntry( acceptedAction.getActiveChanges().getOutputResourceName() );
-						zipOutputStream.putNextEntry(outputEntry); // throws IOException // *4
-						FileUtils.transfer(outputData.stream, zipOutputStream, buffer); // throws IOException 
+						zipOutputStream.putNextEntry(outputEntry); // throws IOException
+            FileUtils.transfer(outputData.stream, zipOutputStream, buffer); // throws IOException 
 						zipOutputStream.closeEntry(); // throws IOException
 					}
 				}

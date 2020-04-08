@@ -333,6 +333,11 @@ public class ManifestActionImpl extends ActionImpl {
 		for ( Map.Entry<String, String> renameEntry : getPackageRenames().entrySet() ) {
 			String key = renameEntry.getKey();
 			int keyLen = key.length();
+			
+			boolean matchSubpackages = SignatureRuleImpl.containsWildcard(key);
+            if (matchSubpackages) {
+                key = SignatureRuleImpl.stripWildcard(key);
+            }
 
 			// System.out.println("Next target [ " + key + " ]");
 
@@ -345,7 +350,7 @@ public class ManifestActionImpl extends ActionImpl {
 					break;
 				}
 
-				if ( !isTruePackageMatch(text, matchStart, keyLen) ) {
+				if ( !SignatureRuleImpl.isTruePackageMatch(text, matchStart, keyLen, matchSubpackages) ) {
 					lastMatchEnd = matchStart + keyLen;
 					continue;
 				}
