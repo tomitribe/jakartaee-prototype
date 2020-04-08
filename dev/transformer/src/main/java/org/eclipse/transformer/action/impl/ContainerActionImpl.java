@@ -47,12 +47,11 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 	}
 
 	public ContainerActionImpl(
-		Logger logger,
+		Logger logger, boolean isTerse, boolean isVerbose,
 		InputBufferImpl buffer,
-		SelectionRuleImpl selectionRule,
-		SignatureRuleImpl signatureRule) {
+		SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
 
-		super(logger, buffer, selectionRule, signatureRule);
+		super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
 
 		this.compositeAction = createUsing( CompositeActionImpl::new );
 	}
@@ -123,16 +122,16 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 		getActiveChanges().record();
 	}
 
-	protected void recordUnselected(Action action, boolean hasChanges, String resourceName) {
+	protected void recordUnselected(Action action, String resourceName) {
 		debug( "Resource [ {} ] Action [ {} ]: Accepted but not selected",
 			   resourceName, action.getName() );
 
-		getActiveChanges().record(action, hasChanges);
+		getActiveChanges().record( action, !ContainerChanges.HAS_CHANGES );
 	}
 
 	protected void recordTransform(Action action, String resourceName) {
 		debug( "Resource [ {} ] Action [ {} ]: Changes [ {} ]",
-			   resourceName, action.getName(), action.hasChanges() );
+			   resourceName, action.getName(), action.hadChanges() );
 
 		getActiveChanges().record(action);
 	}
@@ -156,7 +155,7 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 		String inputPath, InputStream inputStream, long inputCount,
 		OutputStream outputStream) throws TransformException {
 
-		startRecording();
+		startRecording(inputPath);
 
 		try {
 			setResourceNames(inputPath, inputPath);
@@ -181,7 +180,7 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 			}
 
 		} finally {
-			stopRecording();
+			stopRecording(inputPath);
 		}
 	}
 
@@ -201,7 +200,7 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 				long inputLength = inputEntry.getSize();
 
 				debug( "[ {}.{} ] [ {} ] Size [ {} ]",
-					   getClass().getSimpleName(), "apply", inputName, inputLength );
+					getClass().getSimpleName(), "apply", inputName, inputLength );
 
 				boolean selected = select(inputName);
 				Action acceptedAction = acceptAction(inputName);
@@ -210,7 +209,7 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 					if ( acceptedAction == null ) {
 						recordUnaccepted(inputName);
 					} else {
-						recordUnselected(acceptedAction, !ContainerChanges.HAS_CHANGES, inputName);
+						recordUnselected(acceptedAction, inputName);
 					}
 
 					// TODO: Should more of the entry details be transferred?
@@ -278,9 +277,9 @@ public abstract class ContainerActionImpl extends ActionImpl implements Containe
 
 						// TODO: Should more of the entry details be transferred?
 
-						ZipEntry outputEntry = new ZipEntry( acceptedAction.getActiveChanges().getOutputResourceName() );
+						ZipEntry outputEntry = new ZipEntry( acceptedAction.getLastActiveChanges().getOutputResourceName() );
 						zipOutputStream.putNextEntry(outputEntry); // throws IOException
-            FileUtils.transfer(outputData.stream, zipOutputStream, buffer); // throws IOException 
+						FileUtils.transfer(outputData.stream, zipOutputStream, buffer); // throws IOException 
 						zipOutputStream.closeEntry(); // throws IOException
 					}
 				}

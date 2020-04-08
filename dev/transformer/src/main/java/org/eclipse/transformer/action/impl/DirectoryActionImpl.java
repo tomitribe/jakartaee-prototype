@@ -24,18 +24,16 @@ import java.io.File;
 import org.eclipse.transformer.TransformException;
 import org.eclipse.transformer.action.Action;
 import org.eclipse.transformer.action.ActionType;
-import org.eclipse.transformer.action.ContainerChanges;
 import org.slf4j.Logger;
 
 public class DirectoryActionImpl extends ContainerActionImpl {
 
     public DirectoryActionImpl(
-        Logger logger,
+        Logger logger, boolean isTerse, boolean isVerbose,
     	InputBufferImpl buffer,
-    	SelectionRuleImpl selectionRule,
-    	SignatureRuleImpl signatureRule) {
+    	SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
 
-    	super(logger, buffer, selectionRule, signatureRule);
+    	super(logger,  isTerse, isVerbose, buffer, selectionRule, signatureRule);
     }
 
 	//
@@ -69,12 +67,12 @@ public class DirectoryActionImpl extends ContainerActionImpl {
 	public void apply(String inputPath, File inputFile, File outputFile)
 		throws TransformException {
 
-    	startRecording();
+    	startRecording(inputPath);
     	try {
     		setResourceNames(inputPath, inputPath);
     		transform(".", inputFile, outputFile);
     	} finally {
-    		stopRecording();
+    		stopRecording(inputPath);
     	}
 	}
 
@@ -109,7 +107,7 @@ public class DirectoryActionImpl extends ContainerActionImpl {
 	    	if ( selectedAction == null ) {
 	    		recordUnaccepted(inputPath);
 	    	} else if ( !select(inputPath) ) {
-	    		recordUnselected(selectedAction, !ContainerChanges.HAS_CHANGES, inputPath);
+	    		recordUnselected(selectedAction, inputPath);
 	    	} else {
 	    		selectedAction.apply(inputPath, inputFile, outputFile);
 	    		recordTransform(selectedAction, inputPath);

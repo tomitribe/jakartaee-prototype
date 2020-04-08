@@ -153,7 +153,7 @@ public class TestTransformManifest extends CaptureTest {
 			CaptureLoggerImpl useLogger = getCaptureLogger();
 
 			jakartaManifestAction = new ManifestActionImpl(
-				useLogger,
+				useLogger, false, false,
 				new InputBufferImpl(),
 				new SelectionRuleImpl( useLogger, getIncludes(), getExcludes() ),
 				new SignatureRuleImpl(
@@ -174,7 +174,7 @@ public class TestTransformManifest extends CaptureTest {
 			CaptureLoggerImpl useLogger = getCaptureLogger();
 
 			jakartaFeatureAction = new ManifestActionImpl(
-				useLogger,
+				useLogger, false, false,
 				new InputBufferImpl(),
 				new SelectionRuleImpl( useLogger, getIncludes(), getExcludes() ),
 				new SignatureRuleImpl( useLogger, getPackageRenames(), getPackageVersions(), null, null, null ),
@@ -433,13 +433,12 @@ public class TestTransformManifest extends CaptureTest {
 	 */
 	class ManifestActionImpl_Test extends ManifestActionImpl {
 		public ManifestActionImpl_Test (
-			Logger logger,
+			Logger logger, boolean isTerse, boolean isVerbose,
 			InputBufferImpl buffer,
-			SelectionRuleImpl selectionRule,
-			SignatureRuleImpl signatureRule,
+			SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule,
 			boolean isManifest) {
 
-			super(logger, buffer, selectionRule, signatureRule, isManifest);
+			super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule, isManifest);
 		}
 
 		public boolean callIsTrueMatch(String text, int matchStart, int keyLen ) {
@@ -462,7 +461,7 @@ public class TestTransformManifest extends CaptureTest {
 			CaptureLoggerImpl useLogger = getCaptureLogger();
 
 			manifestAction_test = new ManifestActionImpl_Test(
-				useLogger,
+				useLogger, false, false,
 				new InputBufferImpl(),
 				new SelectionRuleImpl( useLogger, getIncludes(), getExcludes() ), 
 				new SignatureRuleImpl( useLogger, getPackageRenames(), getPackageVersions(), null, null, null ),

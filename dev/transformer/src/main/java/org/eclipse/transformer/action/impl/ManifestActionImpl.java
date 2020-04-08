@@ -51,31 +51,29 @@ public class ManifestActionImpl extends ActionImpl {
 	public static final boolean IS_FEATURE = !IS_MANIFEST;	
 
 	public static ManifestActionImpl newManifestAction(
-		Logger logger,
+		Logger logger, boolean isTerse, boolean isVerbose,
 		InputBufferImpl buffer,
-		SelectionRuleImpl selectionRule,
-		SignatureRuleImpl signatureRule) {
+		SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
 
-		return new ManifestActionImpl(logger, buffer, selectionRule, signatureRule, IS_MANIFEST);
+		return new ManifestActionImpl(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule, IS_MANIFEST);
 	}
 
 	public static ManifestActionImpl newFeatureAction(
-		Logger logger,
+		Logger logger, boolean isTerse, boolean isVerbose,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
 
-		return new ManifestActionImpl(logger, buffer, selectionRule, signatureRule, IS_FEATURE);
+		return new ManifestActionImpl(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule, IS_FEATURE);
 	}
 
 	public ManifestActionImpl(
-		Logger logger,
+		Logger logger, boolean isTerse, boolean isVerbose,
 		InputBufferImpl buffer,
-		SelectionRuleImpl selectionRule,
-		SignatureRuleImpl signatureRule,
+		SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule,
 		boolean isManifest) {
 
-		super(logger, buffer, selectionRule, signatureRule);
+		super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
 
 		this.isManifest = isManifest;
 	}
@@ -135,9 +133,9 @@ public class ManifestActionImpl extends ActionImpl {
 
 		transform(initialName, initialManifest, finalManifest);
 
-		info("[ {}.{} ]: [ {} ] Replacements [ {} ]",
-			getClass().getSimpleName(), "transform",
-			initialName, getActiveChanges().getReplacements());
+		// info("[ {}.{} ]: [ {} ] Replacements [ {} ]",
+		//     getClass().getSimpleName(), "transform",
+		//     initialName, getActiveChanges().getReplacements());
 
 		if ( !hasNonResourceNameChanges() ) {
 			debug("[ {}.{} ]: [ {} ] Null transform", className, methodName, initialName);
@@ -202,8 +200,7 @@ public class ManifestActionImpl extends ActionImpl {
 		String inputName, String entryName,
 		Attributes initialAttributes, Attributes finalAttributes) {
 
-		debug(
-			"Transforming [ {} ]: [ {} ] Attributes [ {} ]",
+		debug("Transforming [ {} ]: [ {} ] Attributes [ {} ]",
 			inputName, entryName, initialAttributes.size() );		
 
 		int replacements = 0;
@@ -228,8 +225,7 @@ public class ManifestActionImpl extends ActionImpl {
 			finalAttributes.put(untypedName, finalValue);
 		}
 
-		debug(
-			"Transformed [ {} ]: [ {} ] Attributes [ {} ] Replacements [ {} ]",
+		debug("Transformed [ {} ]: [ {} ] Attributes [ {} ] Replacements [ {} ]",
 			inputName, entryName, finalAttributes.size(), replacements );
 
 		return replacements;
@@ -735,7 +731,7 @@ public class ManifestActionImpl extends ActionImpl {
 		}
 		
 		finalMainAttributes.putValue(SYMBOLIC_NAME_PROPERTY_NAME, finalSymbolicName);
-		info("Bundle symbolic name: {} --> {}", initialSymbolicName, finalSymbolicName);
+		verbose("Bundle symbolic name: {} --> {}", initialSymbolicName, finalSymbolicName);
 
 		if ( !isWildcard ) {
 			String initialVersion = initialMainAttributes.getValue(VERSION_PROPERTY_NAME);
@@ -743,7 +739,7 @@ public class ManifestActionImpl extends ActionImpl {
 				String finalVersion = bundleUpdate.getVersion();
 				if ( (finalVersion != null) && !finalVersion.isEmpty() ) {
 					finalMainAttributes.putValue(VERSION_PROPERTY_NAME, finalVersion);
-					info("Bundle version: {} --> {}", initialVersion, finalVersion);
+					verbose("Bundle version: {} --> {}", initialVersion, finalVersion);
 				}
 			}
 		}
@@ -753,7 +749,7 @@ public class ManifestActionImpl extends ActionImpl {
 			String finalName = bundleUpdate.updateName(initialName);
 			if ( (finalName != null) && !finalName.isEmpty() ) {
 				finalMainAttributes.putValue(NAME_PROPERTY_NAME, finalName);
-				info("Bundle name: {} --> {}", initialName, finalName);
+				verbose("Bundle name: {} --> {}", initialName, finalName);
 			}
 		}
 
@@ -762,7 +758,7 @@ public class ManifestActionImpl extends ActionImpl {
 			String finalDescription = bundleUpdate.updateDescription(initialDescription);
 			if ( (finalDescription != null) && !finalDescription.isEmpty() ) {
 				finalMainAttributes.putValue(DESCRIPTION_PROPERTY_NAME, finalDescription);
-				info("Bundle description: {} --> {}", initialDescription, finalDescription);
+				verbose("Bundle description: {} --> {}", initialDescription, finalDescription);
 			}
 		}
 

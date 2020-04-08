@@ -133,7 +133,7 @@ public class TestTransformClass extends CaptureTest {
 			CaptureLoggerImpl useLogger = getCaptureLogger();
 
 			jakartaJarAction = new JarActionImpl(
-				useLogger,
+				useLogger, false, false,
 				createBuffer(),
 				createSelectionRule( useLogger, getIncludes(), getExcludes() ),
 				createSignatureRule( useLogger, getPackageRenames(), null, null, null ) );
@@ -150,7 +150,7 @@ public class TestTransformClass extends CaptureTest {
 				TransformProperties.invert( getPackageRenames() );
 
 			javaxJarAction = new JarActionImpl(
-				useLogger,
+				useLogger, false, false,
 				createBuffer(),
 				createSelectionRule( useLogger, getIncludes(), getExcludes() ),
 				createSignatureRule( useLogger, invertedRenames, null, null, null ) );
@@ -246,7 +246,7 @@ public class TestTransformClass extends CaptureTest {
 		CaptureLoggerImpl useLogger = getCaptureLogger();
 
 		return new ClassActionImpl(
-			useLogger,
+			useLogger, false, false,
 			createBuffer(),
 			createSelectionRule( useLogger, Collections.emptySet(), Collections.emptySet() ),
 			createSignatureRule( useLogger, getStandardRenames(), null, null, null ) );
@@ -308,7 +308,7 @@ public class TestTransformClass extends CaptureTest {
 		CaptureLoggerImpl useLogger = getCaptureLogger();
 
 		return new ClassActionImpl(
-			useLogger,
+			useLogger, false, false,
 			createBuffer(),
 			createSelectionRule( useLogger, Collections.emptySet(), Collections.emptySet() ),
 			createSignatureRule( useLogger, Collections.emptyMap(), null, null, getDirectStrings() ) );

@@ -1110,7 +1110,9 @@ public class Transformer {
         public CompositeActionImpl getRootAction() {
         	if ( rootAction == null ) {
         		CompositeActionImpl useRootAction = new CompositeActionImpl(
-                     getLogger(), getBuffer(), getSelectionRule(), getSignatureRule() );
+                     getLogger(), isTerse, isVerbose,
+                     getBuffer(),
+                     getSelectionRule(), getSignatureRule() );
 
         		DirectoryActionImpl directoryAction =
         			useRootAction.addUsing( DirectoryActionImpl::new );

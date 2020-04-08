@@ -25,12 +25,11 @@ import org.slf4j.Logger;
 public class ZipActionImpl extends ContainerActionImpl {
 
 	public ZipActionImpl(
-		Logger logger,
+		Logger logger, boolean isTerse, boolean isVerbose,
 		InputBufferImpl buffer,
-		SelectionRuleImpl selectionRule,
-		SignatureRuleImpl signatureRule) {
+		SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
 
-		super(logger, buffer, selectionRule, signatureRule);
+		super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
 	}
 
 	//

@@ -52,12 +52,12 @@ import aQute.lib.io.IO;
 
 public abstract class ActionImpl implements Action {
 	public ActionImpl(
-		Logger logger,
-		InputBufferImpl buffer,
-		SelectionRuleImpl selectionRule,
-		SignatureRuleImpl signatureRule) {
+		Logger logger, boolean isTerse, boolean isVerbose,
+		InputBufferImpl buffer, SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
 
 		this.logger = logger;
+		this.isTerse = isTerse;
+		this.isVerbose = isVerbose;
 
 		this.buffer = buffer;
 
@@ -74,22 +74,34 @@ public abstract class ActionImpl implements Action {
 
 	public static interface ActionInit<A extends ActionImpl> {
 		A apply(
-			Logger logger,
+			Logger logger, boolean isTerse, boolean isVerbose,
 			InputBufferImpl buffer,
 			SelectionRuleImpl selectionRule,
 			SignatureRuleImpl signatureRule);
 	}
 
 	public <A extends ActionImpl> A createUsing(ActionInit<A> init) {
-		return init.apply( getLogger(), getBuffer(), getSelectionRule(), getSignatureRule() );
+		return init.apply(
+			getLogger(), getIsTerse(), getIsVerbose(),
+			getBuffer(), getSelectionRule(), getSignatureRule() );
 	}
 
 	//
 
 	private final Logger logger;
+	private final boolean isTerse;
+	private final boolean isVerbose;
 
 	public Logger getLogger() {
 		return logger;
+	}
+
+	public boolean getIsTerse() {
+		return isTerse;
+	}
+	
+	public boolean getIsVerbose() {
+		return isVerbose;
 	}
 
 	public void trace(String message, Object... parms) {
@@ -104,6 +116,18 @@ public abstract class ActionImpl implements Action {
 		getLogger().info(message, parms);
 	}
 
+	public void terse(String message, Object...parms) {
+		if ( getIsTerse() ) {
+			info(message, parms);
+		}
+	}
+
+	public void verbose(String message, Object...parms) {
+		if ( getIsVerbose() ) {
+			info(message, parms);
+		}
+	}
+	
 	public void warn(String message, Object... parms) {
 		getLogger().warn(message, parms);
 	}
@@ -306,7 +330,11 @@ public abstract class ActionImpl implements Action {
 	protected ChangesImpl activeChanges;
 	protected ChangesImpl lastActiveChanges;
 
-	protected void startRecording() {
+	protected void startRecording(String inputName) {
+		if ( getIsVerbose() ) {
+			info("Start processing [ {} ] using [ {} ]", inputName, getActionType() );
+		}
+
 		if ( numActiveChanges == changes.size() ) {
 			changes.add( activeChanges = newChanges() );
 		} else {
@@ -316,7 +344,28 @@ public abstract class ActionImpl implements Action {
 		numActiveChanges++;
 	}
 
-	protected void stopRecording() {
+	protected void stopRecording(String inputName) {
+		if ( getIsVerbose() ) {
+			String changeText;
+
+			boolean nameChanged = activeChanges.hasResourceNameChange();
+			boolean contentChanged = activeChanges.hasNonResourceNameChanges();
+
+			if ( nameChanged && contentChanged ) {
+				changeText = "Name and content changes";
+			} else if ( nameChanged ) {
+				changeText = "Name changes";
+			} else if ( contentChanged ) {
+				changeText = "Content changes";
+			} else {
+				changeText = "No changes";
+			}
+
+			info("Stop processing [ {} ] using [ {} ]: {}",
+				inputName, getActionType(),
+				changeText);
+		}
+
 		lastActiveChanges = activeChanges;
 
 		numActiveChanges--;
@@ -330,13 +379,14 @@ public abstract class ActionImpl implements Action {
 	//
 
 	@Override
-	public ChangesImpl getLastActiveChanges() {
-		return lastActiveChanges;
-	}
-
-	@Override
 	public ChangesImpl getActiveChanges() {
 		return activeChanges;
+	}
+
+	protected void setResourceNames(String inputResourceName, String outputResourceName) {
+		ChangesImpl useChanges = getActiveChanges();
+		useChanges.setInputResourceName(inputResourceName);
+		useChanges.setOutputResourceName(outputResourceName);
 	}
 
 	@Override
@@ -366,16 +416,26 @@ public abstract class ActionImpl implements Action {
 		return getActiveChanges().hasNonResourceNameChanges();
 	}
 
-	protected void setResourceNames(String inputResourceName, String outputResourceName) {
-		ChangesImpl useChanges = getActiveChanges();
-		useChanges.setInputResourceName(inputResourceName);
-		useChanges.setOutputResourceName(outputResourceName);
-	}
-
 	//
 
-	public ChangesImpl geActiveChanges() {
+	@Override
+	public ChangesImpl getLastActiveChanges() {
 		return lastActiveChanges;
+	}
+
+	@Override
+	public boolean hadChanges() {
+		return getLastActiveChanges().hasChanges();
+	}
+
+	@Override
+	public boolean hadResourceNameChange() {
+		return getLastActiveChanges().hasResourceNameChange();
+	}
+
+	@Override
+	public boolean hadNonResourceNameChanges() {
+		return getLastActiveChanges().hasNonResourceNameChanges();
 	}
 
 	//
@@ -449,11 +509,11 @@ public abstract class ActionImpl implements Action {
 	public InputStreamData apply(String inputName, InputStream inputStream, int inputCount)
 		throws TransformException {
 
-		startRecording();
+		startRecording(inputName);
 		try {
 			return basicApply(inputName, inputStream, inputCount); // throws TransformException {
 		} finally {
-			stopRecording();
+			stopRecording(inputName);
 		}
 	}
 	
@@ -493,11 +553,11 @@ public abstract class ActionImpl implements Action {
 		String inputName, InputStream inputStream, long inputCount,
 		OutputStream outputStream) throws TransformException {
 
-		startRecording();
+		startRecording(inputName);
 		try {
 			basicApply(inputName, inputStream, inputCount, outputStream); // throws TransformException
 		} finally {
-			stopRecording();
+			stopRecording(inputName);
 		}
 	}
 

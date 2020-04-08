@@ -216,12 +216,12 @@ public class ClassActionImpl extends ActionImpl {
 	}
 
 	public ClassActionImpl(
-		Logger logger,
+		Logger logger, boolean isTerse, boolean isVerbose,
 		InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule,
 		SignatureRuleImpl signatureRule) {
 
-		super(logger, buffer, selectionRule, signatureRule);
+		super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
 	}
 
 	//
@@ -341,6 +341,7 @@ public class ClassActionImpl extends ActionImpl {
 		if ( outputClassName != null ) {
 			classBuilder.this_class(outputClassName);
 			outputName = relocateClass( getLogger(), inputName, inputClassName, outputClassName );
+			verbose("Class name [ {} ] -> [ {} ]", inputName, outputName);
 		} else {
 			outputClassName = inputClassName;
 			outputName = inputName;
@@ -393,8 +394,9 @@ public class ClassActionImpl extends ActionImpl {
 			if ( outputField != null ) {
 				fields.set(outputField);
 				addModifiedField();
-				debug( "       {}    -> {}", inputField, outputField);
+				debug("       {}    -> {}", inputField, outputField);
 
+				verbose("Field {} -> {}", inputField, outputField);
 			}
 		}
 
@@ -409,6 +411,8 @@ public class ClassActionImpl extends ActionImpl {
 				methods.set(outputMethod);
 				addModifiedMethod();
 				debug( "       {}    -> {}", inputMethod, outputMethod);
+
+				verbose("Method {} -> {}", inputMethod, outputMethod);
 			}
 		}
 
@@ -426,7 +430,8 @@ public class ClassActionImpl extends ActionImpl {
 			if ( outputAttribute != null ) {
 				attributes.set(outputAttribute);
 				addModifiedAttribute();
-				debug( "       {}    -> {}", inputAttribute, outputAttribute);
+				debug("       {}    -> {}", inputAttribute, outputAttribute);
+				verbose("Attribute {} -> {}", inputAttribute, outputAttribute);
 			}
 		}
 
@@ -439,7 +444,7 @@ public class ClassActionImpl extends ActionImpl {
 		}
 
 		if ( !hasNonResourceNameChanges() ) {
-			info("  Class bytes: {} {}", inputName, inputLength);
+			verbose("  Class bytes: {} {}", inputName, inputLength);
 			return null;
 		}
 
@@ -453,7 +458,7 @@ public class ClassActionImpl extends ActionImpl {
 		}
 
 		byte[] outputBytes = outputClassData.toByteArray();
-		info("  Class size: {}: {} -> {}", inputName, inputBytes.length, outputBytes.length);
+		verbose("  Class size: {}: {} -> {}", inputName, inputBytes.length, outputBytes.length);
 		
 		return new ByteData(outputName, outputBytes, 0, outputBytes.length);
 	}
@@ -469,6 +474,7 @@ public class ClassActionImpl extends ActionImpl {
 		String outputDescriptor = transformDescriptor(inputDescriptor);
 		if ( outputDescriptor != null ) {
 		    debug("    {}       {}    -> {}", member.name, member.descriptor, outputDescriptor);
+			verbose("Member {}.{} > {}", member.name, member.descriptor, outputDescriptor);
 		}
 
 		Attribute[] inputAttributes = member.attributes;
@@ -497,6 +503,7 @@ public class ClassActionImpl extends ActionImpl {
 				outputAttributes[attributeNo] = outputAttribute;
 
 				debug("       {}    -> {}", inputAttribute, outputAttribute);
+				verbose("Attribute {} -> {}", inputAttribute, outputAttribute);
 			}
 		}
 
@@ -840,6 +847,7 @@ public class ClassActionImpl extends ActionImpl {
                 debug("    String ConstantValue: {} (unchanged)", inputValue);
             } else {
                 debug("    String ConstantValue: {}                       -> {} ({})", inputValue, outputString, transformCase);
+                verbose("String ConstantValue: {} -> {} ({})", inputValue, outputString, transformCase);                
             }
             return outputString;
         } else {
@@ -1084,6 +1092,7 @@ public class ClassActionImpl extends ActionImpl {
 						constants.entry( constantNo, new ClassInfo(constants.utf8Info(outputClassName)) );
 						modifiedConstants++;
 						debug("    Class: {}        -> {}", inputClassName, outputClassName);
+						verbose("Class Reference: {} -> {}", inputClassName, outputClassName);
 					} else {
 					    debug("Skip class {} (unchanged)", inputClassName);
 					}
@@ -1099,6 +1108,7 @@ public class ClassActionImpl extends ActionImpl {
 							new NameAndTypeInfo( info.name_index, constants.utf8Info(outputDescriptor)) );
 						modifiedConstants++;
 						debug("    NameAndType: {}              -> {}", inputDescriptor, outputDescriptor);
+						verbose("NameAndType: {} -> {}", inputDescriptor, outputDescriptor);						
 					} else {
 					    debug("Skip name-and-type {} (unchanged)", inputDescriptor);
 					}
@@ -1112,7 +1122,8 @@ public class ClassActionImpl extends ActionImpl {
 					if ( outputDescriptor != null ) {
 						constants.entry( constantNo, new MethodTypeInfo(constants.utf8Info(outputDescriptor)) );
 						modifiedConstants++;
-						debug("    MethodType: {}             -> {}", inputDescriptor, outputDescriptor);
+						debug("    MethodType: {} -> {}", inputDescriptor, outputDescriptor);
+						verbose("MethodType: {} -> {}", inputDescriptor, outputDescriptor);
 					} else {
 					    debug("Skip method-type {} (unchanged)", inputDescriptor);
 					}
@@ -1144,7 +1155,8 @@ public class ClassActionImpl extends ActionImpl {
 					if ( outputUtf8 != null ) {
 						constants.entry(constantNo, outputUtf8);
 						modifiedConstants++;
-						debug("    UTF8: {}       -> {} ({})", inputUtf8, outputUtf8, transformCase);
+						debug("    UTF8: {} -> {} ({})", inputUtf8, outputUtf8, transformCase);						
+						verbose("UTF8: {} -> {} ({})", inputUtf8, outputUtf8, transformCase);
 					} else {
 					    debug("Skip UTF8 {} (unchanged)", inputUtf8);
 					}
@@ -1167,7 +1179,8 @@ public class ClassActionImpl extends ActionImpl {
 					if ( outputString != null ) {
 						constants.entry(constantNo, new StringInfo( constants.utf8Info(outputString) ) );
 						modifiedConstants++;
-						debug("    String: {}         -> {}", inputString, outputString);
+						debug("    String: {} -> {}", inputString, outputString);
+						verbose("String: {} -> {}", inputString, outputString);
 					} else {
 					    debug("Skip string {} (unchanged)", inputString);
 					}

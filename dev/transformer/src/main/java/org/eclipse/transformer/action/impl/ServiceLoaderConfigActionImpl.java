@@ -55,12 +55,11 @@ public class ServiceLoaderConfigActionImpl extends ActionImpl {
 	//
 
 	public ServiceLoaderConfigActionImpl(
-		Logger logger,
+		Logger logger, boolean isTerse, boolean isVerbose,
 		InputBufferImpl buffer,
-		SelectionRuleImpl selectionRule,
-		SignatureRuleImpl signatureRule) {
+		SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
 
-		super(logger, buffer, selectionRule, signatureRule);
+		super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
 	}
 
 	//
@@ -121,8 +120,7 @@ public class ServiceLoaderConfigActionImpl extends ActionImpl {
 		if ( outputName == null ) {
 			outputName = inputName;
 		} else {
-			info("Input service name  [ {} ]", inputName);
-			info("Output service name [ {} ]", outputName);
+			verbose("Service name  [ {} ] -> [ {} ]", inputName, outputName);
 		}
 		setResourceNames(inputName, outputName);
 
