@@ -190,7 +190,7 @@ public class TransformerLoggerFactory {
 		}
 
 		if ( settings.logLevel != null ) {
-			setLoggingProperty(LoggerProperty.LOG_LEVEL_ROOT.getPropertyName(), settings.logFileName);
+			setLoggingProperty(LoggerProperty.LOG_LEVEL_ROOT.getPropertyName(), settings.logLevel);
 		}
 
 		if ( settings.properties != null ) {
