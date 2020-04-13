@@ -59,6 +59,15 @@ class TestCommandLine {
         verifyAction(JavaActionImpl.class.getName(), inputFileName, outputFileName);
     }
 
+    @Test
+    void testSetLogLevel() throws Exception {
+    	Transformer t = new Transformer(System.out, System.err);
+    	t.setArgs(new String[] {"-ll", "debug"});
+        t.setParsedArgs();
+        TransformOptions options = t.createTransformOptions();
+        options.setLogging();
+    }
+
     private void verifyAction(
     	String actionClassName,
     	String inputFileName, String outputFileName) throws Exception {
