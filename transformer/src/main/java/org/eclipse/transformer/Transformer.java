@@ -31,6 +31,24 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.transformer.action.impl.ActionImpl;
+import org.eclipse.transformer.action.impl.ClassActionImpl;
+import org.eclipse.transformer.action.impl.CompositeActionImpl;
+import org.eclipse.transformer.action.impl.DirectoryActionImpl;
+import org.eclipse.transformer.action.impl.EarActionImpl;
+import org.eclipse.transformer.action.impl.InputBufferImpl;
+import org.eclipse.transformer.action.impl.JarActionImpl;
+import org.eclipse.transformer.action.impl.JavaActionImpl;
+import org.eclipse.transformer.action.impl.ManifestActionImpl;
+import org.eclipse.transformer.action.impl.NullActionImpl;
+import org.eclipse.transformer.action.impl.RarActionImpl;
+import org.eclipse.transformer.action.impl.RelocateResourceActionImpl;
+import org.eclipse.transformer.action.impl.SelectionRuleImpl;
+import org.eclipse.transformer.action.impl.ServiceLoaderConfigActionImpl;
+import org.eclipse.transformer.action.impl.SignatureRuleImpl;
+import org.eclipse.transformer.action.impl.WarActionImpl;
+import org.eclipse.transformer.action.impl.XmlActionImpl;
+import org.eclipse.transformer.action.impl.ZipActionImpl;
 import org.slf4j.Logger;
 
 import org.apache.commons.cli.CommandLine;
@@ -45,23 +63,6 @@ import org.apache.commons.cli.Option.Builder;
 import org.eclipse.transformer.TransformerLoggerFactory.LoggerProperty;
 import org.eclipse.transformer.action.ActionType;
 import org.eclipse.transformer.action.BundleData;
-import org.eclipse.transformer.action.impl.ActionImpl;
-import org.eclipse.transformer.action.impl.ClassActionImpl;
-import org.eclipse.transformer.action.impl.CompositeActionImpl;
-import org.eclipse.transformer.action.impl.DirectoryActionImpl;
-import org.eclipse.transformer.action.impl.EarActionImpl;
-import org.eclipse.transformer.action.impl.InputBufferImpl;
-import org.eclipse.transformer.action.impl.JarActionImpl;
-import org.eclipse.transformer.action.impl.JavaActionImpl;
-import org.eclipse.transformer.action.impl.ManifestActionImpl;
-import org.eclipse.transformer.action.impl.NullActionImpl;
-import org.eclipse.transformer.action.impl.RarActionImpl;
-import org.eclipse.transformer.action.impl.SelectionRuleImpl;
-import org.eclipse.transformer.action.impl.ServiceLoaderConfigActionImpl;
-import org.eclipse.transformer.action.impl.SignatureRuleImpl;
-import org.eclipse.transformer.action.impl.WarActionImpl;
-import org.eclipse.transformer.action.impl.XmlActionImpl;
-import org.eclipse.transformer.action.impl.ZipActionImpl;
 import org.eclipse.transformer.util.FileUtils;
 
 import aQute.lib.io.IO;
@@ -281,7 +282,7 @@ public class Transformer {
         RULES_DIRECT("td", "direct", "Transformation direct string replacements",
             OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
             !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
-        
+
         RULES_MASTER_XML("tf", "xml", "Map of XML filenames to property files",
             OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
             !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
@@ -319,7 +320,7 @@ public class Transformer {
         public String getShortTag() {
             return getSettings().getShortTag();
         }
-        
+
         public String getLongTag() {
             return getSettings().getLongTag();
         }
@@ -377,7 +378,7 @@ public class Transformer {
     }
 
     private final PrintStream sysErr;
-    
+
     protected PrintStream getSystemErr() {
     	return sysErr;
     }
@@ -395,7 +396,7 @@ public class Transformer {
 
     public void outputPrint(String message, Object... parms) {
     	systemPrint( getSystemOut(), message, parms );
-    }    
+    }
 
     //
 
@@ -413,7 +414,7 @@ public class Transformer {
 
     /**
      * Set default resource references for the several 'RULE" options.
-     * 
+     *
      * Values are located relative to the option loader class.
      *
      * @param optionLoader The class relative to which to load the default resources.
@@ -427,13 +428,13 @@ public class Transformer {
     public Class<?> getRuleLoader() {
     	return ruleLoader;
     }
-    
+
     public Map<AppOption, String> getRuleDefaultRefs() {
     	return ruleDefaultRefs;
     }
 
     public String getDefaultReference(AppOption appOption) {
-    	Map<AppOption, String> useDefaultRefs = getRuleDefaultRefs();    	
+    	Map<AppOption, String> useDefaultRefs = getRuleDefaultRefs();
     	return ( (useDefaultRefs == null) ? null : getRuleDefaultRefs().get(appOption) );
     }
 
@@ -459,7 +460,7 @@ public class Transformer {
         if ( useArgs != null ) {
             if ( useArgs.length > 0 ) {
                 return useArgs[0]; // First argument
-            } 
+            }
         }
         return null;
     }
@@ -469,7 +470,7 @@ public class Transformer {
         if ( useArgs != null ) {
             if ( useArgs.length > 1 ) {
                 return useArgs[1]; // Second argument
-            } 
+            }
         }
         return null;
     }
@@ -527,7 +528,7 @@ public class Transformer {
             	      TransformerLoggerFactory.LoggerProperty.values() ) {
             	helpWriter.println("  [ " + loggerProperty.getPropertyName() + " ]");
             }
-            
+
             helpWriter.flush();
 
         }
@@ -537,7 +538,7 @@ public class Transformer {
 
     /**
      * Load properties for the specified rule option.
-     * 
+     *
      * Answer an empty collection if the rule option was not provided.
      *
      * Options loading tries {@link #getOptionValue(AppOption)}, then
@@ -572,7 +573,7 @@ public class Transformer {
             throws IOException {
     	return loadInternalProperties( ruleOption.toString(), resourceRef );
     }
-    	
+
     protected UTF8Properties loadInternalProperties(String ruleOption, String resourceRef)
         throws IOException {
 
@@ -742,13 +743,13 @@ public class Transformer {
     	public String getInputFileName() {
     	    return inputName;
     	}
-    	
+
         public String getOutputFileName() {
             return outputName;
         }
 
     	private InputBufferImpl buffer;
-    	
+
     	protected InputBufferImpl getBuffer() {
     		if ( buffer == null ) {
     			buffer = new InputBufferImpl();
@@ -807,7 +808,7 @@ public class Transformer {
         	}
 
         	if ( !xmlMasterProperties.isEmpty() ) {
-        		boolean useInternalXml = (getOptionValue(AppOption.RULES_MASTER_XML) == null); 
+        		boolean useInternalXml = (getOptionValue(AppOption.RULES_MASTER_XML) == null);
 
         	    Map<String, String> xmlFileMap =
         	    	TransformProperties.convertPropertiesToMap(xmlMasterProperties); // throws IllegalArgumentException
@@ -847,7 +848,7 @@ public class Transformer {
         	return validateRules(packageRenames, packageVersions);
     	}
 
-    	protected boolean validateRules(Map<String, String> renamesMap, 
+    	protected boolean validateRules(Map<String, String> renamesMap,
     	                                Map<String, String> versionsMap) {
 
     	    if ( (versionsMap == null) || versionsMap.isEmpty() ) {
@@ -882,7 +883,7 @@ public class Transformer {
 
     	    return true;
     	}
-    	      
+
         protected String getRuleFileName(AppOption ruleOption) {
             String rulesFileName = getOptionValue(ruleOption);
             if ( rulesFileName != null ) {
@@ -984,8 +985,8 @@ public class Transformer {
     		if ( signatureRules == null ) {
     			signatureRules =  new SignatureRuleImpl(
     				logger,
-    				packageRenames, 
-    				packageVersions, 
+    				packageRenames,
+    				packageVersions,
     				bundleUpdates,
     				masterXmlUpdates,
     				directStrings);
@@ -1023,7 +1024,7 @@ public class Transformer {
 //      String inputFileName = getInputFileName();
 //      int indexOfLastSlash = inputFileName.lastIndexOf('/');
 //      if (indexOfLastSlash == -1 ) {
-//          return OUTPUT_PREFIX + inputFileName; 
+//          return OUTPUT_PREFIX + inputFileName;
 //      } else {
 //          return inputFileName.substring(0, indexOfLastSlash+1) + OUTPUT_PREFIX + inputFileName.substring(indexOfLastSlash+1);
 //      }
@@ -1041,8 +1042,8 @@ public class Transformer {
         		if ( indexOfLastSlash == -1 ) {
         			useOutputName = OUTPUT_PREFIX + inputName;
         		} else {
-        			String inputPrefix = inputName.substring( 0, indexOfLastSlash + 1 ); 
-        			String inputSuffix = inputName.substring( indexOfLastSlash + 1 ); 
+        			String inputPrefix = inputName.substring( 0, indexOfLastSlash + 1 );
+        			String inputSuffix = inputName.substring( indexOfLastSlash + 1 );
         			useOutputName = inputPrefix + OUTPUT_PREFIX + inputSuffix;
         		}
         	}
@@ -1121,6 +1122,7 @@ public class Transformer {
         			useRootAction.addUsing( ClassActionImpl::new );
         		JavaActionImpl javaAction =
         			useRootAction.addUsing( JavaActionImpl::new );
+
         		ServiceLoaderConfigActionImpl serviceConfigAction =
         			useRootAction.addUsing( ServiceLoaderConfigActionImpl::new );
         		ManifestActionImpl manifestAction =
@@ -1139,9 +1141,12 @@ public class Transformer {
 
         		XmlActionImpl xmlAction =
                         useRootAction.addUsing( XmlActionImpl::new );
-        		
+
         		ZipActionImpl zipAction =
         			useRootAction.addUsing( ZipActionImpl::new );
+
+				RelocateResourceActionImpl resourceAction =
+					useRootAction.addUsing( RelocateResourceActionImpl::new);
 
         		NullActionImpl nullAction =
         			useRootAction.addUsing( NullActionImpl::new );
@@ -1159,6 +1164,7 @@ public class Transformer {
         		directoryAction.addAction(rarAction);
         		directoryAction.addAction(earAction);
         		directoryAction.addAction(xmlAction);
+        		directoryAction.addAction(resourceAction);
         		directoryAction.addAction(nullAction);
 
         		jarAction.addAction(classAction);
@@ -1167,6 +1173,7 @@ public class Transformer {
         		jarAction.addAction(manifestAction);
         		jarAction.addAction(featureAction);
         		jarAction.addAction(xmlAction);
+        		jarAction.addAction(resourceAction);
         		jarAction.addAction(nullAction);
 
         		warAction.addAction(classAction);
@@ -1176,6 +1183,7 @@ public class Transformer {
         		warAction.addAction(featureAction);
         		warAction.addAction(jarAction);
         		warAction.addAction(xmlAction);
+        		warAction.addAction(resourceAction);
         		warAction.addAction(nullAction);
 
         		rarAction.addAction(classAction);
@@ -1185,6 +1193,7 @@ public class Transformer {
         		rarAction.addAction(featureAction);
         		rarAction.addAction(jarAction);
         		rarAction.addAction(xmlAction);
+        		rarAction.addAction(resourceAction);
         		rarAction.addAction(nullAction);
 
         		earAction.addAction(manifestAction);
@@ -1192,6 +1201,7 @@ public class Transformer {
         		earAction.addAction(warAction);
         		earAction.addAction(rarAction);
         		earAction.addAction(xmlAction);
+        		earAction.addAction(resourceAction);
         		earAction.addAction(nullAction);
 
         		zipAction.addAction(classAction);
@@ -1204,6 +1214,7 @@ public class Transformer {
         		zipAction.addAction(rarAction);
         		zipAction.addAction(earAction);
         		zipAction.addAction(xmlAction);
+        		zipAction.addAction(resourceAction);
         		zipAction.addAction(nullAction);
 
         		rootAction = useRootAction;
@@ -1286,7 +1297,7 @@ public class Transformer {
         }
         detectLogFile();
 
-        if ( !options.setInput() ) { 
+        if ( !options.setInput() ) {
             return TRANSFORM_ERROR_RC;
         }
 

@@ -22,7 +22,7 @@ package org.eclipse.transformer.action;
 public enum ActionType {
 	NULL,
 
-	CLASS,
+	CLASS, RESOURCE,
 	MANIFEST, FEATURE,
 	SERVICE_LOADER_CONFIG,
 	XML,
@@ -31,7 +31,7 @@ public enum ActionType {
 	JAVA,
 	DIRECTORY;
 
-	public boolean matches(String tag) {
+    public boolean matches(String tag) {
 		return name().toLowerCase().startsWith(tag);
 	}
 }
