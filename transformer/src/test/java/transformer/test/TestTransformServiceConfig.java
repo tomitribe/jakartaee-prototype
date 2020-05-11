@@ -1,21 +1,13 @@
-/*
+/********************************************************************************
  * Copyright (c) 2020 Contributors to the Eclipse Foundation
  *
- * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * SPDX-License-Identifier: (EPL-2.0 OR Apache-2.0)
+ ********************************************************************************/
 
 package transformer.test;
 
@@ -66,18 +58,20 @@ public class TestTransformServiceConfig extends CaptureTest {
 
 	//
 
-	public static final String JAVAX_OTHER_READER_SERVICE_PATH = "transformer/test/data/META-INF/services/javax.other.Reader";
+	public static final String TEST_DATA_PATH = "transformer/test/data/serviceconfig";
+
+	public static final String JAVAX_OTHER_READER_SERVICE_PATH = TEST_DATA_PATH + "/" + "META-INF/services/javax.other.Reader";
 	public static final String[] JAVAX_OTHER_READER_LINES = { "javax.other.ReaderImpl" };
-	public static final String JAVAX_SAMPLE_READER_SERVICE_PATH = "transformer/test/data/META-INF/services/javax.sample.Reader";
+	public static final String JAVAX_SAMPLE_READER_SERVICE_PATH = TEST_DATA_PATH + "/" + "META-INF/services/javax.sample.Reader";
 	public static final String[] JAVAX_SAMPLE_READER_LINES = { "javax.sample.ReaderImpl" };	
-	public static final String JAVAX_SAMPLE_WRITER_SERVICE_PATH = "transformer/test/data/META-INF/services/javax.sample.Writer";
+	public static final String JAVAX_SAMPLE_WRITER_SERVICE_PATH = TEST_DATA_PATH + "/" + "META-INF/services/javax.sample.Writer";
 	public static final String[] JAVAX_SAMPLE_WRITER_LINES = { "javax.sample.WriterImpl" };	
 	
-	public static final String JAKARTA_OTHER_READER_SERVICE_PATH = "transformer/test/data/META-INF/services/jakarta.other.Reader";
+	public static final String JAKARTA_OTHER_READER_SERVICE_PATH = TEST_DATA_PATH + "/" + "META-INF/services/jakarta.other.Reader";
 	public static final String[] JAKARTA_OTHER_READER_LINES = { "jakarta.other.ReaderImpl" };
-	public static final String JAKARTA_SAMPLE_READER_SERVICE_PATH = "transformer/test/data/META-INF/services/jakarta.sample.Reader";
+	public static final String JAKARTA_SAMPLE_READER_SERVICE_PATH = TEST_DATA_PATH + "/" + "META-INF/services/jakarta.sample.Reader";
 	public static final String[] JAKARTA_SAMPLE_READER_LINES = { "jakarta.sample.ReaderImpl" };	
-	public static final String JAKARTA_SAMPLE_WRITER_SERVICE_PATH = "transformer/test/data/META-INF/services/jakarta.sample.Writer";
+	public static final String JAKARTA_SAMPLE_WRITER_SERVICE_PATH = TEST_DATA_PATH + "/" + "META-INF/services/jakarta.sample.Writer";
 	public static final String[] JAKARTA_SAMPLE_WRITER_LINES = { "jakarta.sample.WriterImpl" };	
 
 	public static final String JAVAX_SAMPLE = "javax.sample";

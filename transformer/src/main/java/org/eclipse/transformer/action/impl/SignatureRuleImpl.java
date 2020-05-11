@@ -1,21 +1,13 @@
-/*
+/********************************************************************************
  * Copyright (c) 2020 Contributors to the Eclipse Foundation
  *
- * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * SPDX-License-Identifier: (EPL-2.0 OR Apache-2.0)
+ ********************************************************************************/
 
 package org.eclipse.transformer.action.impl;
 
@@ -103,26 +95,31 @@ public class SignatureRuleImpl implements SignatureRule {
 			useBundleUpdates = Collections.emptyMap();
 		}
 		this.bundleUpdates = useBundleUpdates;	
-        
-		if ( (masterXmlUpdates != null) && !masterXmlUpdates.isEmpty() ) {
-		    Map<String,  Map<String, String>> specificXmlMap = new HashMap<String,  Map<String, String>>();
-		    Map<Pattern, Map<String, String>> wildCardXmlMap = new HashMap<Pattern, Map<String, String>>();
-		    for ( Map.Entry<String, Map<String, String>> entry : masterXmlUpdates.entrySet() ) {
-		        String key = entry.getKey();  
 
-		        if ((key.indexOf('?') != -1) || (key.indexOf('*') != -1)) {
-		            key = key.replace("?", ".?").replace("*", ".*?");
-		            Pattern p = Pattern.compile(key);
-		            wildCardXmlMap.put(p, entry.getValue());
+		if ( (masterXmlUpdates != null) && !masterXmlUpdates.isEmpty() ) {
+		    Map<String,  Map<String, String>> useSpecificXmlUpdates = new HashMap<String,  Map<String, String>>();
+		    Map<Pattern, Map<String, String>> useWildCardXmlUpdates = new HashMap<Pattern, Map<String, String>>();
+
+		    for ( Map.Entry<String, Map<String, String>> entry : masterXmlUpdates.entrySet() ) {
+		        String matchesFileName = entry.getKey();  
+		        Map<String, String> substitutions = entry.getValue();
+
+		        if ( (matchesFileName.indexOf('?') != -1) || (matchesFileName.indexOf('*') != -1) ) {
+		            matchesFileName = matchesFileName.replace("?", ".?").replace("*", ".*?");
+		            Pattern matchPattern = Pattern.compile(matchesFileName);
+		            useWildCardXmlUpdates.put(matchPattern, substitutions);
+
 		        } else {
-		            specificXmlMap.put(key, entry.getValue());
+		            useSpecificXmlUpdates.put(matchesFileName, substitutions);
 		        }
 		    }
-		    this.specificXmlFileUpdates = specificXmlMap;
-		    this.wildCardXmlFileUpdates = wildCardXmlMap;
+
+		    this.specificXmlUpdates = useSpecificXmlUpdates;
+		    this.wildCardXmlUpdates = useWildCardXmlUpdates;
+
 		} else {
-		    this.specificXmlFileUpdates = null;
-		    this.wildCardXmlFileUpdates = null;
+		    this.specificXmlUpdates = null;
+		    this.wildCardXmlUpdates = null;
 		}
 
 		Map<String, String> useDirectStrings;
@@ -165,10 +162,18 @@ public class SignatureRuleImpl implements SignatureRule {
 	}
 
 	// 
+
+    private final Map<String, Map<String, String>> specificXmlUpdates;
+    private final Map<Pattern, Map<String, String>> wildCardXmlUpdates;
+
+    public Map<String, Map<String, String>> getSpecificXmlUpdates() {
+    	return specificXmlUpdates;
+    }
     
-    public final Map<String, Map<String, String>> specificXmlFileUpdates;
-    public final Map<Pattern, Map<String, String>> wildCardXmlFileUpdates;
-	
+    public Map<Pattern, Map<String, String>> getWildCardXmlUpdates() {
+    	return wildCardXmlUpdates;
+    }
+
 	//
 
 	private final Map<String, String> directStrings;
@@ -314,7 +319,7 @@ public class SignatureRuleImpl implements SignatureRule {
 //                           + " *************");
 
         int textLength = text.length();
-              
+
         if ( matchStart > 0 ) {
             char charBeforeMatch = text.charAt(matchStart - 1);
             if ( Character.isJavaIdentifierPart(charBeforeMatch) || (charBeforeMatch == '.')) { 
@@ -326,13 +331,13 @@ public class SignatureRuleImpl implements SignatureRule {
         if ( textLength > matchEnd ) {
 
             char charAfterMatch = text.charAt(matchEnd);
-                        
+
             // Check the next character can also be part of a package name then 
             // we are looking at a larger package name, and thus not a match.
             if ( Character.isJavaIdentifierPart(charAfterMatch) ) {
                 return false;
             }
-            
+
             // If the next char is dot, check the character after the dot.  Assume an upper case letter indicates the start of a 
             // class name and thus the end of the package name which indicates a match. ( This means this doesn't work 
             // for package names that do not follow the convention of using lower case characters ).            
@@ -388,31 +393,30 @@ public class SignatureRuleImpl implements SignatureRule {
         Matcher m = p.matcher(input);
         return m.matches();
     }
-	
-	public Map<String, String> getXmlRuleMap(String inputFileName) {
-	    String fileName = FileUtils.getFileNameFromFullyQualifiedFileName(inputFileName); 
 
-	    if (fileName.toLowerCase().endsWith(".xml")) {
+	public Map<String, String> getXmlSubstitutions(String inputFileName) {
+	    String simpleFileName = FileUtils.getFileNameFromFullyQualifiedFileName(inputFileName); 
 
-	        // First check for a specific match. Not considering wildcard.
-	        Map<String, String> ruleMap = specificXmlFileUpdates.get(fileName);
-	        if (ruleMap != null) {
-	            return ruleMap;
-	        }
-
-	        for ( Map.Entry<Pattern, Map<String, String>> updateEntry : wildCardXmlFileUpdates.entrySet() ) {
-	            if ( matches(updateEntry.getKey(), fileName) ) {
-	                return updateEntry.getValue();
-	            }
-	        }
+	    Map<String, String> specificUpdates = getSpecificXmlUpdates().get(simpleFileName);
+	    if ( specificUpdates != null ) {
+	    	return specificUpdates;
 	    }
+
+	    for ( Map.Entry<Pattern, Map<String, String>> wildcardEntry : getWildCardXmlUpdates().entrySet() ) {
+	    	if ( matches( wildcardEntry.getKey(), simpleFileName ) ) {
+	    		return wildcardEntry.getValue();
+	    	}
+	    }
+
 	    return null;
 	}
-	
+
     public String replaceText(String inputFileName, String text) { 
-        
-        Map<String, String> substitutions = getXmlRuleMap(inputFileName);       
-        
+        Map<String, String> substitutions = getXmlSubstitutions(inputFileName);
+        if ( substitutions == null ) {
+        	throw new IllegalStateException("Input [ " + inputFileName + " ] selected for XML transformation, but found no substitutions");
+        }
+
         String initialText = text;
 
         for ( Map.Entry<String, String> entry : substitutions.entrySet() ) {
