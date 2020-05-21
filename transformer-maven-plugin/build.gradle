@@ -23,8 +23,12 @@ dependencies {
   implementation 'org.apache.maven:maven-plugin-api:2.2.1'
   implementation 'org.apache.maven:maven-project:2.2.1'
   implementation 'org.apache.maven:maven-core:2.2.1'
-  implementation 'org.apache.maven:maven-artifact:2.2.1'
+  implementation ('org.apache.maven:maven-artifact:2.2.1') {
+	  force = true
+  }
   implementation 'commons-cli:commons-cli:1.4'
+
+  testImplementation 'org.apache.maven.shared:maven-verifier:1.7.1'
 }
 
 publishing {
@@ -58,6 +62,18 @@ publishing {
           url = 'http://github.com/tbitonti/jakartaee-prototype'
         }
       }
+
+	  pom.withXml {
+		asNode()
+		  .appendNode('repositories')
+		  .appendNode('repository')
+		  .appendNode('id', 'jfrog').parent()
+		  .appendNode('layout', 'default').parent()
+		  .appendNode('url', 'https://bndtools.jfrog.io/bndtools/libs-snapshot').parent()
+		  .appendNode('snapshots').appendNode('enabled', 'true').parent().parent()
+		  .appendNode('releases').appendNode('enabled', 'false').parent().parent()
+
+	  }
     }
   }
 }

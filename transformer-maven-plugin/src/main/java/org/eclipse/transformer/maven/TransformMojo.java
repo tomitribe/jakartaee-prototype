@@ -18,6 +18,9 @@
  */
 package org.eclipse.transformer.maven;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -74,6 +77,16 @@ public class TransformMojo extends AbstractMojo {
     @Component
     private MavenProjectHelper projectHelper;
 
+	@Component
+	protected ArtifactFactory factory;
+
+	@Component
+	protected ArtifactResolver resolver;
+
+	@Parameter
+	private Artifact artifact;
+
+
 
     public void execute() throws MojoExecutionException {
         final File sourceFile = project.getArtifact().getFile();
@@ -81,7 +94,7 @@ public class TransformMojo extends AbstractMojo {
 
         final Transformer transformer = new Transformer(System.out, System.err);
         transformer.setOptionDefaults(JakartaTransformer.class, getOptionDefaults());
-        transformer.setArgs(new String[]{sourceFile.getAbsolutePath()});
+        transformer.setArgs(new String[]{sourceFile.getAbsolutePath(), targetFile.getAbsolutePath()});
 
         int rc = transformer.run();
         projectHelper.attachArtifact(project, project.getArtifact().getType(), classifier, targetFile);
@@ -101,7 +114,7 @@ public class TransformMojo extends AbstractMojo {
         optionDefaults.put(Transformer.AppOption.RULES_VERSIONS, isEmpty(rulesVersionUri) ? "jakarta-versions.properties" : rulesVersionUri);
         optionDefaults.put(Transformer.AppOption.RULES_BUNDLES, isEmpty(rulesBundlesUri) ? "jakarta-bundles.properties" : rulesBundlesUri);
         optionDefaults.put(Transformer.AppOption.RULES_DIRECT, isEmpty(rulesDirectUri) ? "jakarta-direct.properties" : rulesDirectUri);
-        optionDefaults.put(Transformer.AppOption.RULES_MASTER_XML, isEmpty(rulesXmlsUri) ? "jakarta-xml.properties" : rulesXmlsUri);
+        optionDefaults.put(Transformer.AppOption.RULES_MASTER_XML, isEmpty(rulesXmlsUri) ? "jakarta-xml-master.properties" : rulesXmlsUri);
         return optionDefaults;
     }
 
