@@ -1,21 +1,13 @@
-/*
+/********************************************************************************
  * Copyright (c) 2020 Contributors to the Eclipse Foundation
  *
- * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * SPDX-License-Identifier: (EPL-2.0 OR Apache-2.0)
+ ********************************************************************************/
 
 package org.eclipse.transformer.action.impl;
 
@@ -123,7 +115,7 @@ public class ClassActionImpl extends ActionImpl {
 	 * Otherwise, use the usual path for the output class name using java class
 	 * resource placement.
 	 *
-	 * @param useLogger Logger for messaging
+	 * @param logger Logger for messaging
 	 * @param inputPath The initial path to the class.
 	 * @param inputClassName The initial class name.
 	 * @param outputClassName The final class name.
@@ -450,7 +442,7 @@ public class ClassActionImpl extends ActionImpl {
 
 		ClassFile outputClass = classBuilder.build();
 
-		ByteBufferDataOutput outputClassData = new ByteBufferDataOutput( inputBytes.length + FileUtils.PAGE_SIZE );
+		ByteBufferDataOutput outputClassData = new ByteBufferDataOutput( inputLength + FileUtils.PAGE_SIZE );
 		try {
 			outputClass.write(outputClassData); // throws IOException
 		} catch ( IOException e ) {
@@ -458,8 +450,8 @@ public class ClassActionImpl extends ActionImpl {
 		}
 
 		byte[] outputBytes = outputClassData.toByteArray();
-		verbose("  Class size: {}: {} -> {}", inputName, inputBytes.length, outputBytes.length);
-		
+		verbose("  Class size: {}: {} -> {}", inputName, inputLength, outputBytes.length);
+
 		return new ByteData(outputName, outputBytes, 0, outputBytes.length);
 	}
 

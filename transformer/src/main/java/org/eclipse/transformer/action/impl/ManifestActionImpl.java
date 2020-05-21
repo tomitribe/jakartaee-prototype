@@ -1,21 +1,13 @@
-/*
+/********************************************************************************
  * Copyright (c) 2020 Contributors to the Eclipse Foundation
  *
- * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * SPDX-License-Identifier: (EPL-2.0 OR Apache-2.0)
+ ********************************************************************************/
 
 package org.eclipse.transformer.action.impl;
 
@@ -189,6 +181,8 @@ public class ManifestActionImpl extends ActionImpl {
 	    useNames.add("Import-Package");
 	    useNames.add("Subsystem-Content");
 	    useNames.add("IBM-API-Package");
+	    useNames.add("Provide-Capability");
+	    useNames.add("Require-Capability");
 	    SELECT_ATTRIBUTES = useNames;
 	}
 
@@ -357,11 +351,17 @@ public class ManifestActionImpl extends ActionImpl {
 				String head = text.substring(0, matchStart);
 				String tail = text.substring(matchStart + keyLen);
 
-                int tailLenBeforeReplaceVersion = tail.length();			
-				tail = replacePackageVersion(tail, getPackageVersions().get(value));
-				int tailLenAfterReplaceVersion = tail.length();
+				int tailLenBeforeReplaceVersion = tail.length();			
+
+				String newVersion = getPackageVersions().get(value);
+				if ( newVersion != null ) {
+					tail = replacePackageVersion(tail, newVersion);
+				} else {
+					debug("replacePackages [ {} ]: [ {} -> {} ]; leaving version", initialText, key, value);
+				}
 
 				text = head + value + tail;
+				int tailLenAfterReplaceVersion = tail.length();					
 
 				lastMatchEnd = matchStart + valueLen;
 
@@ -669,7 +669,7 @@ public class ManifestActionImpl extends ActionImpl {
 //	Subsystem-Type: osgi.subsystem.feature
 //	Subsystem-Vendor: IBM Corp.
 //	Subsystem-Version: 1.0.0
-	
+
 	public boolean transformBundleIdentity(
 		String inputName,
 		Attributes initialMainAttributes,
