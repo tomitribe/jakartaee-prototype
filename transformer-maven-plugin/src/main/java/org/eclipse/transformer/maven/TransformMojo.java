@@ -18,7 +18,6 @@
  */
 package org.eclipse.transformer.maven;
 
-import com.ibm.ws.jakarta.transformer.JakartaTransformer;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -30,6 +29,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 import org.eclipse.transformer.Transformer;
+import org.eclipse.transformer.jakarta.JakartaTransformer;
 
 import java.io.File;
 import java.util.HashMap;
