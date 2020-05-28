@@ -9,7 +9,7 @@ sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
 group = 'org.tomitribe.transformer'
-version = '0.1.0-SNAPSHOT'
+version = '0.0.1'
 
 configurations {
   archive.extendsFrom(implementation)
@@ -98,5 +98,16 @@ publishing {
 		}
 	}
   }
+}
+
+repositories {
+	maven {
+		name 'Sonatype OSS'
+		url 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
+		credentials {
+			username project.repoUser
+			password project.repoPassword
+		}
+	}
 }
 

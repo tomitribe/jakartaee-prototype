@@ -12,3 +12,5 @@ bin/
 /.recommenders/
 .DS_Store
 .*.swp
+
+gradle.properties
