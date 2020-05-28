@@ -68,24 +68,23 @@ public class TransformMojo extends AbstractMojo {
     @Parameter(defaultValue = "transformed")
     private String classifier;
 
-    @Parameter(defaultValue = "${project.build.directory}", required = true )
+    @Parameter(defaultValue = "${project.build.directory}", required = true)
     private File outputDirectory;
 
-    @Parameter(defaultValue = "${project.build.finalName}", readonly = true )
+    @Parameter(defaultValue = "${project.build.finalName}", readonly = true)
     private String finalName;
 
     @Component
     private MavenProjectHelper projectHelper;
 
-	@Component
-	protected ArtifactFactory factory;
+    @Component
+    protected ArtifactFactory factory;
 
-	@Component
-	protected ArtifactResolver resolver;
+    @Component
+    protected ArtifactResolver resolver;
 
-	@Parameter
-	private Artifact artifact;
-
+    @Parameter
+    private Artifact artifact;
 
 
     public void execute() throws MojoExecutionException {
