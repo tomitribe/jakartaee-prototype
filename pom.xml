@@ -20,7 +20,7 @@
     <groupId>org.tomitribe.transformer</groupId>
     <artifactId>transformer-parent</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.1</version>
     <name>Eclipse Transformer :: Parent</name>
 
     <parent>
@@ -33,7 +33,7 @@
         <connection>scm:git:git@github.com:tomitribe/transformer.git</connection>
         <url>scm:git:git@github.com:tomitribe/transformer.git</url>
         <developerConnection>scm:git:git@github.com:tomitribe/transformer.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>transformer-parent-0.0.1</tag>
     </scm>
 
     <properties>
