@@ -24,118 +24,118 @@ import org.junit.jupiter.api.Assertions;
 
 public class TestUtils {
 
-	public static InputStream getResourceStream(String path) {
-		return TestUtils.class.getClassLoader().getResourceAsStream(path);
-	}
+    public static InputStream getResourceStream(String path) {
+        return TestUtils.class.getClassLoader().getResourceAsStream(path);
+    }
 
-	public static void verify(String tag, String[] expected, List<String> actual) {
-		int actualLen = actual.size();
-		
-		int minLength = expected.length;
-		if ( minLength > actualLen ) {
-			minLength = actualLen;
-		}
+    public static void verify(String tag, String[] expected, List<String> actual) {
+        int actualLen = actual.size();
 
-		for ( int lineNo = 0; lineNo < expected.length; lineNo++ ) {
-			Assertions.assertEquals(expected[lineNo], actual.get(lineNo), "Unequal lines [ " + lineNo + " ]");
-		}
+        int minLength = expected.length;
+        if ( minLength > actualLen ) {
+            minLength = actualLen;
+        }
 
-		Assertions.assertEquals(expected.length, actual.size(), "String [ " + tag + " ] length mismatch");
-	}
+        for ( int lineNo = 0; lineNo < expected.length; lineNo++ ) {
+            Assertions.assertEquals(expected[lineNo], actual.get(lineNo), "Unequal lines [ " + lineNo + " ]");
+        }
 
-	public static void filter(List<String> lines) {
-		Iterator<String> iterator = lines.iterator();
-		while ( iterator.hasNext() ) {
-			String nextLine = iterator.next();
-			String trimLine = nextLine.trim();
-			if ( trimLine.isEmpty() || (trimLine.charAt(0) == '#') ) {
-				iterator.remove();
-			}
-		}
-	}
+        Assertions.assertEquals(expected.length, actual.size(), "String [ " + tag + " ] length mismatch");
+    }
 
-	public static List<String> loadLines(InputStream inputStream) throws IOException {
-		InputStreamReader reader = new InputStreamReader(inputStream);
-		BufferedReader lineReader = new BufferedReader(reader);
+    public static void filter(List<String> lines) {
+        Iterator<String> iterator = lines.iterator();
+        while ( iterator.hasNext() ) {
+            String nextLine = iterator.next();
+            String trimLine = nextLine.trim();
+            if ( trimLine.isEmpty() || (trimLine.charAt(0) == '#') ) {
+                iterator.remove();
+            }
+        }
+    }
 
-		List<String> lines = new ArrayList<String>();
-		String line;
-		while ( (line = lineReader.readLine()) != null ) {
-			lines.add(line);
-		}
+    public static List<String> loadLines(InputStream inputStream) throws IOException {
+        InputStreamReader reader = new InputStreamReader(inputStream);
+        BufferedReader lineReader = new BufferedReader(reader);
 
-		return lines;
-	}
+        List<String> lines = new ArrayList<String>();
+        String line;
+        while ( (line = lineReader.readLine()) != null ) {
+            lines.add(line);
+        }
 
-	public static int occurrences(List<String> lines, String tag) {
-		int occurrences = 0;
-		for ( String line : lines ) {
-			occurrences += occurrences(line, tag);
-		}
-		return occurrences;
-	}
+        return lines;
+    }
 
-	public static int occurrences(String line, String tag) {
-		int occurrences = 0;
+    public static int occurrences(List<String> lines, String tag) {
+        int occurrences = 0;
+        for ( String line : lines ) {
+            occurrences += occurrences(line, tag);
+        }
+        return occurrences;
+    }
 
-		int tagLen = tag.length();
+    public static int occurrences(String line, String tag) {
+        int occurrences = 0;
 
-		int limit = line.length() - tagLen;
-		int lastFindLoc = 0;
-		while ( lastFindLoc <= limit ) {
-			lastFindLoc = line.indexOf(tag, lastFindLoc);
-			if ( lastFindLoc == -1 ) {
-				lastFindLoc = limit + 1;
-			} else {
-				lastFindLoc += tagLen;
-				occurrences++;
-			}
-		}
+        int tagLen = tag.length();
 
-		return occurrences;
-	}
-	
-	public static List<String> manifestCollapse(List<String> inputManifestLines) {
-		List<String> outputManifestLines = new ArrayList<String>();
-		StringBuilder outputBuilder = new StringBuilder();
-		for ( String inputLine : inputManifestLines ) {
-			if ( inputLine.isEmpty() ) {
-				continue; // Unexpected
-			}
-			
-			if ( inputLine.charAt(0) == ' ' ) {
-				int lineLen = inputLine.length();
-				for ( int charNo = 1; charNo < lineLen; charNo++ ) {
-					outputBuilder.append( inputLine.charAt(charNo) );
-				}
-			} else {
-				if ( outputBuilder.length() > 0 ) {
-					outputManifestLines.add( outputBuilder.toString() );
-					outputBuilder.setLength(0);
-				}
-				outputBuilder.append(inputLine);
-			}
-		}
-		if ( outputBuilder.length() > 0 ) {
-			outputManifestLines.add( outputBuilder.toString() );
-			outputBuilder.setLength(0);
-		}
+        int limit = line.length() - tagLen;
+        int lastFindLoc = 0;
+        while ( lastFindLoc <= limit ) {
+            lastFindLoc = line.indexOf(tag, lastFindLoc);
+            if ( lastFindLoc == -1 ) {
+                lastFindLoc = limit + 1;
+            } else {
+                lastFindLoc += tagLen;
+                occurrences++;
+            }
+        }
 
-		return outputManifestLines;
-	}
+        return occurrences;
+    }
 
-	public static void transfer(
-		String streamName,
-		InputStream inputStream, OutputStream outputStream,
-		byte[] buffer) throws IOException {
+    public static List<String> manifestCollapse(List<String> inputManifestLines) {
+        List<String> outputManifestLines = new ArrayList<String>();
+        StringBuilder outputBuilder = new StringBuilder();
+        for ( String inputLine : inputManifestLines ) {
+            if ( inputLine.isEmpty() ) {
+                continue; // Unexpected
+            }
 
-		int bytesRead;
-		long totalBytes = 0L;
-		while ( (bytesRead = inputStream.read(buffer)) != -1 ) {
-			outputStream.write(buffer, 0, bytesRead);
-			totalBytes += bytesRead;
-		}
+            if ( inputLine.charAt(0) == ' ' ) {
+                int lineLen = inputLine.length();
+                for ( int charNo = 1; charNo < lineLen; charNo++ ) {
+                    outputBuilder.append( inputLine.charAt(charNo) );
+                }
+            } else {
+                if ( outputBuilder.length() > 0 ) {
+                    outputManifestLines.add( outputBuilder.toString() );
+                    outputBuilder.setLength(0);
+                }
+                outputBuilder.append(inputLine);
+            }
+        }
+        if ( outputBuilder.length() > 0 ) {
+            outputManifestLines.add( outputBuilder.toString() );
+            outputBuilder.setLength(0);
+        }
 
-		System.out.println("Transferred [ " + totalBytes + " ] from [ " + streamName + " ]");
-	}
+        return outputManifestLines;
+    }
+
+    public static void transfer(
+        String streamName,
+        InputStream inputStream, OutputStream outputStream,
+        byte[] buffer) throws IOException {
+
+        int bytesRead;
+        long totalBytes = 0L;
+        while ( (bytesRead = inputStream.read(buffer)) != -1 ) {
+            outputStream.write(buffer, 0, bytesRead);
+            totalBytes += bytesRead;
+        }
+
+        System.out.println("Transferred [ " + totalBytes + " ] from [ " + streamName + " ]");
+    }
 }

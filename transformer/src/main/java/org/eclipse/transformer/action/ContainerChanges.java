@@ -15,40 +15,40 @@ import java.util.Map;
 import java.util.Set;
 
 public interface ContainerChanges extends Changes {
-	int getAllResources();
+    int getAllResources();
 
-	int getAllUnselected();
-	int getAllSelected();
+    int getAllUnselected();
+    int getAllSelected();
 
-	int getAllUnchanged();
-	int getAllChanged();
+    int getAllUnchanged();
+    int getAllChanged();
 
-	Map<String, int[]> getChangedByAction();
-	Map<String, int[]> getUnchangedByAction();
+    Map<String, int[]> getChangedByAction();
+    Map<String, int[]> getUnchangedByAction();
 
-	Set<String> getActionNames();
+    Set<String> getActionNames();
 
-	int getChanged(Action action);
-	int getChanged(String name);
+    int getChanged(Action action);
+    int getChanged(String name);
 
-	int getUnchanged(Action action);
-	int getUnchanged(String name);
+    int getUnchanged(Action action);
+    int getUnchanged(String name);
 
-	//
+    //
 
-	void add(ContainerChanges otherChanges);
+    void add(ContainerChanges otherChanges);
 
-	boolean hasNestedChanges();
-	ContainerChanges getNestedChanges();
-	void addNested(ContainerChanges otherChanges);
+    boolean hasNestedChanges();
+    ContainerChanges getNestedChanges();
+    void addNested(ContainerChanges otherChanges);
 
-	//
+    //
 
-	void record();
+    void record();
 
-	boolean HAS_CHANGES = true;
+    boolean HAS_CHANGES = true;
 
-	void record(Action action);
-	void record(Action action, boolean hasChanges);
-	void record(String name, boolean hasChanges);
+    void record(Action action);
+    void record(Action action, boolean hasChanges);
+    void record(String name, boolean hasChanges);
 }

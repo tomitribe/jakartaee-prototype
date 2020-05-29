@@ -36,7 +36,7 @@ class TestCommandLine {
     }
 
     @Test
-    void testManifestActionAccepted() throws Exception {   
+    void testManifestActionAccepted() throws Exception {
         String inputFileName = DATA_DIR + "MANIFEST.MF";
         String outputFileName = DATA_DIR + "output_MANIFEST.MF";
         verifyAction(ManifestActionImpl.class.getName(), inputFileName, outputFileName);
@@ -51,16 +51,16 @@ class TestCommandLine {
 
     @Test
     void testSetLogLevel() throws Exception {
-    	Transformer t = new Transformer(System.out, System.err);
-    	t.setArgs(new String[] {"-ll", "debug"});
+        Transformer t = new Transformer(System.out, System.err);
+        t.setArgs(new String[] {"-ll", "debug"});
         t.setParsedArgs();
         TransformOptions options = t.createTransformOptions();
         options.setLogging();
     }
 
     private void verifyAction(
-    	String actionClassName,
-    	String inputFileName, String outputFileName) throws Exception {
+        String actionClassName,
+        String inputFileName, String outputFileName) throws Exception {
 
         Transformer t = new Transformer(System.out, System.err);
 
@@ -76,13 +76,13 @@ class TestCommandLine {
 
         assertTrue(options.setInput(), "options.setInput() failed");
         assertEquals(
-        	inputFileName, options.getInputFileName(), 
-        	"input file name is not correct [" + options.getInputFileName() + "]");
+            inputFileName, options.getInputFileName(),
+            "input file name is not correct [" + options.getInputFileName() + "]");
 
         assertTrue(options.setOutput(), "options.setOutput() failed");
         assertEquals(
-        	outputFileName, options.getOutputFileName(), 
-        	"output file name is not correct [" + options.getOutputFileName() + "]");
+            outputFileName, options.getOutputFileName(),
+            "output file name is not correct [" + options.getOutputFileName() + "]");
 
         assertTrue(options.setRules(), "options.setRules() failed");
         assertTrue(options.acceptAction(), "options.acceptAction() failed");
@@ -91,8 +91,8 @@ class TestCommandLine {
         options.transform();
         assertTrue( (new File(outputFileName)).exists(), "output file not created" );
     }
-    
-	// at org.eclipse.transformer.Transformer$TransformOptions.transform(Transformer.java:1255)
-	// at transformer.test.TestCommandLine.verifyAction(TestCommandLine.java:88)
-	// at transformer.test.TestCommandLine.testManifestActionAccepted(TestCommandLine.java:50)    
+
+    // at org.eclipse.transformer.Transformer$TransformOptions.transform(Transformer.java:1255)
+    // at transformer.test.TestCommandLine.verifyAction(TestCommandLine.java:88)
+    // at transformer.test.TestCommandLine.testManifestActionAccepted(TestCommandLine.java:50)
 }

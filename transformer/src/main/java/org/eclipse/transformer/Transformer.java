@@ -72,7 +72,7 @@ public class Transformer {
     public static final int FILE_TYPE_ERROR_RC = 4;
     public static final int LOGGER_SETTINGS_ERROR_RC = 5;
 
-    public static String[] RC_DESCRIPTIONS = new String[] {
+    public static final String[] RC_DESCRIPTIONS = new String[] {
         "Success",
         "Parse Error",
         "Rules Error",
@@ -284,7 +284,7 @@ public class Transformer {
         RULES_DIRECT("td", "direct", "Transformation direct string replacements",
             OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
             !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
-        
+
         RULES_MASTER_XML("tf", "xml", "Map of XML filenames to property files",
             OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
             !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
@@ -322,7 +322,7 @@ public class Transformer {
         public String getShortTag() {
             return getSettings().getShortTag();
         }
-        
+
         public String getLongTag() {
             return getSettings().getLongTag();
         }
@@ -438,7 +438,7 @@ public class Transformer {
     private void displayBuildProperties() {
         Properties useBuildProperties = getBuildProperties();
 
-        preInitDisplay( getClass().getName() ); 
+        preInitDisplay( getClass().getName() );
         preInitDisplay( "  Version [ " + useBuildProperties.getProperty(SHORT_VERSION_PROPERTY_NAME) + " ]" );
         preInitDisplay( "  Build [ " + useBuildProperties.getProperty(BUILD_DATE_PROPERTY_NAME) + " ]" );
         preInitDisplay( "" );
@@ -453,7 +453,7 @@ public class Transformer {
     }
 
     private final PrintStream sysErr;
-    
+
     protected PrintStream getSystemErr() {
         return sysErr;
     }
@@ -471,7 +471,7 @@ public class Transformer {
 
     public void outputPrint(String message, Object... parms) {
         systemPrint( getSystemOut(), message, parms );
-    }    
+    }
 
     //
 
@@ -489,7 +489,7 @@ public class Transformer {
 
     /**
      * Set default resource references for the several 'RULE" options.
-     * 
+     *
      * Values are located relative to the option loader class.
      *
      * @param optionLoader The class relative to which to load the default resources.
@@ -503,13 +503,13 @@ public class Transformer {
     public Class<?> getRuleLoader() {
         return ruleLoader;
     }
-    
+
     public Map<AppOption, String> getRuleDefaultRefs() {
         return ruleDefaultRefs;
     }
 
     public String getDefaultReference(AppOption appOption) {
-        Map<AppOption, String> useDefaultRefs = getRuleDefaultRefs();        
+        Map<AppOption, String> useDefaultRefs = getRuleDefaultRefs();
         return ( (useDefaultRefs == null) ? null : getRuleDefaultRefs().get(appOption) );
     }
 
@@ -535,7 +535,7 @@ public class Transformer {
         if ( useArgs != null ) {
             if ( useArgs.length > 0 ) {
                 return useArgs[0]; // First argument
-            } 
+            }
         }
         return null;
     }
@@ -545,7 +545,7 @@ public class Transformer {
         if ( useArgs != null ) {
             if ( useArgs.length > 1 ) {
                 return useArgs[1]; // Second argument
-            } 
+            }
         }
         return null;
     }
@@ -554,10 +554,10 @@ public class Transformer {
         return getParsedArgs().hasOption( option.getShortTag() );
     }
 
-    protected static boolean DO_NORMALIZE = true;
+    protected static boolean doNormalize = true;
 
     protected String getOptionValue(AppOption option) {
-        return getOptionValue(option, !DO_NORMALIZE);
+        return getOptionValue(option, !doNormalize);
     }
 
     protected String getOptionValue(AppOption option, boolean normalize) {
@@ -575,7 +575,7 @@ public class Transformer {
     }
 
     protected String[] getOptionValues(AppOption option) {
-        return getOptionValues(option, !DO_NORMALIZE);
+        return getOptionValues(option, !doNormalize);
     }
 
     protected String[] getOptionValues(AppOption option, boolean normalize) {
@@ -608,7 +608,7 @@ public class Transformer {
             helpWriter.println();
 
             HelpFormatter helpFormatter = new HelpFormatter();
-            boolean AUTO_USAGE = true;
+            boolean autoUsage = true;
             helpFormatter.printHelp(
                 helpWriter,
                 HelpFormatter.DEFAULT_WIDTH + 5,
@@ -617,7 +617,7 @@ public class Transformer {
                 getAppOptions(),
                 HelpFormatter.DEFAULT_LEFT_PAD, HelpFormatter.DEFAULT_DESC_PAD,
                 "", // Footer
-                !AUTO_USAGE);
+                !autoUsage);
 
             helpWriter.println();
             helpWriter.println("Actions:");
@@ -640,7 +640,7 @@ public class Transformer {
 
     /**
      * Load properties for the specified rule option.
-     * 
+     *
      * Answer an empty collection if the rule option was not provided.
      *
      * Options loading tries {@link #getOptionValue(AppOption)}, then
@@ -656,12 +656,12 @@ public class Transformer {
      *     URI was specified.
      */
     protected UTF8Properties loadProperties(AppOption ruleOption) throws IOException, URISyntaxException {
-        String rulesReference = getOptionValue(ruleOption, DO_NORMALIZE);
+        String rulesReference = getOptionValue(ruleOption, doNormalize);
 
         if ( rulesReference == null ) {
             rulesReference = getDefaultReference(ruleOption);
             if ( rulesReference == null ) {
-                dual_info("Skipping option [ %s ]", ruleOption);
+                dualInfo("Skipping option [ %s ]", ruleOption);
                 return FileUtils.createProperties();
             } else {
                 return loadInternalProperties(ruleOption, rulesReference);
@@ -691,10 +691,10 @@ public class Transformer {
         // dual_info("Using internal [ %s ]: [ %s ]", ruleOption, resourceRef);
         URL rulesUrl = getRuleLoader().getResource(resourceRef);
         if ( rulesUrl == null ) {
-            dual_info("Internal [ %s ] were not found [ %s ]", ruleOption, resourceRef);
+            dualInfo("Internal [ %s ] were not found [ %s ]", ruleOption, resourceRef);
             throw new IOException("Resource [ " + resourceRef + " ] not found on [ " + getRuleLoader() + " ]");
         } else {
-            dual_info("Internal [ %s ] URL [ %s ]", ruleOption, rulesUrl);
+            dualInfo("Internal [ %s ] URL [ %s ]", ruleOption, rulesUrl);
         }
         return FileUtils.loadProperties(rulesUrl);
     }
@@ -711,7 +711,7 @@ public class Transformer {
         // dual_info("Using external [ %s ]: [ %s ]", referenceName, externalReference);
         URI currentDirectoryUri = IO.work.toURI();
         URL rulesUrl = URIUtil.resolve(currentDirectoryUri, externalReference).toURL();
-        dual_info("External [ %s ] URL [ %s ]", referenceName, rulesUrl);
+        dualInfo("External [ %s ] URL [ %s ]", referenceName, rulesUrl);
 
         return FileUtils.loadProperties(rulesUrl);
     }
@@ -759,7 +759,7 @@ public class Transformer {
         outputPrint("Log file [ " + System.getProperty(LoggerProperty.LOG_FILE.getPropertyName()) + " ]");
     }
 
-    public void dual_info(String message, Object... parms) {
+    public void dualInfo(String message, Object... parms) {
         if ( parms.length != 0 ) {
             message = String.format(message, parms);
         }
@@ -769,7 +769,7 @@ public class Transformer {
         info(message);
     }
 
-    protected void dual_error(String message, Object... parms) {
+    protected void dualError(String message, Object... parms) {
         if ( parms.length != 0 ) {
             message = String.format(message, parms);
         }
@@ -779,7 +779,7 @@ public class Transformer {
         info(message);
     }
 
-    protected void dual_error(String message, Throwable th) {
+    protected void dualError(String message, Throwable th) {
         if ( !toSysOut && !toSysErr ) {
             PrintStream useOutput = getSystemErr();
             systemPrint(useOutput, message);
@@ -854,13 +854,13 @@ public class Transformer {
         public String getInputFileName() {
             return inputName;
         }
-        
+
         public String getOutputFileName() {
             return outputName;
         }
 
         private InputBufferImpl buffer;
-        
+
         protected InputBufferImpl getBuffer() {
             if ( buffer == null ) {
                 buffer = new InputBufferImpl();
@@ -882,11 +882,11 @@ public class Transformer {
                 includes = new HashSet<String>();
                 excludes = new HashSet<String>();
                 TransformProperties.setSelections(includes, excludes, selectionProperties);
-                dual_info("Selection rules are in use");
+                dualInfo("Selection rules are in use");
             } else {
                 includes = null;
                 excludes = null;
-                dual_info("All resources will be selected");
+                dualInfo("All resources will be selected");
             }
 
             if ( !renameProperties.isEmpty() ) {
@@ -895,31 +895,31 @@ public class Transformer {
                     renames = TransformProperties.invert(renames);
                 }
                 packageRenames = renames;
-                dual_info("Package renames are in use");
+                dualInfo("Package renames are in use");
             } else {
                 packageRenames = null;
-                dual_info("No package renames are available");
+                dualInfo("No package renames are available");
             }
 
             if ( !versionProperties.isEmpty() ) {
                 packageVersions = TransformProperties.getPackageVersions(versionProperties);
-                dual_info("Package versions will be updated");
+                dualInfo("Package versions will be updated");
             } else {
                 packageVersions = null;
-                dual_info("Package versions will not be updated");
+                dualInfo("Package versions will not be updated");
             }
 
             if ( !updateProperties.isEmpty() ) {
                 bundleUpdates = TransformProperties.getBundleUpdates(updateProperties);
                 // throws IllegalArgumentException
-                dual_info("Bundle identities will be updated");
+                dualInfo("Bundle identities will be updated");
             } else {
                 bundleUpdates = null;
-                dual_info("Bundle identities will not be updated");
+                dualInfo("Bundle identities will not be updated");
             }
 
             if ( !xmlMasterProperties.isEmpty() ) {
-                String masterXmlRef = getOptionValue(AppOption.RULES_MASTER_XML, DO_NORMALIZE);
+                String masterXmlRef = getOptionValue(AppOption.RULES_MASTER_XML, doNormalize);
 
                 Map<String, String> substitutionRefs =
                     TransformProperties.convertPropertiesToMap(xmlMasterProperties); // throws IllegalArgumentException
@@ -935,7 +935,7 @@ public class Transformer {
                     } else {
                         String relativeSubstitutionsRef = relativize(substitutionsRef, masterXmlRef);
                         if ( !relativeSubstitutionsRef.equals(substitutionsRef) ) {
-                            dual_info(
+                            dualInfo(
                                 "Adjusted substition reference from [ %s ] to [ %s ]",
                                 substitutionsRef, relativeSubstitutionsRef);
                         }
@@ -947,25 +947,25 @@ public class Transformer {
                 }
 
                 masterXmlUpdates = masterUpdates;
-                dual_info("XML files will be updated");
+                dualInfo("XML files will be updated");
 
             } else {
                 masterXmlUpdates = null;
-                dual_info("XML files will not be updated");
+                dualInfo("XML files will not be updated");
             }
 
             if ( !directProperties.isEmpty() ) {
                 directStrings = TransformProperties.getDirectStrings(directProperties);
-                dual_info("Java direct string updates will be performed");
+                dualInfo("Java direct string updates will be performed");
             } else {
                 directStrings = null;
-                dual_info("Java direct string updates will not be performed");
+                dualInfo("Java direct string updates will not be performed");
             }
 
             return validateRules(packageRenames, packageVersions);
         }
 
-        protected boolean validateRules(Map<String, String> renamesMap, 
+        protected boolean validateRules(Map<String, String> renamesMap,
                                         Map<String, String> versionsMap) {
 
             if ( (versionsMap == null) || versionsMap.isEmpty() ) {
@@ -977,11 +977,11 @@ public class Transformer {
                 String versionsRef = getRuleFileName(AppOption.RULES_VERSIONS);
 
                 if ( renamesRef == null ) {
-                    dual_error(
+                    dualError(
                         "Package version updates were specified in [ " + versionsRef + " ]" +
                         "but no rename rules were specified.");
                 } else {
-                    dual_error(
+                    dualError(
                         "Package version updates were specified in [ " + versionsRef + " ]" +
                         "but no rename rules were specified in [ " + renamesRef + " ]");
                 }
@@ -990,7 +990,7 @@ public class Transformer {
 
             for ( String entry : versionsMap.keySet() ) {
                 if ( !renamesMap.containsValue(entry) ) {
-                    dual_error(
+                    dualError(
                         "Version rule key [ " + entry + "]" +
                         " from [ " + getRuleFileName(AppOption.RULES_VERSIONS) + " ]" +
                         " not found in rename rules [ " + getRuleFileName(AppOption.RULES_RENAMES) +" ]");
@@ -1000,9 +1000,9 @@ public class Transformer {
 
             return true;
         }
-              
+
         protected String getRuleFileName(AppOption ruleOption) {
-            String rulesFileName = getOptionValue(ruleOption, DO_NORMALIZE);
+            String rulesFileName = getOptionValue(ruleOption, doNormalize);
             if ( rulesFileName != null ) {
                 return rulesFileName;
             } else {
@@ -1114,8 +1114,8 @@ public class Transformer {
             if ( signatureRules == null ) {
                 signatureRules =  new SignatureRuleImpl(
                     logger,
-                    packageRenames, 
-                    packageVersions, 
+                    packageRenames,
+                    packageVersions,
                     bundleUpdates,
                     masterXmlUpdates,
                     directStrings);
@@ -1126,7 +1126,7 @@ public class Transformer {
         public boolean setInput() {
             String useInputName = getInputFileNameFromCommandLine();
             if ( useInputName == null ) {
-                dual_error("No input file was specified");
+                dualError("No input file was specified");
                 return false;
             }
 
@@ -1135,12 +1135,12 @@ public class Transformer {
             inputPath = inputFile.getAbsolutePath();
 
             if ( !inputFile.exists() ) {
-                dual_error("Input does not exist [ %s ] [ %s ]", inputName, inputPath);
+                dualError("Input does not exist [ %s ] [ %s ]", inputName, inputPath);
                 return false;
             }
 
-            dual_info("Input     [ %s ]", inputName);
-            dual_info("          [ %s ]", inputPath);
+            dualInfo("Input     [ %s ]", inputName);
+            dualInfo("          [ %s ]", inputPath);
             return true;
         }
 
@@ -1153,7 +1153,7 @@ public class Transformer {
 //      String inputFileName = getInputFileName();
 //      int indexOfLastSlash = inputFileName.lastIndexOf('/');
 //      if (indexOfLastSlash == -1 ) {
-//          return OUTPUT_PREFIX + inputFileName; 
+//          return OUTPUT_PREFIX + inputFileName;
 //      } else {
 //          return inputFileName.substring(0, indexOfLastSlash+1) + OUTPUT_PREFIX + inputFileName.substring(indexOfLastSlash+1);
 //      }
@@ -1171,8 +1171,8 @@ public class Transformer {
                 if ( indexOfLastSlash == -1 ) {
                     useOutputName = OUTPUT_PREFIX + inputName;
                 } else {
-                    String inputPrefix = inputName.substring( 0, indexOfLastSlash + 1 ); 
-                    String inputSuffix = inputName.substring( indexOfLastSlash + 1 ); 
+                    String inputPrefix = inputName.substring( 0, indexOfLastSlash + 1 );
+                    String inputSuffix = inputName.substring( indexOfLastSlash + 1 );
                     useOutputName = inputPrefix + OUTPUT_PREFIX + inputSuffix;
                 }
             }
@@ -1182,10 +1182,10 @@ public class Transformer {
 
             boolean putIntoDirectory = ( inputFile.isFile() && useOutputFile.isDirectory() );
 
-            if ( putIntoDirectory ) { 
+            if ( putIntoDirectory ) {
                 useOutputName = useOutputName + '/' + inputName;
                 if ( isVerbose ) {
-                    dual_info("Output generated using input name and output directory [ %s ]", useOutputName);
+                    dualInfo("Output generated using input name and output directory [ %s ]", useOutputName);
                 }
 
                 useOutputFile = new File(useOutputName);
@@ -1207,25 +1207,25 @@ public class Transformer {
                 }
             }
 
-            dual_info("Output    [ %s ] (%s)", useOutputName, outputCase);
-            dual_info("          [ %s ]", useOutputPath);
+            dualInfo("Output    [ %s ] (%s)", useOutputName, outputCase);
+            dualInfo("          [ %s ]", useOutputPath);
 
             allowOverwrite = hasOption(AppOption.OVERWRITE);
             if ( allowOverwrite) {
-                dual_info("Overwrite of output is enabled");
+                dualInfo("Overwrite of output is enabled");
             }
 
             if ( useOutputFile.exists() ) {
                 if ( allowOverwrite ) {
-                    dual_info("Output exists and will be overwritten [ %s ]", useOutputPath);
+                    dualInfo("Output exists and will be overwritten [ %s ]", useOutputPath);
                 } else {
-                    dual_error("Output already exists [ %s ]", useOutputPath);
+                    dualError("Output already exists [ %s ]", useOutputPath);
                     return false;
                 }
             } else {
                 if ( allowOverwrite ) {
                     if ( isVerbose ) {
-                        dual_info("Overwritten specified, but output [ %s ] does not exist", useOutputPath);
+                        dualInfo("Overwritten specified, but output [ %s ] does not exist", useOutputPath);
                     }
                 }
             }
@@ -1269,7 +1269,7 @@ public class Transformer {
 
                 XmlActionImpl xmlAction =
                         useRootAction.addUsing( XmlActionImpl::new );
-                
+
                 ZipActionImpl zipAction =
                     useRootAction.addUsing( ZipActionImpl::new );
 
@@ -1347,21 +1347,21 @@ public class Transformer {
             if ( actionName != null ) {
                 for ( ActionImpl action : getRootAction().getActions() ) {
                     if ( action.getActionType().matches(actionName) ) {
-                        dual_info("Forced action [ %s ] [ %s ]", actionName, action.getName());
+                        dualInfo("Forced action [ %s ] [ %s ]", actionName, action.getName());
                         acceptedAction = action;
                         return true;
                     }
                 }
-                dual_error("No match for forced action [ %s ]", actionName);
+                dualError("No match for forced action [ %s ]", actionName);
                 return false;
 
             } else {
                 acceptedAction = getRootAction().acceptAction(inputName,  inputFile);
                 if ( acceptedAction == null ) {
-                    dual_error("No action selected for input [ %s ]", inputName);
+                    dualError("No action selected for input [ %s ]", inputName);
                     return false;
                 } else {
-                    dual_info("Action selected for input [ %s ]: %s", inputName, acceptedAction.getName());
+                    dualInfo("Action selected for input [ %s ]: %s", inputName, acceptedAction.getName());
                     return true;
                 }
             }
@@ -1421,7 +1421,7 @@ public class Transformer {
         }
         detectLogFile();
 
-        if ( !options.setInput() ) { 
+        if ( !options.setInput() ) {
             return TRANSFORM_ERROR_RC;
         }
 
@@ -1433,11 +1433,11 @@ public class Transformer {
         try {
             loadedRules = options.setRules();
         } catch ( Exception e ) {
-            dual_error("Exception loading rules:", e);
+            dualError("Exception loading rules:", e);
             return RULES_ERROR_RC;
         }
         if ( !loadedRules ) {
-            dual_error("Transformation rules cannot be used");
+            dualError("Transformation rules cannot be used");
             return RULES_ERROR_RC;
         }
         if ( options.isVerbose ) {
@@ -1445,17 +1445,17 @@ public class Transformer {
         }
 
         if ( !options.acceptAction() ) {
-            dual_error("No action selected");
+            dualError("No action selected");
             return FILE_TYPE_ERROR_RC;
         }
 
         try {
             options.transform(); // throws JakartaTransformException
         } catch ( TransformException e ) {
-            dual_error("Transform failure:", e);
+            dualError("Transform failure:", e);
             return TRANSFORM_ERROR_RC;
         } catch ( Throwable th) {
-            dual_error("Unexpected failure:", th);
+            dualError("Unexpected failure:", th);
             return TRANSFORM_ERROR_RC;
         }
 

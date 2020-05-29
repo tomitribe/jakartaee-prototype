@@ -16,27 +16,27 @@ import org.slf4j.Logger;
 
 public class JarActionImpl extends ZipActionImpl {
 
-	public JarActionImpl(
-		Logger logger, boolean isTerse, boolean isVerbose,
-		InputBufferImpl buffer,
-		SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
+    public JarActionImpl(
+        Logger logger, boolean isTerse, boolean isVerbose,
+        InputBufferImpl buffer,
+        SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
 
-		super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
-	}
+        super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
+    }
 
-	//
+    //
 
-	public String getName() {
-		return "Jar Action";
-	}
+    public String getName() {
+        return "Jar Action";
+    }
 
-	@Override
-	public ActionType getActionType() {
-		return ActionType.JAR;
-	}
+    @Override
+    public ActionType getActionType() {
+        return ActionType.JAR;
+    }
 
-	@Override
-	public String getAcceptExtension() {
-		return ".jar";
-	}
+    @Override
+    public String getAcceptExtension() {
+        return ".jar";
+    }
 }

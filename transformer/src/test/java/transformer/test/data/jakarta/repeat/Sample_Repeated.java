@@ -18,7 +18,7 @@ import java.lang.annotation.RetentionPolicy;
 @Repeatable(Sample_Repeats.class)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Sample_Repeated {
-	int value() default -1;
+    int value() default -1;
 
-	String name() default "name";
+    String name() default "name";
 }

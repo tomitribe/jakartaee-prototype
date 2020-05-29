@@ -15,27 +15,27 @@ import org.eclipse.transformer.action.ActionType;
 import org.slf4j.Logger;
 
 public class RarActionImpl extends ContainerActionImpl {
-	public RarActionImpl(
-		Logger logger, boolean isTerse, boolean isVerbose,
-		InputBufferImpl buffer,
-		SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
+    public RarActionImpl(
+        Logger logger, boolean isTerse, boolean isVerbose,
+        InputBufferImpl buffer,
+        SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
 
-		super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
-	}
+        super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
+    }
 
-	//
+    //
 
-	public String getName() {
-		return "RAR Action";
-	}
+    public String getName() {
+        return "RAR Action";
+    }
 
-	@Override
-	public ActionType getActionType() {
-		return ActionType.RAR;
-	}
+    @Override
+    public ActionType getActionType() {
+        return ActionType.RAR;
+    }
 
-	@Override
-	public String getAcceptExtension() {
-		return ".rar";
-	}
+    @Override
+    public String getAcceptExtension() {
+        return ".rar";
+    }
 }

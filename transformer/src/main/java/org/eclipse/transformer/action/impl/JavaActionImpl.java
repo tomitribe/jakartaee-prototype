@@ -29,36 +29,36 @@ import org.slf4j.Logger;
 
 public class JavaActionImpl extends ActionImpl {
 
-	public JavaActionImpl(
-		Logger logger, boolean isTerse, boolean isVerbose,
-		InputBufferImpl buffer,
-		SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
+    public JavaActionImpl(
+        Logger logger, boolean isTerse, boolean isVerbose,
+        InputBufferImpl buffer,
+        SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
 
         super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
-	}
+    }
 
-	//
+    //
 
-	@Override
-	public String getName() {
-		return ( "Java Action" );
-	}
+    @Override
+    public String getName() {
+        return ( "Java Action" );
+    }
 
-	@Override
-	public ActionType getActionType() {
-		return ( ActionType.JAVA );
-	}
+    @Override
+    public ActionType getActionType() {
+        return ( ActionType.JAVA );
+    }
 
-	//
+    //
 
-	@Override
-	public String getAcceptExtension() {
-		return ".java";
-	}
+    @Override
+    public String getAcceptExtension() {
+        return ".java";
+    }
 
-	//
+    //
 
-	/**
+    /**
      * Replace all embedded packages of specified text with replacement
      * packages.
      *
@@ -75,7 +75,7 @@ public class JavaActionImpl extends ActionImpl {
         for ( Map.Entry<String, String> renameEntry : getPackageRenames().entrySet() ) {
             String key = renameEntry.getKey();
             int keyLen = key.length();
-            
+
             boolean matchSubpackages = SignatureRuleImpl.containsWildcard(key);
             if (matchSubpackages) {
                 key = SignatureRuleImpl.stripWildcard(key);
@@ -83,7 +83,7 @@ public class JavaActionImpl extends ActionImpl {
 
             //System.out.println("replacePackages: Next target [ " + key + " ]");
             int textLimit = text.length() - keyLen;
-            
+
             int lastMatchEnd = 0;
             while ( lastMatchEnd <= textLimit ) {
                 int matchStart = text.indexOf(key, lastMatchEnd);
@@ -102,7 +102,7 @@ public class JavaActionImpl extends ActionImpl {
                 String head = text.substring(0, matchStart);
                 String tail = text.substring(matchStart + keyLen);
 
-//                int tailLenBeforeReplaceVersion = tail.length();            
+//                int tailLenBeforeReplaceVersion = tail.length();
 //                tail = replacePackageVersion(tail, getPackageVersions().get(value));
 //                int tailLenAfterReplaceVersion = tail.length();
 
@@ -127,118 +127,118 @@ public class JavaActionImpl extends ActionImpl {
         }
     }
 
-	@Override
-	public ByteData apply(String inputName, byte[] inputBytes, int inputLength) 
-		throws TransformException {
+    @Override
+    public ByteData apply(String inputName, byte[] inputBytes, int inputLength)
+        throws TransformException {
 
-		String outputName = null; 
-		// String outputName = renameInput(inputName); // TODO
-		// if ( outputName == null ) {
-			outputName = inputName;
-		// } else {
-		//     info("Input class name  [ {} ]", inputName);
-		//     info("Output class name [ {} ]", outputName);
-		// }
-		setResourceNames(inputName, outputName);
+        String outputName = null;
+        // String outputName = renameInput(inputName); // TODO
+        // if ( outputName == null ) {
+            outputName = inputName;
+        // } else {
+        //     info("Input class name  [ {} ]", inputName);
+        //     info("Output class name [ {} ]", outputName);
+        // }
+        setResourceNames(inputName, outputName);
 
-		InputStream inputStream = new ByteArrayInputStream(inputBytes, 0, inputLength);
-		InputStreamReader inputReader;
-		try {
-			inputReader = new InputStreamReader(inputStream, "UTF-8");
-		} catch ( UnsupportedEncodingException e ) {
-			error("Strange: UTF-8 is an unrecognized encoding for reading [ {} ]", e, inputName);
-			return null;
-		}
+        InputStream inputStream = new ByteArrayInputStream(inputBytes, 0, inputLength);
+        InputStreamReader inputReader;
+        try {
+            inputReader = new InputStreamReader(inputStream, "UTF-8");
+        } catch ( UnsupportedEncodingException e ) {
+            error("Strange: UTF-8 is an unrecognized encoding for reading [ {} ]", e, inputName);
+            return null;
+        }
 
-		BufferedReader reader = new BufferedReader(inputReader);
+        BufferedReader reader = new BufferedReader(inputReader);
 
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream(inputBytes.length);
-		OutputStreamWriter outputWriter;
-		try {
-			outputWriter = new OutputStreamWriter(outputStream, "UTF-8");
-		} catch ( UnsupportedEncodingException e ) {
-			error("Strange: UTF-8 is an unrecognized encoding for writing [ {} ]", e, inputName);
-			return null;
-		}
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(inputBytes.length);
+        OutputStreamWriter outputWriter;
+        try {
+            outputWriter = new OutputStreamWriter(outputStream, "UTF-8");
+        } catch ( UnsupportedEncodingException e ) {
+            error("Strange: UTF-8 is an unrecognized encoding for writing [ {} ]", e, inputName);
+            return null;
+        }
 
-		BufferedWriter writer = new BufferedWriter(outputWriter);
+        BufferedWriter writer = new BufferedWriter(outputWriter);
 
-		try {
-			transform(reader, writer); // throws IOException
-		} catch ( IOException e ) {
-			error("Failed to transform [ {} ]", e, inputName);
-			return null;
-		}
+        try {
+            transform(reader, writer); // throws IOException
+        } catch ( IOException e ) {
+            error("Failed to transform [ {} ]", e, inputName);
+            return null;
+        }
 
-		try {
-			writer.flush(); // throws
-		} catch ( IOException e ) {
-			error("Failed to flush [ {} ]", e, inputName);
-			return null;
-		}
+        try {
+            writer.flush(); // throws
+        } catch ( IOException e ) {
+            error("Failed to flush [ {} ]", e, inputName);
+            return null;
+        }
 
-		if ( !hasNonResourceNameChanges() ) {
-			return null;
-		}
+        if ( !hasNonResourceNameChanges() ) {
+            return null;
+        }
 
-		byte[] outputBytes = outputStream.toByteArray();
-		return new ByteData(inputName, outputBytes, 0, outputBytes.length);
-	}
-
-	protected void transform(BufferedReader reader, BufferedWriter writer)
-		throws IOException {
-
-		String inputLine;
-		while ( (inputLine = reader.readLine()) != null ) {
-			String outputLine = replacePackages(inputLine);
-			if ( outputLine == null ) {
-				outputLine = inputLine;
-			} else {
-				addReplacement();
-			}
-			writer.write(outputLine);
-			writer.write('\n');
-		}
+        byte[] outputBytes = outputStream.toByteArray();
+        return new ByteData(inputName, outputBytes, 0, outputBytes.length);
     }
 
-	// TODO: Copied from ServiceConfigActionImpl; need to update
-	//       to work for paths.
+    protected void transform(BufferedReader reader, BufferedWriter writer)
+        throws IOException {
 
-	protected String renameInput(String inputName) {
-		String inputPrefix;
-		String classQualifiedName;
+        String inputLine;
+        while ( (inputLine = reader.readLine()) != null ) {
+            String outputLine = replacePackages(inputLine);
+            if ( outputLine == null ) {
+                outputLine = inputLine;
+            } else {
+                addReplacement();
+            }
+            writer.write(outputLine);
+            writer.write('\n');
+        }
+    }
 
-		int lastSlash = inputName.lastIndexOf('/');
-		if ( lastSlash == -1 ) {
-			inputPrefix = null;
-			classQualifiedName = inputName;
-		} else {
-			inputPrefix = inputName.substring(0, lastSlash + 1);
-			classQualifiedName = inputName.substring(lastSlash + 1);
-		}
+    // TODO: Copied from ServiceConfigActionImpl; need to update
+    //       to work for paths.
 
-		int classStart = classQualifiedName.lastIndexOf('.');
-		if ( classStart == -1 ) {
-			return null;
-		}
+    protected String renameInput(String inputName) {
+        String inputPrefix;
+        String classQualifiedName;
 
-		String packageName = classQualifiedName.substring(0, classStart);
-		if ( packageName.isEmpty() ) {
-			return null;
-		}
+        int lastSlash = inputName.lastIndexOf('/');
+        if ( lastSlash == -1 ) {
+            inputPrefix = null;
+            classQualifiedName = inputName;
+        } else {
+            inputPrefix = inputName.substring(0, lastSlash + 1);
+            classQualifiedName = inputName.substring(lastSlash + 1);
+        }
 
-		// 'className' includes a leading '.'
-		String className = classQualifiedName.substring(classStart);
+        int classStart = classQualifiedName.lastIndexOf('.');
+        if ( classStart == -1 ) {
+            return null;
+        }
 
-		String outputName = replacePackage(packageName);
-		if ( outputName == null ) {
-			return null;
-		}
+        String packageName = classQualifiedName.substring(0, classStart);
+        if ( packageName.isEmpty() ) {
+            return null;
+        }
 
-		if ( inputPrefix == null ) {
-			return outputName + className;
-		} else {
-			return inputPrefix + outputName + className;
-		}
-	}
+        // 'className' includes a leading '.'
+        String className = classQualifiedName.substring(classStart);
+
+        String outputName = replacePackage(packageName);
+        if ( outputName == null ) {
+            return null;
+        }
+
+        if ( inputPrefix == null ) {
+            return outputName + className;
+        } else {
+            return inputPrefix + outputName + className;
+        }
+    }
 }

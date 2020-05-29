@@ -21,13 +21,13 @@ public class BiDiMapImpl_Empty<Holder, Held> implements BiDiMap<Holder, Held> {
     //
 
     protected BiDiMapImpl_Empty(
-    	Class<Holder> holderClass, String holderTag,
-    	Class<Held> heldClass, String heldTag) {
+        Class<Holder> holderClass, String holderTag,
+        Class<Held> heldClass, String heldTag) {
 
         super();
 
         this.hashText =
-        	getClass().getSimpleName() +
+            getClass().getSimpleName() +
             "<" + holderClass.getSimpleName() + "," + heldClass.getSimpleName() + ">" +
             "@" + Integer.toHexString(hashCode()) +
             "(" + holderTag + " : " + heldTag + ")";
@@ -126,24 +126,24 @@ public class BiDiMapImpl_Empty<Holder, Held> implements BiDiMap<Holder, Held> {
         throw new UnsupportedOperationException();
     }
 
-	@Override
-	public <OtherHolder extends Holder, OtherHeld extends Held>
-		void record(BiDiMap<OtherHolder, OtherHeld> otherMap) {
+    @Override
+    public <OtherHolder extends Holder, OtherHeld extends Held>
+        void record(BiDiMap<OtherHolder, OtherHeld> otherMap) {
         throw new UnsupportedOperationException();
-	}
+    }
 
-	@Override
-	public <OtherHolder extends Holder, OtherHeld extends Held>
-	    void record(BiDiMap<OtherHolder, OtherHeld> otherMap,
-		        	Set<? extends Holder> restrictedHolders) {
+    @Override
+    public <OtherHolder extends Holder, OtherHeld extends Held>
+        void record(BiDiMap<OtherHolder, OtherHeld> otherMap,
+                    Set<? extends Holder> restrictedHolders) {
         throw new UnsupportedOperationException();
-	}
+    }
 
-	@Override
-	public <OtherHolder extends Holder, OtherHeld extends Held> boolean sameAs(
-			BiDiMap<OtherHolder, OtherHeld> otherMap) {
-		return ( otherMap.isEmpty() );
-	}
+    @Override
+    public <OtherHolder extends Holder, OtherHeld extends Held> boolean sameAs(
+            BiDiMap<OtherHolder, OtherHeld> otherMap) {
+        return ( otherMap.isEmpty() );
+    }
 
     //
 

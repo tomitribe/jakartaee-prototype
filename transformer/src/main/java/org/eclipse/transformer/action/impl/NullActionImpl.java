@@ -20,43 +20,43 @@ import org.slf4j.Logger;
 
 public class NullActionImpl extends ActionImpl {
 
-	public NullActionImpl(
-		Logger logger, boolean isTerse, boolean isVerbose,
-		InputBufferImpl buffer,
-		SelectionRuleImpl selectionRule,
-		SignatureRuleImpl signatureRule) {
+    public NullActionImpl(
+        Logger logger, boolean isTerse, boolean isVerbose,
+        InputBufferImpl buffer,
+        SelectionRuleImpl selectionRule,
+        SignatureRuleImpl signatureRule) {
 
-		super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
-	}
+        super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
+    }
 
-	//
+    //
 
-	public String getName() {
-		return "Null Action";
-	}
+    public String getName() {
+        return "Null Action";
+    }
 
-	@Override
-	public ActionType getActionType() {
-		return ActionType.NULL;
-	}
+    @Override
+    public ActionType getActionType() {
+        return ActionType.NULL;
+    }
 
-	//
+    //
 
-	@Override
-	public String getAcceptExtension() {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public String getAcceptExtension() {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public boolean accept(String resourcePath, File resourceFile) {
-		return true;
-	}
+    @Override
+    public boolean accept(String resourcePath, File resourceFile) {
+        return true;
+    }
 
-	@Override
-	public ByteData apply(String inputName, byte[] inputBytes, int inputLength)
-		throws TransformException {
+    @Override
+    public ByteData apply(String inputName, byte[] inputBytes, int inputLength)
+        throws TransformException {
 
-		setResourceNames(inputName, inputName);
-		return new ByteData(inputName, inputBytes, 0, inputLength);
-	}
+        setResourceNames(inputName, inputName);
+        return new ByteData(inputName, inputBytes, 0, inputLength);
+    }
 }

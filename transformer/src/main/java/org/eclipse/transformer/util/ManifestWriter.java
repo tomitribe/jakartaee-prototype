@@ -29,109 +29,111 @@ import java.util.jar.Manifest;
 import java.util.jar.Attributes.Name;
 
 public class ManifestWriter {
+    private ManifestWriter() {
+    }
 
-	public static void main(String[] parms) {
-		if ( parms.length != 2 ) {
-			System.out.println(ManifestWriter.class.getName() + " inputPath outputPath");
-			return;
-		}
+    public static void main(String[] parms) {
+        if ( parms.length != 2 ) {
+            System.out.println(ManifestWriter.class.getName() + " inputPath outputPath");
+            return;
+        }
 
-		String inputPath = parms[0];
-		String outputPath = parms[1];
+        String inputPath = parms[0];
+        String outputPath = parms[1];
 
-		System.out.println("Input path [ " + inputPath + " ]");
-		System.out.println("Output path [ " + outputPath + " ]");
+        System.out.println("Input path [ " + inputPath + " ]");
+        System.out.println("Output path [ " + outputPath + " ]");
 
-		File inputFile = new File(inputPath);
-		String inputAbsPath = inputFile.getAbsolutePath();
-		if ( !inputFile.exists() ) {
-			System.out.println("Input [ " + inputAbsPath + " ] does not exist");
-			return;
-		} else {
-			System.out.println("Input full path [ " + inputAbsPath + " ]");
-		}
+        File inputFile = new File(inputPath);
+        String inputAbsPath = inputFile.getAbsolutePath();
+        if ( !inputFile.exists() ) {
+            System.out.println("Input [ " + inputAbsPath + " ] does not exist");
+            return;
+        } else {
+            System.out.println("Input full path [ " + inputAbsPath + " ]");
+        }
 
-		File outputFile = new File(outputPath);
-		String outputAbsPath = outputFile.getAbsolutePath();
-		if ( outputFile.exists() ) {
-			System.out.println("Input [ " + outputAbsPath + " ] already exists");
-			return;
-		} else {
-			System.out.println("Input full path [ " + outputAbsPath + " ]");
-		}
+        File outputFile = new File(outputPath);
+        String outputAbsPath = outputFile.getAbsolutePath();
+        if ( outputFile.exists() ) {
+            System.out.println("Input [ " + outputAbsPath + " ] already exists");
+            return;
+        } else {
+            System.out.println("Input full path [ " + outputAbsPath + " ]");
+        }
 
-		System.out.println("Reading manifest ...");
+        System.out.println("Reading manifest ...");
 
-		FileInputStream inputStream;
-		try {
-			inputStream = new FileInputStream(inputFile);
-		} catch ( IOException e ) {
-			System.out.println("Failed to open [ " + inputAbsPath + " ]: " + e.getMessage());
-			e.printStackTrace();
-			
-			return;
-		}
-		
-		Manifest manifest = new Manifest();
-		try {
-			try {
-				manifest.read(inputStream);
-			} catch ( IOException e2 ) {
-				System.out.println("Failed to read as manifest [ " + inputAbsPath + " ]: " + e2.getMessage());
-				e2.printStackTrace();
-				return;
-			}
-		} finally {
-			try {
-				inputStream.close();
-			} catch ( IOException e1 ) {
-				System.out.println("Failed to close [ " + inputAbsPath + " ]: " + e1.getMessage());
-				e1.printStackTrace();
-			}
-		}
+        FileInputStream inputStream;
+        try {
+            inputStream = new FileInputStream(inputFile);
+        } catch ( IOException e ) {
+            System.out.println("Failed to open [ " + inputAbsPath + " ]: " + e.getMessage());
+            e.printStackTrace();
 
-		System.out.println("Reading manifest ... done");
-		
-		System.out.println("Writing manifest ...");
+            return;
+        }
 
-		FileOutputStream outputStream;
-		try {
-			outputStream = new FileOutputStream(outputFile);
-		} catch ( IOException e ) {
-			System.out.println("Failed to open [ " + outputAbsPath + " ]: " + e.getMessage());
-			e.printStackTrace();
-			return;
-		}
+        Manifest manifest = new Manifest();
+        try {
+            try {
+                manifest.read(inputStream);
+            } catch ( IOException e2 ) {
+                System.out.println("Failed to read as manifest [ " + inputAbsPath + " ]: " + e2.getMessage());
+                e2.printStackTrace();
+                return;
+            }
+        } finally {
+            try {
+                inputStream.close();
+            } catch ( IOException e1 ) {
+                System.out.println("Failed to close [ " + inputAbsPath + " ]: " + e1.getMessage());
+                e1.printStackTrace();
+            }
+        }
 
-		try {
-			try {
-				write(manifest, outputStream);
-			} catch ( IOException e2 ) {
-				System.out.println("Failed to write as manifest [ " + outputAbsPath + " ]: " + e2.getMessage());
-				e2.printStackTrace();
-				return;
-			}
-		} finally {
-			try {
-				outputStream.close();
-			} catch ( IOException e1 ) {
-				System.out.println("Failed to close [ " + outputAbsPath + " ]: " + e1.getMessage());
-				e1.printStackTrace();
-			}
-		}
+        System.out.println("Reading manifest ... done");
 
-		System.out.println("Writing manifest ... done");
-		
-		System.out.println("Successfully rewrite manifest:");
-		System.out.println("Input path [ " + inputPath + " ]");
-		System.out.println("Output path [ " + outputPath + " ]");
-	}
+        System.out.println("Writing manifest ...");
 
-	public static List<String> sort(Set<String> initialElements) {
-		List<String> finalElements = new ArrayList<String>(initialElements);
-		Collections.sort(finalElements);
-		return finalElements;
-	}
+        FileOutputStream outputStream;
+        try {
+            outputStream = new FileOutputStream(outputFile);
+        } catch ( IOException e ) {
+            System.out.println("Failed to open [ " + outputAbsPath + " ]: " + e.getMessage());
+            e.printStackTrace();
+            return;
+        }
+
+        try {
+            try {
+                write(manifest, outputStream);
+            } catch ( IOException e2 ) {
+                System.out.println("Failed to write as manifest [ " + outputAbsPath + " ]: " + e2.getMessage());
+                e2.printStackTrace();
+                return;
+            }
+        } finally {
+            try {
+                outputStream.close();
+            } catch ( IOException e1 ) {
+                System.out.println("Failed to close [ " + outputAbsPath + " ]: " + e1.getMessage());
+                e1.printStackTrace();
+            }
+        }
+
+        System.out.println("Writing manifest ... done");
+
+        System.out.println("Successfully rewrite manifest:");
+        System.out.println("Input path [ " + inputPath + " ]");
+        System.out.println("Output path [ " + outputPath + " ]");
+    }
+
+    public static List<String> sort(Set<String> initialElements) {
+        List<String> finalElements = new ArrayList<String>(initialElements);
+        Collections.sort(finalElements);
+        return finalElements;
+    }
 
     public static void write(Manifest mf, OutputStream out) throws IOException {
         DataOutputStream dos = new DataOutputStream(out);
@@ -141,9 +143,9 @@ public class ManifestWriter {
         write( mf.getMainAttributes(), IS_MAIN, dos, builder );
 
         for ( String mfKey : sort( mf.getEntries().keySet() ) ) {
-        	Attributes mfValue = mf.getAttributes(mfKey);
+            Attributes mfValue = mf.getAttributes(mfKey);
 
-        	builder.append("Name: ");
+            builder.append("Name: ");
             builder.append(mfKey);
             builder.append("\r\n");
 
@@ -158,41 +160,41 @@ public class ManifestWriter {
     }
 
     private static Map<String, Name> getNames(Attributes attributes) {
-    	Map<String, Name> names = new HashMap<String, Name>( attributes.size() );
-    	for ( Object name : attributes.keySet() ) {
-    		Name typedName = (Name) name;
-    		names.put( typedName.toString(), typedName );
-    	}
-    	return names;
+        Map<String, Name> names = new HashMap<String, Name>( attributes.size() );
+        for ( Object name : attributes.keySet() ) {
+            Name typedName = (Name) name;
+            names.put( typedName.toString(), typedName );
+        }
+        return names;
     }
 
     private static void write(
-    	Attributes attributes, boolean isMain,
-    	DataOutputStream out, StringBuilder builder) throws IOException {
+        Attributes attributes, boolean isMain,
+        DataOutputStream out, StringBuilder builder) throws IOException {
 
         String vername;
         String version;
         if ( isMain ) {
-        	vername = Name.MANIFEST_VERSION.toString();
-        	version = attributes.getValue(vername);
-        	if ( version == null ) {
-        		vername = Name.SIGNATURE_VERSION.toString();
-        		version = attributes.getValue(vername);
-        	}
-        	if ( version != null ) {
-        		writeAttribute(vername, version, out, builder); // throws IOException
-        	}
+            vername = Name.MANIFEST_VERSION.toString();
+            version = attributes.getValue(vername);
+            if ( version == null ) {
+                vername = Name.SIGNATURE_VERSION.toString();
+                version = attributes.getValue(vername);
+            }
+            if ( version != null ) {
+                writeAttribute(vername, version, out, builder); // throws IOException
+            }
         } else {
-        	vername = null;
-        	version = null;
+            vername = null;
+            version = null;
         }
 
-    	Map<String, Name> names = getNames(attributes);
+        Map<String, Name> names = getNames(attributes);
 
-    	for ( String name : sort( names.keySet() ) ) {
-    		if ( isMain && (vername != null) && name.equals(vername) ) {
-    			continue;
-    		}
+        for ( String name : sort( names.keySet() ) ) {
+            if ( isMain && (vername != null) && name.equals(vername) ) {
+                continue;
+            }
             String value = (String) attributes.get( names.get(name) );
             writeAttribute(name, value, out, builder);
         }
@@ -203,13 +205,13 @@ public class ManifestWriter {
     private static final boolean IS_MAIN = true;
 
     private static void writeAttribute(
-    	String name, String value,
-    	DataOutputStream out, StringBuilder builder) throws IOException {
+        String name, String value,
+        DataOutputStream out, StringBuilder builder) throws IOException {
 
-		builder.append(name);
-		builder.append(": ");
-		builder.append(value);
-		builder.append("\r\n");
+        builder.append(name);
+        builder.append(": ");
+        builder.append(value);
+        builder.append("\r\n");
 
         make72Safe(builder);
 
@@ -217,7 +219,7 @@ public class ManifestWriter {
         builder.setLength(0);
     }
 
-    
+
     private static void make72Safe(StringBuilder builder) {
         int length = builder.length();
         if ( length > 72 ) {

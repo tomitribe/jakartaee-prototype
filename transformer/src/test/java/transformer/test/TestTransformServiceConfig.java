@@ -33,172 +33,172 @@ import transformer.test.util.CaptureLoggerImpl;
 
 public class TestTransformServiceConfig extends CaptureTest {
 
-	public SelectionRuleImpl createSelectionRule(
-		CaptureLoggerImpl useLogger,
-		Set<String> useIncludes,
-		Set<String> useExcludes) {
+    public SelectionRuleImpl createSelectionRule(
+        CaptureLoggerImpl useLogger,
+        Set<String> useIncludes,
+        Set<String> useExcludes) {
 
-		return new SelectionRuleImpl( useLogger, useIncludes, useExcludes );
-	}
+        return new SelectionRuleImpl( useLogger, useIncludes, useExcludes );
+    }
 
-	public SignatureRuleImpl createSignatureRule(
-		CaptureLoggerImpl useLogger,
-		Map<String, String> usePackageRenames,
-		Map<String, String> usePackageVersions,
-		Map<String, BundleData> bundleData,
-		Map<String, String> directStrings) {
+    public SignatureRuleImpl createSignatureRule(
+        CaptureLoggerImpl useLogger,
+        Map<String, String> usePackageRenames,
+        Map<String, String> usePackageVersions,
+        Map<String, BundleData> bundleData,
+        Map<String, String> directStrings) {
 
-		return new SignatureRuleImpl(
-			useLogger,
-			usePackageRenames, usePackageVersions,
-			bundleData,
-			null,
-			directStrings );
-	}
+        return new SignatureRuleImpl(
+            useLogger,
+            usePackageRenames, usePackageVersions,
+            bundleData,
+            null,
+            directStrings );
+    }
 
-	//
+    //
 
-	public static final String TEST_DATA_PATH = "transformer/test/data/serviceconfig";
+    public static final String TEST_DATA_PATH = "transformer/test/data/serviceconfig";
 
-	public static final String JAVAX_OTHER_READER_SERVICE_PATH = TEST_DATA_PATH + "/" + "META-INF/services/javax.other.Reader";
-	public static final String[] JAVAX_OTHER_READER_LINES = { "javax.other.ReaderImpl" };
-	public static final String JAVAX_SAMPLE_READER_SERVICE_PATH = TEST_DATA_PATH + "/" + "META-INF/services/javax.sample.Reader";
-	public static final String[] JAVAX_SAMPLE_READER_LINES = { "javax.sample.ReaderImpl" };	
-	public static final String JAVAX_SAMPLE_WRITER_SERVICE_PATH = TEST_DATA_PATH + "/" + "META-INF/services/javax.sample.Writer";
-	public static final String[] JAVAX_SAMPLE_WRITER_LINES = { "javax.sample.WriterImpl" };	
-	
-	public static final String JAKARTA_OTHER_READER_SERVICE_PATH = TEST_DATA_PATH + "/" + "META-INF/services/jakarta.other.Reader";
-	public static final String[] JAKARTA_OTHER_READER_LINES = { "jakarta.other.ReaderImpl" };
-	public static final String JAKARTA_SAMPLE_READER_SERVICE_PATH = TEST_DATA_PATH + "/" + "META-INF/services/jakarta.sample.Reader";
-	public static final String[] JAKARTA_SAMPLE_READER_LINES = { "jakarta.sample.ReaderImpl" };	
-	public static final String JAKARTA_SAMPLE_WRITER_SERVICE_PATH = TEST_DATA_PATH + "/" + "META-INF/services/jakarta.sample.Writer";
-	public static final String[] JAKARTA_SAMPLE_WRITER_LINES = { "jakarta.sample.WriterImpl" };	
+    public static final String JAVAX_OTHER_READER_SERVICE_PATH = TEST_DATA_PATH + "/" + "META-INF/services/javax.other.Reader";
+    public static final String[] JAVAX_OTHER_READER_LINES = { "javax.other.ReaderImpl" };
+    public static final String JAVAX_SAMPLE_READER_SERVICE_PATH = TEST_DATA_PATH + "/" + "META-INF/services/javax.sample.Reader";
+    public static final String[] JAVAX_SAMPLE_READER_LINES = { "javax.sample.ReaderImpl" };
+    public static final String JAVAX_SAMPLE_WRITER_SERVICE_PATH = TEST_DATA_PATH + "/" + "META-INF/services/javax.sample.Writer";
+    public static final String[] JAVAX_SAMPLE_WRITER_LINES = { "javax.sample.WriterImpl" };
 
-	public static final String JAVAX_SAMPLE = "javax.sample";
-	public static final String JAKARTA_SAMPLE = "jakarta.sample";
-	
-	public static final String JAVAX_SERVLET = "javax.servlet";
-	public static final String JAVAX_SERVLET_ANNOTATION = "javax.servlet.annotation";
-	public static final String JAVAX_SERVLET_DESCRIPTOR = "javax.servlet.descriptor";
-	public static final String JAVAX_SERVLET_HTTP = "javax.servlet.http";
-	public static final String JAVAX_SERVLET_RESOURCES = "javax.servlet.resources";	
+    public static final String JAKARTA_OTHER_READER_SERVICE_PATH = TEST_DATA_PATH + "/" + "META-INF/services/jakarta.other.Reader";
+    public static final String[] JAKARTA_OTHER_READER_LINES = { "jakarta.other.ReaderImpl" };
+    public static final String JAKARTA_SAMPLE_READER_SERVICE_PATH = TEST_DATA_PATH + "/" + "META-INF/services/jakarta.sample.Reader";
+    public static final String[] JAKARTA_SAMPLE_READER_LINES = { "jakarta.sample.ReaderImpl" };
+    public static final String JAKARTA_SAMPLE_WRITER_SERVICE_PATH = TEST_DATA_PATH + "/" + "META-INF/services/jakarta.sample.Writer";
+    public static final String[] JAKARTA_SAMPLE_WRITER_LINES = { "jakarta.sample.WriterImpl" };
 
-	public static final String JAKARTA_SERVLET_VERSION = "[2.6, 6.0)";
-	public static final String JAKARTA_SERVLET_ANNOTATION_VERSION  = "[2.6, 6.0)";
-	public static final String JAKARTA_SERVLET_DESCRIPTOR_VERSION  = "[2.6, 6.0)";
-	public static final String JAKARTA_SERVLET_HTTP_VERSION  = "[2.6, 6.0)";
-	public static final String JAKARTA_SERVLET_RESOURCES_VERSION  = "[2.6, 6.0)";
+    public static final String JAVAX_SAMPLE = "javax.sample";
+    public static final String JAKARTA_SAMPLE = "jakarta.sample";
 
-	protected Set<String> includes;
-	
-	public Set<String> getIncludes() {
-		if ( includes == null ) {
-			includes = new HashSet<String>();
-			includes.add(JAVAX_SAMPLE_READER_SERVICE_PATH);
-			includes.add(JAVAX_SAMPLE_WRITER_SERVICE_PATH);
-		}
+    public static final String JAVAX_SERVLET = "javax.servlet";
+    public static final String JAVAX_SERVLET_ANNOTATION = "javax.servlet.annotation";
+    public static final String JAVAX_SERVLET_DESCRIPTOR = "javax.servlet.descriptor";
+    public static final String JAVAX_SERVLET_HTTP = "javax.servlet.http";
+    public static final String JAVAX_SERVLET_RESOURCES = "javax.servlet.resources";
 
-		return includes;
-	}
+    public static final String JAKARTA_SERVLET_VERSION = "[2.6, 6.0)";
+    public static final String JAKARTA_SERVLET_ANNOTATION_VERSION  = "[2.6, 6.0)";
+    public static final String JAKARTA_SERVLET_DESCRIPTOR_VERSION  = "[2.6, 6.0)";
+    public static final String JAKARTA_SERVLET_HTTP_VERSION  = "[2.6, 6.0)";
+    public static final String JAKARTA_SERVLET_RESOURCES_VERSION  = "[2.6, 6.0)";
 
-	public Set<String> getExcludes() {
-		return Collections.emptySet();
-	}
+    protected Set<String> includes;
 
-	protected Map<String, String> packageRenames;
+    public Set<String> getIncludes() {
+        if ( includes == null ) {
+            includes = new HashSet<String>();
+            includes.add(JAVAX_SAMPLE_READER_SERVICE_PATH);
+            includes.add(JAVAX_SAMPLE_WRITER_SERVICE_PATH);
+        }
 
-	public Map<String, String> getPackageRenames() {
-		if ( packageRenames == null ) {
-			packageRenames = new HashMap<String, String>();
-			packageRenames.put(JAVAX_SAMPLE, JAKARTA_SAMPLE);
-		}
-		return packageRenames;
-	}
-	
-	public ServiceLoaderConfigActionImpl jakartaServiceAction;
-	public ServiceLoaderConfigActionImpl javaxServiceAction;
+        return includes;
+    }
 
-	public ServiceLoaderConfigActionImpl getJakartaServiceAction() {
-		if ( jakartaServiceAction == null ) {
-			CaptureLoggerImpl useLogger = getCaptureLogger();
+    public Set<String> getExcludes() {
+        return Collections.emptySet();
+    }
 
-			jakartaServiceAction = new ServiceLoaderConfigActionImpl(
-				useLogger, false, false,
-				createBuffer(),
-				createSelectionRule( useLogger, getIncludes(), getExcludes() ),
-				createSignatureRule( useLogger, getPackageRenames(), null, null, null ) );
-		}
-		return jakartaServiceAction;
-	}
+    protected Map<String, String> packageRenames;
 
-	public ServiceLoaderConfigActionImpl getJavaxServiceAction() {
-		if ( javaxServiceAction == null ) {
-			CaptureLoggerImpl useLogger = getCaptureLogger();
+    public Map<String, String> getPackageRenames() {
+        if ( packageRenames == null ) {
+            packageRenames = new HashMap<String, String>();
+            packageRenames.put(JAVAX_SAMPLE, JAKARTA_SAMPLE);
+        }
+        return packageRenames;
+    }
 
-			Map<String, String> invertedRenames = TransformProperties.invert( getPackageRenames() );
+    public ServiceLoaderConfigActionImpl jakartaServiceAction;
+    public ServiceLoaderConfigActionImpl javaxServiceAction;
 
-			javaxServiceAction = new ServiceLoaderConfigActionImpl(
-				useLogger, false, false,
-				createBuffer(),
-				createSelectionRule( useLogger, getIncludes(), getExcludes() ),
-				createSignatureRule( useLogger, invertedRenames, null, null, null ) );
-		}
-		return javaxServiceAction;
-	}
+    public ServiceLoaderConfigActionImpl getJakartaServiceAction() {
+        if ( jakartaServiceAction == null ) {
+            CaptureLoggerImpl useLogger = getCaptureLogger();
 
-	@Test
-	public void testJakartaTransform() throws IOException, TransformException {
-		ServiceLoaderConfigActionImpl jakartaAction = getJakartaServiceAction();
+            jakartaServiceAction = new ServiceLoaderConfigActionImpl(
+                useLogger, false, false,
+                createBuffer(),
+                createSelectionRule( useLogger, getIncludes(), getExcludes() ),
+                createSignatureRule( useLogger, getPackageRenames(), null, null, null ) );
+        }
+        return jakartaServiceAction;
+    }
 
-		verifyTransform(
-			jakartaAction,
-			JAVAX_OTHER_READER_SERVICE_PATH,
-			JAVAX_OTHER_READER_LINES); // Not transformed 
-		verifyTransform(
-			jakartaAction,
-			JAVAX_SAMPLE_READER_SERVICE_PATH,
-			JAKARTA_SAMPLE_READER_LINES); // Transformed
-		verifyTransform(
-			jakartaAction,
-			JAVAX_SAMPLE_READER_SERVICE_PATH,
-			JAKARTA_SAMPLE_READER_LINES); // Transformed 
-	}
+    public ServiceLoaderConfigActionImpl getJavaxServiceAction() {
+        if ( javaxServiceAction == null ) {
+            CaptureLoggerImpl useLogger = getCaptureLogger();
 
-	@Test
-	public void testJavaxTransform() throws IOException, TransformException {
-		ServiceLoaderConfigActionImpl javaxAction = getJavaxServiceAction();
+            Map<String, String> invertedRenames = TransformProperties.invert( getPackageRenames() );
 
-		verifyTransform(
-			javaxAction,
-			JAKARTA_OTHER_READER_SERVICE_PATH,
-			JAKARTA_OTHER_READER_LINES); // Not transformed
-		verifyTransform(
-			javaxAction,
-			JAKARTA_SAMPLE_READER_SERVICE_PATH,
-			JAVAX_SAMPLE_READER_LINES); // Transformed
-		verifyTransform(
-			javaxAction,
-			JAKARTA_SAMPLE_READER_SERVICE_PATH,
-			JAVAX_SAMPLE_READER_LINES); // Transformed
-	}
+            javaxServiceAction = new ServiceLoaderConfigActionImpl(
+                useLogger, false, false,
+                createBuffer(),
+                createSelectionRule( useLogger, getIncludes(), getExcludes() ),
+                createSignatureRule( useLogger, invertedRenames, null, null, null ) );
+        }
+        return javaxServiceAction;
+    }
 
-	protected void verifyTransform(
-		ServiceLoaderConfigActionImpl action,
-		String inputName,
-		String[] expectedLines) throws IOException, TransformException {
+    @Test
+    public void testJakartaTransform() throws IOException, TransformException {
+        ServiceLoaderConfigActionImpl jakartaAction = getJakartaServiceAction();
 
-		InputStream inputStream = TestUtils.getResourceStream(inputName);
+        verifyTransform(
+            jakartaAction,
+            JAVAX_OTHER_READER_SERVICE_PATH,
+            JAVAX_OTHER_READER_LINES); // Not transformed
+        verifyTransform(
+            jakartaAction,
+            JAVAX_SAMPLE_READER_SERVICE_PATH,
+            JAKARTA_SAMPLE_READER_LINES); // Transformed
+        verifyTransform(
+            jakartaAction,
+            JAVAX_SAMPLE_READER_SERVICE_PATH,
+            JAKARTA_SAMPLE_READER_LINES); // Transformed
+    }
 
-		InputStreamData transformedData;
-		try {
-			transformedData = action.apply(inputName, inputStream);
-		} finally {
-			inputStream.close();
-		}
+    @Test
+    public void testJavaxTransform() throws IOException, TransformException {
+        ServiceLoaderConfigActionImpl javaxAction = getJavaxServiceAction();
 
-		List<String> transformedLines = TestUtils.loadLines(transformedData.stream);
-		TestUtils.filter(transformedLines);
-		TestUtils.verify(inputName, expectedLines, transformedLines);
-	}
-	
+        verifyTransform(
+            javaxAction,
+            JAKARTA_OTHER_READER_SERVICE_PATH,
+            JAKARTA_OTHER_READER_LINES); // Not transformed
+        verifyTransform(
+            javaxAction,
+            JAKARTA_SAMPLE_READER_SERVICE_PATH,
+            JAVAX_SAMPLE_READER_LINES); // Transformed
+        verifyTransform(
+            javaxAction,
+            JAKARTA_SAMPLE_READER_SERVICE_PATH,
+            JAVAX_SAMPLE_READER_LINES); // Transformed
+    }
+
+    protected void verifyTransform(
+        ServiceLoaderConfigActionImpl action,
+        String inputName,
+        String[] expectedLines) throws IOException, TransformException {
+
+        InputStream inputStream = TestUtils.getResourceStream(inputName);
+
+        InputStreamData transformedData;
+        try {
+            transformedData = action.apply(inputName, inputStream);
+        } finally {
+            inputStream.close();
+        }
+
+        List<String> transformedLines = TestUtils.loadLines(transformedData.stream);
+        TestUtils.filter(transformedLines);
+        TestUtils.verify(inputName, expectedLines, transformedLines);
+    }
+
 }

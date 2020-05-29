@@ -19,24 +19,24 @@ public class BiDiMapDeltaImpl<Held, Holder> implements Delta {
     public static final String CLASS_NAME = BiDiMapDeltaImpl.class.getSimpleName();
 
     public static BiDiMapDeltaImpl<String, String> stringDelta(String holderTag, String heldTag) {
-    	return new BiDiMapDeltaImpl<String, String>(
-    		String.class, holderTag, String.class, heldTag,
-    		DO_RECORD_ADDED, DO_RECORD_REMOVED, !DO_RECORD_STILL);
+        return new BiDiMapDeltaImpl<String, String>(
+            String.class, holderTag, String.class, heldTag,
+            DO_RECORD_ADDED, DO_RECORD_REMOVED, !DO_RECORD_STILL);
     }
 
     //
 
     public BiDiMapDeltaImpl(
-    	Class<Holder> holderClass, String holderTag, Class<Held> heldClass, String heldTag,
+        Class<Holder> holderClass, String holderTag, Class<Held> heldClass, String heldTag,
         boolean recordAdded, boolean recordRemoved, boolean recordStill) {
 
         this.hashText =
-            	getClass().getSimpleName() +
-            	"<" + holderClass.getSimpleName() + "," + heldClass.getSimpleName() + ">" +
-            	"@" + Integer.toHexString(hashCode()) +
-            	"(" + holderTag + " : " + heldTag + ")";
+                getClass().getSimpleName() +
+                "<" + holderClass.getSimpleName() + "," + heldClass.getSimpleName() + ">" +
+                "@" + Integer.toHexString(hashCode()) +
+                "(" + holderTag + " : " + heldTag + ")";
 
-    	//
+        //
 
         this.holderClass = holderClass;
         this.holderTag = holderTag;
@@ -114,7 +114,7 @@ public class BiDiMapDeltaImpl<Held, Holder> implements Delta {
     }
 
     public boolean isNull(boolean ignoreRemoved) {
-        return ( isNullAdded() && (ignoreRemoved || isNullRemoved()) ); 
+        return ( isNullAdded() && (ignoreRemoved || isNullRemoved()) );
     }
 
     public void describe(String prefix, List<String> nonNull) {
@@ -190,7 +190,7 @@ public class BiDiMapDeltaImpl<Held, Holder> implements Delta {
         boolean nullAdded = isNullAdded();
         boolean nullRemoved = isNullRemoved();
         boolean nullStill = isNullStill();
-        
+
         if ( nullAdded && nullRemoved ) {
             int numStill = ( nullStill ? 0 : getStillMap().getHolders().size() );
             writer.println(logPrefix + "Mapping Delta: Unchanged [ " + numStill + " ]: " + getHashText());

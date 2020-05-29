@@ -15,29 +15,29 @@ import org.eclipse.transformer.action.ActionType;
 import org.slf4j.Logger;
 
 public class WarActionImpl extends ContainerActionImpl {
-	public WarActionImpl(
-		Logger logger, boolean isTerse, boolean isVerbose,
-		InputBufferImpl buffer,
-		SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
+    public WarActionImpl(
+        Logger logger, boolean isTerse, boolean isVerbose,
+        InputBufferImpl buffer,
+        SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
 
-		super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
-	}
+        super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
+    }
 
-	//
+    //
 
-	public String getName() {
-		return "WAR Action";
-	}
+    public String getName() {
+        return "WAR Action";
+    }
 
-	@Override
-	public ActionType getActionType() {
-		return ActionType.WAR;
-	}
+    @Override
+    public ActionType getActionType() {
+        return ActionType.WAR;
+    }
 
-	//
+    //
 
-	@Override
-	public String getAcceptExtension() {
-		return ".war";
-	}
+    @Override
+    public String getAcceptExtension() {
+        return ".war";
+    }
 }

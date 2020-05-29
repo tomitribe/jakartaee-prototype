@@ -23,42 +23,42 @@ public class MapDeltaImpl<K, V> implements Delta {
     //
 
     private Map<K, V> createMap(boolean enabled, int expected) {
-    	if ( !enabled ) {
-    		return null;
-    	} else if ( expected == ANY_NUMBER ) {
-    		return new HashMap<K, V>();
-    	} else if ( expected == 0 ) {
-    		return null;
-    	} else {
-    		return new HashMap<K, V>(expected);
-    	}
+        if ( !enabled ) {
+            return null;
+        } else if ( expected == ANY_NUMBER ) {
+            return new HashMap<K, V>();
+        } else if ( expected == 0 ) {
+            return null;
+        } else {
+            return new HashMap<K, V>(expected);
+        }
     }
 
     private Map<K, V[]> createValueMap(boolean enabled, int expected) {
-    	if ( !enabled ) {
-    		return null;
-    	} else if ( expected == ANY_NUMBER ) {
-    		return new HashMap<K, V[]>();
-    	} else if ( expected == 0 ) {
-    		return null;
-    	} else {
-    		return new HashMap<K, V[]>(expected);
-    	}
+        if ( !enabled ) {
+            return null;
+        } else if ( expected == ANY_NUMBER ) {
+            return new HashMap<K, V[]>();
+        } else if ( expected == 0 ) {
+            return null;
+        } else {
+            return new HashMap<K, V[]>(expected);
+        }
     }
 
     //
 
     public MapDeltaImpl(Class<K> keyClass, Class<V> valueClass) {
-    	this(keyClass, valueClass,
-    		 DO_RECORD_ADDED, DO_RECORD_REMOVED, DO_RECORD_CHANGED, !DO_RECORD_STILL);
+        this(keyClass, valueClass,
+             DO_RECORD_ADDED, DO_RECORD_REMOVED, DO_RECORD_CHANGED, !DO_RECORD_STILL);
     }
 
     public MapDeltaImpl(
-    	Class<K> keyClass, Class<V> valueClass,
-    	int expectedAdded, int expectedRemoved) {
+        Class<K> keyClass, Class<V> valueClass,
+        int expectedAdded, int expectedRemoved) {
 
         this(keyClass, valueClass,
-        	 DO_RECORD_ADDED, DO_RECORD_REMOVED, DO_RECORD_CHANGED, !DO_RECORD_STILL,
+             DO_RECORD_ADDED, DO_RECORD_REMOVED, DO_RECORD_CHANGED, !DO_RECORD_STILL,
              expectedAdded, expectedRemoved, ZERO_CHANGED, ZERO_STILL);
     }
 
@@ -66,9 +66,9 @@ public class MapDeltaImpl<K, V> implements Delta {
         Class<K> keyClass, Class<V> valueClass,
         boolean recordAdded, boolean recordRemoved, boolean recordChanged, boolean recordStill) {
 
-    	this(keyClass, valueClass,
-    		 recordAdded, recordRemoved, recordChanged, recordStill,
-    		 ANY_NUMBER_OF_ADDED, ANY_NUMBER_OF_REMOVED, ANY_NUMBER_OF_CHANGED, ANY_NUMBER_OF_STILL);
+        this(keyClass, valueClass,
+             recordAdded, recordRemoved, recordChanged, recordStill,
+             ANY_NUMBER_OF_ADDED, ANY_NUMBER_OF_REMOVED, ANY_NUMBER_OF_CHANGED, ANY_NUMBER_OF_STILL);
     }
 
     public MapDeltaImpl(
@@ -76,13 +76,13 @@ public class MapDeltaImpl<K, V> implements Delta {
         boolean recordAdded, boolean recordRemoved, boolean recordChanged, boolean recordStill,
         int expectedAdded, int expectedRemoved, int expectedChanged, int expectedStill) {
 
-    	this.keyClass = keyClass;
-    	this.valueClass = valueClass;
+        this.keyClass = keyClass;
+        this.valueClass = valueClass;
 
         this.hashText =
-        	getClass().getSimpleName() +
-        	"<" + keyClass.getSimpleName() + "," + valueClass.getSimpleName() + ">" +
-        	"@" + Integer.toHexString(hashCode());
+            getClass().getSimpleName() +
+            "<" + keyClass.getSimpleName() + "," + valueClass.getSimpleName() + ">" +
+            "@" + Integer.toHexString(hashCode());
 
         this.addedMap = createMap(recordAdded, expectedAdded);
         this.removedMap = createMap(recordRemoved, expectedRemoved);
@@ -95,13 +95,13 @@ public class MapDeltaImpl<K, V> implements Delta {
     protected final Class<K> keyClass;
 
     public Class<K> getKeyClass() {
-    	return keyClass;
+        return keyClass;
     }
 
     protected final Class<V> valueClass;
 
     public Class<V> getValueClass() {
-    	return valueClass;
+        return valueClass;
     }
 
     //
@@ -180,10 +180,10 @@ public class MapDeltaImpl<K, V> implements Delta {
 
     public void recordChanged(K changedKey_f, V value_f, V value_i) {
         if ( changedMap != null ) {
-        	@SuppressWarnings("unchecked")
-			V[] valueChange = (V[]) Array.newInstance(valueClass, 2);
-        	valueChange[FINAL_VALUE_OFFSET] = value_f;
-        	valueChange[INITIAL_VALUE_OFFSET] = value_i;
+            @SuppressWarnings("unchecked")
+            V[] valueChange = (V[]) Array.newInstance(valueClass, 2);
+            valueChange[FINAL_VALUE_OFFSET] = value_f;
+            valueChange[INITIAL_VALUE_OFFSET] = value_i;
 
             changedMap.put(changedKey_f, valueChange);
         }
@@ -240,58 +240,58 @@ public class MapDeltaImpl<K, V> implements Delta {
             }
 
         } else {
-        	for ( Map.Entry<K, V> entry_f : finalMap.entrySet() ) {
-        		K key_f = entry_f.getKey();
-        		V value_f = entry_f.getValue();
+            for ( Map.Entry<K, V> entry_f : finalMap.entrySet() ) {
+                K key_f = entry_f.getKey();
+                V value_f = entry_f.getValue();
 
-        		if ( !initialMap.containsKey(key_f) ) {
-        			addedMap.put(key_f, value_f);
+                if ( !initialMap.containsKey(key_f) ) {
+                    addedMap.put(key_f, value_f);
 
-        		} else {
-        			V value_i = initialMap.get(key_f);
+                } else {
+                    V value_i = initialMap.get(key_f);
 
-        			if ( ((value_i == null) && (value_f != null)) ||
-        				 ((value_i != null) && (value_f == null)) ||
-        				 ((value_i != null) && (value_f != null) && !value_f.equals(value_i)) ) {
-        				if ( changedMap != null ) {
-        					recordChanged(key_f, value_f, value_i);
-        				}
-        			} else {
-        				if ( stillMap != null ) {
-        					recordStill(key_f, value_f);
-        				}
-        			}
-        		}
-        	}
+                    if ( ((value_i == null) && (value_f != null)) ||
+                         ((value_i != null) && (value_f == null)) ||
+                         ((value_i != null) && (value_f != null) && !value_f.equals(value_i)) ) {
+                        if ( changedMap != null ) {
+                            recordChanged(key_f, value_f, value_i);
+                        }
+                    } else {
+                        if ( stillMap != null ) {
+                            recordStill(key_f, value_f);
+                        }
+                    }
+                }
+            }
 
-        	for ( Map.Entry<K, V> entry_i : initialMap.entrySet() ) {
-        		K key_i = entry_i.getKey();
-        		V value_i = entry_i.getValue();
+            for ( Map.Entry<K, V> entry_i : initialMap.entrySet() ) {
+                K key_i = entry_i.getKey();
+                V value_i = entry_i.getValue();
 
-        		if ( !finalMap.containsKey(key_i) ) {
-        			addedMap.put(key_i,  value_i);
+                if ( !finalMap.containsKey(key_i) ) {
+                    addedMap.put(key_i,  value_i);
 
-        		} else {
-        			// Changes should have already been recorded
-        			// when processing the final map.
-        			//
-        			// Note that 'recordChanged' in this case exposes
-        			// a weakness of how changes are recorded, in that
-        			// that record has a bias towards the final key.
+                } else {
+                    // Changes should have already been recorded
+                    // when processing the final map.
+                    //
+                    // Note that 'recordChanged' in this case exposes
+                    // a weakness of how changes are recorded, in that
+                    // that record has a bias towards the final key.
 
-        			// V value_f = finalMap.get(key_f);
+                    // V value_f = finalMap.get(key_f);
 
-        			// if ( ((value_f == null) && (value_i != null)) ||
-        			//         ((value_f != null) && (value_i == null)) ||
-        			//         ((value_f != null) && (value_i != null) && !value_i.equals(value_f)) ) {
-        			//     if ( changedMap_f != null ) {
-        			//            recordChanged(key_i, value_i, value_f);
-        			//     }
-        			// } else {
-        			//     if ( stillMap != null ) {
-        			//         recordStill(initialKey, initialValue);
-        			//     }
-        			// }
+                    // if ( ((value_f == null) && (value_i != null)) ||
+                    //         ((value_f != null) && (value_i == null)) ||
+                    //         ((value_f != null) && (value_i != null) && !value_i.equals(value_f)) ) {
+                    //     if ( changedMap_f != null ) {
+                    //            recordChanged(key_i, value_i, value_f);
+                    //     }
+                    // } else {
+                    //     if ( stillMap != null ) {
+                    //         recordStill(initialKey, initialValue);
+                    //     }
+                    // }
                 }
             }
         }
@@ -323,7 +323,7 @@ public class MapDeltaImpl<K, V> implements Delta {
                     break;
                 } else {
                     writer.println(prefix +
-                    	"  [ " + addedNo + " ] " +
+                        "  [ " + addedNo + " ] " +
                         addedEntry.getKey() + ": " + addedEntry.getValue());
                 }
                 addedNo++;
@@ -343,7 +343,7 @@ public class MapDeltaImpl<K, V> implements Delta {
                     break;
                 } else {
                     writer.println(prefix +
-                    	"  [ " + removedNo + " ] " + 
+                        "  [ " + removedNo + " ] " +
                         removedEntry.getKey() + ": " + removedEntry.getValue());
                 }
                 removedNo++;
@@ -364,7 +364,7 @@ public class MapDeltaImpl<K, V> implements Delta {
                 } else {
                     V[] valueDelta = changedEntry.getValue();
                     writer.println(prefix +
-                    	"  " + changedEntry.getKey() + ": " +
+                        "  " + changedEntry.getKey() + ": " +
                         valueDelta[FINAL_VALUE_OFFSET] +
                         " :: ( " + valueDelta[INITIAL_VALUE_OFFSET] + " )");
                 }

@@ -28,120 +28,120 @@ import aQute.bnd.signatures.TypeParameter;
 
 public interface SignatureRule {
 
-	BundleData getBundleUpdate(String symbolicName);
+    BundleData getBundleUpdate(String symbolicName);
 
-	//
+    //
 
-	Map<String, String> getPackageRenames();
+    Map<String, String> getPackageRenames();
 
-	Map<String, String> getPackageVersions();
+    Map<String, String> getPackageVersions();
 
-	//
+    //
 
-	public static enum SignatureType {
-		CLASS, FIELD, METHOD
-	}
+    public static enum SignatureType {
+        CLASS, FIELD, METHOD
+    }
 
-	public static final boolean ALLOW_SIMPLE_SUBSTITUTION = true;
-	public static final boolean NO_SIMPLE_SUBSTITUTION = false;
-	
-	/**
-	 * Replace a single package according to the package rename rules.
-	 * 
-	 * Package names must match exactly.
-	 *
-	 * @param initialName The package name which is to be replaced.
-	 *
-	 * @return The replacement for the initial package name.  Null if no
-	 *     replacement is available.
-	 */
-	String replacePackage(String initialName);
+    public static final boolean ALLOW_SIMPLE_SUBSTITUTION = true;
+    public static final boolean NO_SIMPLE_SUBSTITUTION = false;
 
-	/**
-	 * Replace a single package according to the package rename rules.
-	 * The package name has '/' separators, not '.' separators.
-	 *
-	 * Package names must match exactly.
-	 *
-	 * @param initialName The package name which is to be replaced.
-	 *
-	 * @return The replacement for the initial package name.  Null if no
-	 *     replacement is available.
-	 */
-	String replaceBinaryPackage(String initialName);
+    /**
+     * Replace a single package according to the package rename rules.
+     *
+     * Package names must match exactly.
+     *
+     * @param initialName The package name which is to be replaced.
+     *
+     * @return The replacement for the initial package name.  Null if no
+     *     replacement is available.
+     */
+    String replacePackage(String initialName);
 
-	/**
-	 * Replace all embedded packages of specified text with replacement
-	 * packages.
-	 *
-	 * @param text String embedding zero, one, or more package names.
-	 * @param packageRenames map of names and replacement values
-	 * @return The text with all embedded package names replaced.  Null if no
-	 *     replacements were performed.
-	 */
-	String replacePackages(String text);
-	String replacePackages(String text, Map<String, String> packageRenames);
+    /**
+     * Replace a single package according to the package rename rules.
+     * The package name has '/' separators, not '.' separators.
+     *
+     * Package names must match exactly.
+     *
+     * @param initialName The package name which is to be replaced.
+     *
+     * @return The replacement for the initial package name.  Null if no
+     *     replacement is available.
+     */
+    String replaceBinaryPackage(String initialName);
 
-	String transformConstantAsBinaryType(String inputConstant);
-	String transformConstantAsBinaryType(String inputConstant, boolean allowSimpleSubstitution);
+    /**
+     * Replace all embedded packages of specified text with replacement
+     * packages.
+     *
+     * @param text String embedding zero, one, or more package names.
+     * @param packageRenames map of names and replacement values
+     * @return The text with all embedded package names replaced.  Null if no
+     *     replacements were performed.
+     */
+    String replacePackages(String text);
+    String replacePackages(String text, Map<String, String> packageRenames);
 
-	/**
-	 * Modify a fully qualified type name according to the package rename table.
-	 * Answer either the transformed type name, or, if the type name was not changed,
-	 * a wrapped null.
-	 * 
-	 * @param inputName A fully qualified type name which is to be transformed.
-	 *
-	 * @return The transformed type name, or a wrapped null if no changed was made.
-	 */
-	String transformBinaryType(String inputName);
+    String transformConstantAsBinaryType(String inputConstant);
+    String transformConstantAsBinaryType(String inputConstant, boolean allowSimpleSubstitution);
 
-	String transformConstantAsDescriptor(String inputConstant);
-	String transformConstantAsDescriptor(String inputConstant, boolean allowSimpleSubstitution);
-	
-	String transformDescriptor(String inputDescriptor);
-	String transformDescriptor(String inputDescriptor, boolean allowSimpleSubstitution);
+    /**
+     * Modify a fully qualified type name according to the package rename table.
+     * Answer either the transformed type name, or, if the type name was not changed,
+     * a wrapped null.
+     *
+     * @param inputName A fully qualified type name which is to be transformed.
+     *
+     * @return The transformed type name, or a wrapped null if no changed was made.
+     */
+    String transformBinaryType(String inputName);
 
-	/**
-	 * Transform a class, field, or method signature.
-	 * 
-	 * Answer a wrapped null if the signature is not changed by the transformation
-	 * rules.
-	 *
-	 * @param input The signature value which is to be transformed.
-	 * @param signatureType The type of the signature value.
-	 *
-	 * @return The transformed signature value.  A wrapped null if no change
-	 *     was made to the value.
-	 */
-	String transform(String input, SignatureType signatureType);
+    String transformConstantAsDescriptor(String inputConstant);
+    String transformConstantAsDescriptor(String inputConstant, boolean allowSimpleSubstitution);
 
-	ClassSignature transform(ClassSignature classSignature);
+    String transformDescriptor(String inputDescriptor);
+    String transformDescriptor(String inputDescriptor, boolean allowSimpleSubstitution);
 
-	FieldSignature transform(FieldSignature fieldSignature);
+    /**
+     * Transform a class, field, or method signature.
+     *
+     * Answer a wrapped null if the signature is not changed by the transformation
+     * rules.
+     *
+     * @param input The signature value which is to be transformed.
+     * @param signatureType The type of the signature value.
+     *
+     * @return The transformed signature value.  A wrapped null if no change
+     *     was made to the value.
+     */
+    String transform(String input, SignatureType signatureType);
 
-	MethodSignature transform(MethodSignature methodSignature);
+    ClassSignature transform(ClassSignature classSignature);
 
-	Result transform(Result type);
+    FieldSignature transform(FieldSignature fieldSignature);
 
-	ThrowsSignature transform(ThrowsSignature type);
+    MethodSignature transform(MethodSignature methodSignature);
 
-	ArrayTypeSignature transform(ArrayTypeSignature inputType);
+    Result transform(Result type);
 
-	TypeParameter transform(TypeParameter inputTypeParameter);
+    ThrowsSignature transform(ThrowsSignature type);
 
-	ClassTypeSignature transform(ClassTypeSignature inputType);
+    ArrayTypeSignature transform(ArrayTypeSignature inputType);
 
-	SimpleClassTypeSignature transform(SimpleClassTypeSignature inputSignature);
+    TypeParameter transform(TypeParameter inputTypeParameter);
 
-	TypeArgument transform(TypeArgument inputArgument);
+    ClassTypeSignature transform(ClassTypeSignature inputType);
 
-	JavaTypeSignature transform(JavaTypeSignature type);
+    SimpleClassTypeSignature transform(SimpleClassTypeSignature inputSignature);
 
-	ReferenceTypeSignature transform(ReferenceTypeSignature type);
+    TypeArgument transform(TypeArgument inputArgument);
 
-	//
+    JavaTypeSignature transform(JavaTypeSignature type);
 
-	String getDirectString(String initialValue);
+    ReferenceTypeSignature transform(ReferenceTypeSignature type);
+
+    //
+
+    String getDirectString(String initialValue);
 
 }

@@ -16,5 +16,5 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Sample_Repeats {
-	Sample_Repeated[] value();
+    Sample_Repeated[] value();
 }

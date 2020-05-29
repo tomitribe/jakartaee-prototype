@@ -31,20 +31,20 @@ public class BiDiMapImpl<Holder, Held> implements BiDiMap<Holder, Held> {
     //
 
     protected BiDiMapImpl(
-    	Class<Holder> holderClass, String holderTag,
-    	Class<Held> heldClass, String heldTag) {
+        Class<Holder> holderClass, String holderTag,
+        Class<Held> heldClass, String heldTag) {
 
         super();
 
         this.hashText =
-        	getClass().getSimpleName() +
-        	"<" + holderClass.getSimpleName() + "," + heldClass.getSimpleName() + ">" +
-        	"@" + Integer.toHexString(hashCode()) +
-        	"(" + holderTag + " : " + heldTag + ")";
+            getClass().getSimpleName() +
+            "<" + holderClass.getSimpleName() + "," + heldClass.getSimpleName() + ">" +
+            "@" + Integer.toHexString(hashCode()) +
+            "(" + holderTag + " : " + heldTag + ")";
 
         this.holderClass = holderClass;
         this.holderTag = holderTag;
-        
+
         this.heldClass = heldClass;
         this.heldTag = heldTag;
 
@@ -59,7 +59,7 @@ public class BiDiMapImpl<Holder, Held> implements BiDiMap<Holder, Held> {
 
     @Override
     public Class<Holder> getHolderClass() {
-    	return holderClass;
+        return holderClass;
     }
 
     @Override
@@ -72,7 +72,7 @@ public class BiDiMapImpl<Holder, Held> implements BiDiMap<Holder, Held> {
 
     @Override
     public Class<Held> getHeldClass() {
-    	return heldClass;
+        return heldClass;
     }
 
     @Override
@@ -92,13 +92,13 @@ public class BiDiMapImpl<Holder, Held> implements BiDiMap<Holder, Held> {
 
     @Override
     public boolean holds(Holder holder, Held held) {
-    	Set<Held> heldBy = holderToHeldMap.get(holder);
-    	return ( (heldBy != null) && heldBy.contains(held) );
+        Set<Held> heldBy = holderToHeldMap.get(holder);
+        return ( (heldBy != null) && heldBy.contains(held) );
     }
 
     @Override
     public boolean isHolder(Holder holder) {
-    	return holderToHeldMap.containsKey(holder);
+        return holderToHeldMap.containsKey(holder);
     }
 
     @Override
@@ -114,7 +114,7 @@ public class BiDiMapImpl<Holder, Held> implements BiDiMap<Holder, Held> {
 
     @Override
     public boolean isHeld(Held held) {
-    	return heldToHoldersMap.containsKey(held);
+        return heldToHoldersMap.containsKey(held);
     }
 
     @Override
@@ -179,7 +179,7 @@ public class BiDiMapImpl<Holder, Held> implements BiDiMap<Holder, Held> {
 
     @Override
     public <OtherHolder extends Holder, OtherHeld extends Held>
-    	void record(BiDiMap<OtherHolder, OtherHeld> otherMap) {
+        void record(BiDiMap<OtherHolder, OtherHeld> otherMap) {
         for ( OtherHolder holder : otherMap.getHolders() ) {
             Set<OtherHeld> heldBy = otherMap.getHeld(holder);
             for ( OtherHeld held : heldBy ) {
@@ -190,8 +190,8 @@ public class BiDiMapImpl<Holder, Held> implements BiDiMap<Holder, Held> {
 
     @Override
     public <OtherHolder extends Holder, OtherHeld extends Held>
-    	void record(BiDiMap<OtherHolder, OtherHeld> otherMap,
-    			    Set<? extends Holder> restrictedHolders) {
+        void record(BiDiMap<OtherHolder, OtherHeld> otherMap,
+                    Set<? extends Holder> restrictedHolders) {
 
         for ( OtherHolder holder : otherMap.getHolders() ) {
             if ( !restrictedHolders.contains(holder) ) {
@@ -214,7 +214,7 @@ public class BiDiMapImpl<Holder, Held> implements BiDiMap<Holder, Held> {
      * @return True if the maps have the same contents.
      */
     @Override
-    public <OtherHolder extends Holder, OtherHeld extends Held> 
+    public <OtherHolder extends Holder, OtherHeld extends Held>
         boolean sameAs(BiDiMap<OtherHolder, OtherHeld> otherMap) {
 
         if ( otherMap == null ) {
@@ -228,13 +228,13 @@ public class BiDiMapImpl<Holder, Held> implements BiDiMap<Holder, Held> {
         }
 
         for ( OtherHolder otherHolder : otherMap.getHolders() ) {
-        	Set<OtherHeld> otherHeldBy = otherMap.getHeld(otherHolder);
-        	Set<Held> heldBy = getHeld(otherHolder);
+            Set<OtherHeld> otherHeldBy = otherMap.getHeld(otherHolder);
+            Set<Held> heldBy = getHeld(otherHolder);
 
             if ( otherHeldBy.size() != heldBy.size() ) {
-            	return false;
+                return false;
             } else if ( !otherHeldBy.containsAll(heldBy) ) {
-            	return false;
+                return false;
             }
         }
 

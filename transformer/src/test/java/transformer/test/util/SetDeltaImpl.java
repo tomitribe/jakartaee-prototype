@@ -22,19 +22,19 @@ public class SetDeltaImpl<E> implements Delta {
     //
 
     public static SetDeltaImpl<String> stringDelta(String elementTag) {
-		return new SetDeltaImpl<String>(
-			String.class, elementTag,
-			DO_RECORD_ADDED, DO_RECORD_REMOVED, !DO_RECORD_STILL);
+        return new SetDeltaImpl<String>(
+            String.class, elementTag,
+            DO_RECORD_ADDED, DO_RECORD_REMOVED, !DO_RECORD_STILL);
     }
 
     public SetDeltaImpl(
-    	Class<E> elementClass, String elementTag,
-    	boolean recordAdded, boolean recordRemoved, boolean recordStill) {
+        Class<E> elementClass, String elementTag,
+        boolean recordAdded, boolean recordRemoved, boolean recordStill) {
 
         this.hashText =
-        	getClass().getSimpleName() + 
-        	"<" + elementClass.getSimpleName() + ">" +
-        	"@" + Integer.toHexString( hashCode() ) + "(" + elementTag + ")";
+            getClass().getSimpleName() +
+            "<" + elementClass.getSimpleName() + ">" +
+            "@" + Integer.toHexString( hashCode() ) + "(" + elementTag + ")";
 
         this.elementClass = elementClass;
         this.elementTag = elementTag;
@@ -49,13 +49,13 @@ public class SetDeltaImpl<E> implements Delta {
     protected final Class<E> elementClass;
 
     public Class<E> getElementClass() {
-    	return elementClass;
+        return elementClass;
     }
 
     protected final String elementTag;
-    
+
     public String getElementTag() {
-    	return elementTag;
+        return elementTag;
     }
 
     //
@@ -127,66 +127,66 @@ public class SetDeltaImpl<E> implements Delta {
     //
 
     public void subtract(E[] array_f, E[] array_i) {
-    	if ( ((array_f == null) || (array_f.length == 0)) &&
+        if ( ((array_f == null) || (array_f.length == 0)) &&
              ((array_i == null) || (array_i.length == 0)) ) {
              // Nothing to do: Both lists are empty.
 
         } else if ( (array_f == null) || (array_f.length == 0) ) {
             // Everything in the initial list was removed.
             if ( removed_i != null ) {
-            	for ( E e_i : array_i ) {
-            		removed_i.add(e_i);
-            	}
+                for ( E e_i : array_i ) {
+                    removed_i.add(e_i);
+                }
             }
 
         } else if ( (array_i == null) || (array_i.length == 0) ) {
             // Everything in the final list was added.
-        	if ( added_f != null ) {
-        		for ( E e_f : array_f ) {
-        			added_f.add(e_f);
-        		}
-        	}
+            if ( added_f != null ) {
+                for ( E e_f : array_f ) {
+                    added_f.add(e_f);
+                }
+            }
 
         } else {
-        	// Two non-empty arrays: Have to do the work of comparing them.
+            // Two non-empty arrays: Have to do the work of comparing them.
 
-        	Set<E> set_i = new HashSet<E>(array_i.length);
-        	for ( E e_i : array_i ) {
-        		set_i.add(e_i);
-        	}
-        	Set<E> set_f = new HashSet<E>(array_f.length);
-        	for ( E e_f : array_f ) {
-        		set_f.add(e_f);
-        	}
+            Set<E> set_i = new HashSet<E>(array_i.length);
+            for ( E e_i : array_i ) {
+                set_i.add(e_i);
+            }
+            Set<E> set_f = new HashSet<E>(array_f.length);
+            for ( E e_f : array_f ) {
+                set_f.add(e_f);
+            }
 
-        	for ( E element_f : set_f ) {
-        		if ( !set_i.contains(element_f) ) {
-        			if ( added_f != null ) {
-        				added_f.add(element_f);
-        			}
-        		} else {
-        			if ( still_f != null ) {
-        				still_f.add(element_f);
-        			}
-        		}
-        	}
+            for ( E element_f : set_f ) {
+                if ( !set_i.contains(element_f) ) {
+                    if ( added_f != null ) {
+                        added_f.add(element_f);
+                    }
+                } else {
+                    if ( still_f != null ) {
+                        still_f.add(element_f);
+                    }
+                }
+            }
 
-        	for ( E element_i : set_i ) {
-        		if ( !set_f.contains(element_i) ) {
-        			if ( removed_i != null ) {
-        				removed_i.add(element_i);
-        			}
-        		} else {
-        			// if ( still_i != null ) {
-        			//     still_i.add(element_i);
-        			// }
-        		}
-        	}
+            for ( E element_i : set_i ) {
+                if ( !set_f.contains(element_i) ) {
+                    if ( removed_i != null ) {
+                        removed_i.add(element_i);
+                    }
+                } else {
+                    // if ( still_i != null ) {
+                    //     still_i.add(element_i);
+                    // }
+                }
+            }
         }
     }
 
     public void subtract(List<E> list_f, List<E> list_i) {
-    	if ( ((list_f == null) || list_f.isEmpty()) &&
+        if ( ((list_f == null) || list_f.isEmpty()) &&
              ((list_i == null) || list_i.isEmpty()) ) {
              // Nothing to do: Both lists are empty.
 
@@ -198,39 +198,39 @@ public class SetDeltaImpl<E> implements Delta {
 
         } else if ( (list_i == null) || list_i.isEmpty() ) {
             // Everything in the final list was added.
-        	if ( added_f != null ) {
-        		added_f.addAll(list_f);
-        	}
+            if ( added_f != null ) {
+                added_f.addAll(list_f);
+            }
 
         } else {
-        	// Two non-empty lists: Have to do the work of comparing them.
+            // Two non-empty lists: Have to do the work of comparing them.
 
-        	Set<E> set_i = new HashSet<E>(list_i);
-        	Set<E> set_f = new HashSet<E>(list_f);
+            Set<E> set_i = new HashSet<E>(list_i);
+            Set<E> set_f = new HashSet<E>(list_f);
 
-        	for ( E element_f : set_f ) {
-        		if ( !set_i.contains(element_f) ) {
-        			if ( added_f != null ) {
-        				added_f.add(element_f);
-        			}
-        		} else {
-        			if ( still_f != null ) {
-        				still_f.add(element_f);
-        			}
-        		}
-        	}
+            for ( E element_f : set_f ) {
+                if ( !set_i.contains(element_f) ) {
+                    if ( added_f != null ) {
+                        added_f.add(element_f);
+                    }
+                } else {
+                    if ( still_f != null ) {
+                        still_f.add(element_f);
+                    }
+                }
+            }
 
-        	for ( E element_i : set_i ) {
-        		if ( !set_f.contains(element_i) ) {
-        			if ( removed_i != null ) {
-        				removed_i.add(element_i);
-        			}
-        		} else {
-        			// if ( still_i != null ) {
-        			//     still_i.add(element_i);
-        			// }
-        		}
-        	}
+            for ( E element_i : set_i ) {
+                if ( !set_f.contains(element_i) ) {
+                    if ( removed_i != null ) {
+                        removed_i.add(element_i);
+                    }
+                } else {
+                    // if ( still_i != null ) {
+                    //     still_i.add(element_i);
+                    // }
+                }
+            }
         }
     }
 
@@ -252,31 +252,31 @@ public class SetDeltaImpl<E> implements Delta {
             }
 
         } else {
-        	// Two non-empty sets: Have to do the work of comparing them.
+            // Two non-empty sets: Have to do the work of comparing them.
 
-        	for ( E element_f : set_f ) {
-        		if ( !set_i.contains(element_f) ) {
-        			if ( added_f != null ) {
-        				added_f.add(element_f);
-        			}
-        		} else {
-        			if ( still_f != null ) {
-        				still_f.add(element_f);
-        			}
-        		}
-        	}
+            for ( E element_f : set_f ) {
+                if ( !set_i.contains(element_f) ) {
+                    if ( added_f != null ) {
+                        added_f.add(element_f);
+                    }
+                } else {
+                    if ( still_f != null ) {
+                        still_f.add(element_f);
+                    }
+                }
+            }
 
-        	for ( E element_i : set_i ) {
-        		if ( !set_f.contains(element_i) ) {
-        			if ( removed_i != null ) {
-        				removed_i.add(element_i);
-        			}
-        		} else {
-        			// if ( still_i != null ) {
-        			//     still_i.add(element_i);
-        			// }
-        		}
-        	}
+            for ( E element_i : set_i ) {
+                if ( !set_f.contains(element_i) ) {
+                    if ( removed_i != null ) {
+                        removed_i.add(element_i);
+                    }
+                } else {
+                    // if ( still_i != null ) {
+                    //     still_i.add(element_i);
+                    // }
+                }
+            }
         }
     }
 
@@ -284,9 +284,9 @@ public class SetDeltaImpl<E> implements Delta {
 
     @Override
     public void log(PrintWriter writer) {
-    	String methodName = "log";
+        String methodName = "log";
 
-    	String prefix = CLASS_NAME + ": " + methodName + ": ";
+        String prefix = CLASS_NAME + ": " + methodName + ": ";
 
         if ( isNull() ) {
             if ( still_f == null ) {

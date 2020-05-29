@@ -33,7 +33,7 @@ import aQute.lib.utf8properties.UTF8Properties;
  * When true, the output stream will be cached: assigned once during
  * initialization and re-used independently of the current values
  * of System.out and System.err.
- * Defaults to false. 
+ * Defaults to false.
  *
  * org.slf4j.simpleLogger.defaultLogLevel
  * Default log level all root SimpleLogger instances,
@@ -54,7 +54,7 @@ import aQute.lib.utf8properties.UTF8Properties;
  *
  * org.slf4j.simpleLogger.dateTimeFormat
  * The format to use for date and time values which are included in log messages.
- * Formats are specified according to: 
+ * Formats are specified according to:
  * <a href="http://docs.oracle.com/javase/1.5.0/docs/api/java/text/SimpleDateFormat.html">SimpleDateFormat</a>.
  * Defaults to display the the number of milliseconds since the logger was
  * initialized.  The default is used if a non-valid format is specified.
@@ -81,254 +81,254 @@ import aQute.lib.utf8properties.UTF8Properties;
  * Defaults to "WARN".
  */
 public class TransformerLoggerFactory {
-	public TransformerLoggerFactory(Transformer transformer) {
-		this.transformer = transformer;
-		this.settings = new LoggerSettings(this.transformer);
-	}
+    public TransformerLoggerFactory(Transformer transformer) {
+        this.transformer = transformer;
+        this.settings = new LoggerSettings(this.transformer);
+    }
 
-	public final Transformer transformer;
+    public final Transformer transformer;
 
-	public Transformer getTransformer() {
-		return transformer;
-	}
+    public Transformer getTransformer() {
+        return transformer;
+    }
 
-	public LoggerSettings settings;
+    public LoggerSettings settings;
 
-	public LoggerSettings getSettings() {
-		return settings;
-	}
+    public LoggerSettings getSettings() {
+        return settings;
+    }
 
-	protected void verboseOutput(String message, Object...parms) {
-		if ( settings.isVerbose ) {
-			transformer.outputPrint(message, parms);
-		}
-	}
-	
-	protected void normalOutput(String message, Object...parms) {
-		if ( !settings.isVerbose && !settings.isTerse ) {
-			transformer.outputPrint(message, parms);
-		}
-	}
-	
-	protected void nonTerseOutput(String message, Object...parms) {
-		if ( !settings.isTerse ) {
-			transformer.outputPrint(message, parms);
-		}
-	}
+    protected void verboseOutput(String message, Object...parms) {
+        if ( settings.isVerbose ) {
+            transformer.outputPrint(message, parms);
+        }
+    }
 
-	protected void terseOutput(String message, Object...parms) {
-		if ( settings.isTerse ) {
-			transformer.outputPrint(message, parms);
-		}
-	}
+    protected void normalOutput(String message, Object...parms) {
+        if ( !settings.isVerbose && !settings.isTerse ) {
+            transformer.outputPrint(message, parms);
+        }
+    }
 
-	// Options from the transformer:
-	//
-	// LOG_TERSE("q", "quiet", "Display quiet output",
-	//     !OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
-	//     !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
-	// LOG_VERBOSE("v", "verbose", "Display verbose output",
-	//     !OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
-	//     !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
-	// LOG_PROPERTY("lp", "logProperty", "Logging property",
-	//     !OptionSettings.HAS_ARG, OptionSettings.HAS_ARGS,
-	//     !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
-	// LOG_PROPERTY_FILE("lpf", "logPropertyFile", "Logging properties file",
-	//     OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
-	//     !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
-	// LOG_LEVEL("ll", "logLevel", "Logging level",
-	//     OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
-	//     !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
+    protected void nonTerseOutput(String message, Object...parms) {
+        if ( !settings.isTerse ) {
+            transformer.outputPrint(message, parms);
+        }
+    }
+
+    protected void terseOutput(String message, Object...parms) {
+        if ( settings.isTerse ) {
+            transformer.outputPrint(message, parms);
+        }
+    }
+
+    // Options from the transformer:
+    //
+    // LOG_TERSE("q", "quiet", "Display quiet output",
+    //     !OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
+    //     !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
+    // LOG_VERBOSE("v", "verbose", "Display verbose output",
+    //     !OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
+    //     !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
+    // LOG_PROPERTY("lp", "logProperty", "Logging property",
+    //     !OptionSettings.HAS_ARG, OptionSettings.HAS_ARGS,
+    //     !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
+    // LOG_PROPERTY_FILE("lpf", "logPropertyFile", "Logging properties file",
+    //     OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
+    //     !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
+    // LOG_LEVEL("ll", "logLevel", "Logging level",
+    //     OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
+    //     !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
     // LOG_FILE("lf", "logFile", "Logging file",
-	//     OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
-	//     !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
+    //     OptionSettings.HAS_ARG, !OptionSettings.HAS_ARGS,
+    //     !OptionSettings.IS_REQUIRED, OptionSettings.NO_GROUP),
 
-	public static class LoggerSettings {
-		public final boolean isTerse;
-		public final boolean isVerbose;
+    public static class LoggerSettings {
+        public final boolean isTerse;
+        public final boolean isVerbose;
 
-		public final String[] properties;
-		public final String propertyFileName;
+        public final String[] properties;
+        public final String propertyFileName;
 
-		public final String logName;
-		public final String logLevel;
-		public final String logFileName;
-		
-		public LoggerSettings(Transformer transformer) {
-			this.isTerse = transformer.hasOption(Transformer.AppOption.LOG_TERSE);
-			this.isVerbose = transformer.hasOption(Transformer.AppOption.LOG_VERBOSE);
+        public final String logName;
+        public final String logLevel;
+        public final String logFileName;
 
-			this.properties = transformer.getOptionValues(Transformer.AppOption.LOG_PROPERTY);
-			this.propertyFileName = transformer.getOptionValue(Transformer.AppOption.LOG_PROPERTY_FILE, Transformer.DO_NORMALIZE);
+        public LoggerSettings(Transformer transformer) {
+            this.isTerse = transformer.hasOption(Transformer.AppOption.LOG_TERSE);
+            this.isVerbose = transformer.hasOption(Transformer.AppOption.LOG_VERBOSE);
 
-			this.logName = transformer.getOptionValue(Transformer.AppOption.LOG_NAME);
+            this.properties = transformer.getOptionValues(Transformer.AppOption.LOG_PROPERTY);
+            this.propertyFileName = transformer.getOptionValue(Transformer.AppOption.LOG_PROPERTY_FILE, Transformer.doNormalize);
 
-			this.logLevel = transformer.getOptionValue(Transformer.AppOption.LOG_LEVEL);
-			this.logFileName = transformer.getOptionValue(Transformer.AppOption.LOG_FILE, Transformer.DO_NORMALIZE);
-		}
-	}
+            this.logName = transformer.getOptionValue(Transformer.AppOption.LOG_NAME);
 
-	//
+            this.logLevel = transformer.getOptionValue(Transformer.AppOption.LOG_LEVEL);
+            this.logFileName = transformer.getOptionValue(Transformer.AppOption.LOG_FILE, Transformer.doNormalize);
+        }
+    }
 
-	public Logger createLogger() throws TransformException {
-		setLoggingProperties(); // throws TransformException
-		String logName = selectLoggerName();
-		return LoggerFactory.getLogger(logName);
-	}
+    //
 
-	protected void setLoggingProperties() throws TransformException {
-		if ( settings.logFileName != null ) {
-			setLoggingProperty(LoggerProperty.LOG_FILE.getPropertyName(), settings.logFileName);
-		}
+    public Logger createLogger() throws TransformException {
+        setLoggingProperties(); // throws TransformException
+        String logName = selectLoggerName();
+        return LoggerFactory.getLogger(logName);
+    }
 
-		if ( settings.logLevel != null ) {
-			setLoggingProperty(LoggerProperty.LOG_LEVEL_ROOT.getPropertyName(), settings.logLevel);
-		}
+    protected void setLoggingProperties() throws TransformException {
+        if ( settings.logFileName != null ) {
+            setLoggingProperty(LoggerProperty.LOG_FILE.getPropertyName(), settings.logFileName);
+        }
 
-		if ( settings.properties != null ) {
-			for ( String propertyAssignment : settings.properties ) {
-				assignLoggingProperty(propertyAssignment); // throws TransformException
-			}
-		}
+        if ( settings.logLevel != null ) {
+            setLoggingProperty(LoggerProperty.LOG_LEVEL_ROOT.getPropertyName(), settings.logLevel);
+        }
 
-		if ( settings.propertyFileName != null ) {
-			UTF8Properties properties;
-			try {
-				properties = transformer.loadExternalProperties("Logging Properties File", settings.propertyFileName);
-			} catch ( Exception e ) {
-				throw new TransformException("Failed to load logging properties [ " + settings.propertyFileName + " ]", e);
-			}
+        if ( settings.properties != null ) {
+            for ( String propertyAssignment : settings.properties ) {
+                assignLoggingProperty(propertyAssignment); // throws TransformException
+            }
+        }
 
-			for ( Entry<Object, Object> propertyEntry : properties.entrySet() ) {
-				String propertyName = propertyEntry.getKey().toString();
-				String propertyValue = propertyEntry.getValue().toString();
-				setLoggingProperty(propertyName, propertyValue); // throws TransformException
-			}
-		}
+        if ( settings.propertyFileName != null ) {
+            UTF8Properties properties;
+            try {
+                properties = transformer.loadExternalProperties("Logging Properties File", settings.propertyFileName);
+            } catch ( Exception e ) {
+                throw new TransformException("Failed to load logging properties [ " + settings.propertyFileName + " ]", e);
+            }
 
-		if ( settings.isTerse ) {
-			// Don't report; in terse mode!
-		} else if ( settings.isVerbose ) {
-			nonTerseOutput("Verbose output requested");
-		} else {
-			// Don't use of default logging mode
-		}
-	}
+            for ( Entry<Object, Object> propertyEntry : properties.entrySet() ) {
+                String propertyName = propertyEntry.getKey().toString();
+                String propertyValue = propertyEntry.getValue().toString();
+                setLoggingProperty(propertyName, propertyValue); // throws TransformException
+            }
+        }
 
-	protected String selectLoggerName() {
-		String logNameCase;
-		String logName;
-		if ( settings.logName == null ) {
-			logNameCase = "Defaulted";
-			logName = Transformer.class.getSimpleName();
-		} else {
-			logNameCase = "Assigned";
-			logName = settings.logName;
-		}
-		nonTerseOutput("Logger name [ %s ] (%s)", logName, logNameCase);
+        if ( settings.isTerse ) {
+            // Don't report; in terse mode!
+        } else if ( settings.isVerbose ) {
+            nonTerseOutput("Verbose output requested");
+        } else {
+            // Don't use of default logging mode
+        }
+    }
 
-		return logName;
-	}
+    protected String selectLoggerName() {
+        String logNameCase;
+        String logName;
+        if ( settings.logName == null ) {
+            logNameCase = "Defaulted";
+            logName = Transformer.class.getSimpleName();
+        } else {
+            logNameCase = "Assigned";
+            logName = settings.logName;
+        }
+        nonTerseOutput("Logger name [ %s ] (%s)", logName, logNameCase);
 
-	//
-	
-	protected static final String SIMPLE_LOGGER_PROPERTY_PREFIX = "org.slf4j.simpleLogger."; 
+        return logName;
+    }
 
-	protected String completePropertyName(String propertyName) {
-		if ( propertyName.startsWith(SIMPLE_LOGGER_PROPERTY_PREFIX) ) {
-			return null;
-		} else if ( propertyName.contains(".") ) {
-			return null;
-		} else {
-			return SIMPLE_LOGGER_PROPERTY_PREFIX + propertyName;
-		}
-	}
+    //
 
-	protected String[] parseAssignment(String propertyAssignment) {
-		int equalsOffset = propertyAssignment.indexOf("=");
-		if ( equalsOffset == -1 ) {
-			return null;
-		} else {
-			String propertyName = propertyAssignment.substring(0, equalsOffset);
-			String propertyValue = propertyAssignment.substring(equalsOffset + 1);
-			if ( propertyName.isEmpty() || propertyValue.isEmpty() ) {
-				return null;
-			}
-			return new String[] { propertyName, propertyValue };
-		}
-	}
+    protected static final String SIMPLE_LOGGER_PROPERTY_PREFIX = "org.slf4j.simpleLogger.";
 
-	protected void assignLoggingProperty(String propertyAssignment) throws TransformException {
-		String[] assignmentValues = parseAssignment(propertyAssignment);
-		if ( assignmentValues == null ) {
-			throw new TransformException("Malformed logger property assignment [ " + propertyAssignment + " ]");
-		}
-		
-		String propertyName = assignmentValues[0];
-		String propertyValue = assignmentValues[1];
+    protected String completePropertyName(String propertyName) {
+        if ( propertyName.startsWith(SIMPLE_LOGGER_PROPERTY_PREFIX) ) {
+            return null;
+        } else if ( propertyName.contains(".") ) {
+            return null;
+        } else {
+            return SIMPLE_LOGGER_PROPERTY_PREFIX + propertyName;
+        }
+    }
 
-		String completedPropertyName = completePropertyName(propertyName);
-		if ( completedPropertyName != null ) {
-			verboseOutput(
-				"Transformer logging property adjusted from [ %s ] to [ %s ]",
-				propertyName, completedPropertyName, propertyValue);
-		} else {
-			completedPropertyName = propertyName;
-		}
+    protected String[] parseAssignment(String propertyAssignment) {
+        int equalsOffset = propertyAssignment.indexOf("=");
+        if ( equalsOffset == -1 ) {
+            return null;
+        } else {
+            String propertyName = propertyAssignment.substring(0, equalsOffset);
+            String propertyValue = propertyAssignment.substring(equalsOffset + 1);
+            if ( propertyName.isEmpty() || propertyValue.isEmpty() ) {
+                return null;
+            }
+            return new String[] { propertyName, propertyValue };
+        }
+    }
 
-		setLoggingProperty(completedPropertyName, propertyValue);
-	}
+    protected void assignLoggingProperty(String propertyAssignment) throws TransformException {
+        String[] assignmentValues = parseAssignment(propertyAssignment);
+        if ( assignmentValues == null ) {
+            throw new TransformException("Malformed logger property assignment [ " + propertyAssignment + " ]");
+        }
 
-	public enum LoggerProperty {
-		LOG_FILE("org.slf4j.simpleLogger.logFile"),
-		LOG_CACHE_OUTPUT("org.slf4j.simpleLogger.cacheOutputStream"),
+        String propertyName = assignmentValues[0];
+        String propertyValue = assignmentValues[1];
 
-		LOG_LEVEL_ROOT("org.slf4j.simpleLogger.defaultLogLevel"),
-		LOG_LEVEL_CHILD("org.slf4j.simpleLogger.log.a.b.c"),
-		LOG_LEVEL_IN_BRACkETS("org.slf4j.simpleLogger.levelInBrackets"),
+        String completedPropertyName = completePropertyName(propertyName);
+        if ( completedPropertyName != null ) {
+            verboseOutput(
+                "Transformer logging property adjusted from [ %s ] to [ %s ]",
+                propertyName, completedPropertyName, propertyValue);
+        } else {
+            completedPropertyName = propertyName;
+        }
 
-		LOG_SHOW_DATE_TIME("org.slf4j.simpleLogger.showDateTime"),
-		LOG_DATE_TIME_FORMAT("org.slf4j.simpleLogger.dateTimeFormat"),
-		LOG_SHOW_THREAD_NAME("org.slf4j.simpleLogger.showThreadName"),
-		LOG_SHOW_LOG_NAME("org.slf4j.simpleLogger.showLogName"),
-		LOG_SHOW_SHORT_LOG_NAME("org.slf4j.simpleLogger.showShortLogName"),
-		LOG_WARN_STRING("org.slf4j.simpleLogger.warnLevelString");
+        setLoggingProperty(completedPropertyName, propertyValue);
+    }
 
-		private LoggerProperty(String propertyName) {
-			this.propertyName = propertyName;
-		}
+    public enum LoggerProperty {
+        LOG_FILE("org.slf4j.simpleLogger.logFile"),
+        LOG_CACHE_OUTPUT("org.slf4j.simpleLogger.cacheOutputStream"),
 
-		private final String propertyName;
+        LOG_LEVEL_ROOT("org.slf4j.simpleLogger.defaultLogLevel"),
+        LOG_LEVEL_CHILD("org.slf4j.simpleLogger.log.a.b.c"),
+        LOG_LEVEL_IN_BRACkETS("org.slf4j.simpleLogger.levelInBrackets"),
 
-		public String getPropertyName() {
-			return propertyName;
-		}
-	}
+        LOG_SHOW_DATE_TIME("org.slf4j.simpleLogger.showDateTime"),
+        LOG_DATE_TIME_FORMAT("org.slf4j.simpleLogger.dateTimeFormat"),
+        LOG_SHOW_THREAD_NAME("org.slf4j.simpleLogger.showThreadName"),
+        LOG_SHOW_LOG_NAME("org.slf4j.simpleLogger.showLogName"),
+        LOG_SHOW_SHORT_LOG_NAME("org.slf4j.simpleLogger.showShortLogName"),
+        LOG_WARN_STRING("org.slf4j.simpleLogger.warnLevelString");
 
-	protected void setLoggingProperty(String propertyName, String newPropertyValue) {
-		String oldPropertyValue = System.getProperty(propertyName);
+        private LoggerProperty(String propertyName) {
+            this.propertyName = propertyName;
+        }
 
-		if ( oldPropertyValue != null ) {
-			nonTerseOutput(
-				"Blocked assignment of logging property [ %s ] to [ %s ] by prior value [ %s ]",
-				propertyName, newPropertyValue, oldPropertyValue);
+        private final String propertyName;
 
-		} else {
-			System.setProperty(propertyName, newPropertyValue);
+        public String getPropertyName() {
+            return propertyName;
+        }
+    }
 
-			nonTerseOutput(
-				"Assigning logging property [ %s ] to [ %s ]",
-				propertyName, newPropertyValue);
-		}
-	}
+    protected void setLoggingProperty(String propertyName, String newPropertyValue) {
+        String oldPropertyValue = System.getProperty(propertyName);
 
-	public static boolean logToSysOut() {
-		String logFile = System.getProperty( LoggerProperty.LOG_FILE.getPropertyName() );
-		return ( (logFile != null) && logFile.equals("System.out") );
-	}
+        if ( oldPropertyValue != null ) {
+            nonTerseOutput(
+                "Blocked assignment of logging property [ %s ] to [ %s ] by prior value [ %s ]",
+                propertyName, newPropertyValue, oldPropertyValue);
 
-	public static boolean logToSysErr() {
-		String logFile = System.getProperty( LoggerProperty.LOG_FILE.getPropertyName() );
-		return ( (logFile == null) || logFile.equals("System.err") );
-	}
+        } else {
+            System.setProperty(propertyName, newPropertyValue);
+
+            nonTerseOutput(
+                "Assigning logging property [ %s ] to [ %s ]",
+                propertyName, newPropertyValue);
+        }
+    }
+
+    public static boolean logToSysOut() {
+        String logFile = System.getProperty( LoggerProperty.LOG_FILE.getPropertyName() );
+        return ( (logFile != null) && logFile.equals("System.out") );
+    }
+
+    public static boolean logToSysErr() {
+        String logFile = System.getProperty( LoggerProperty.LOG_FILE.getPropertyName() );
+        return ( (logFile == null) || logFile.equals("System.err") );
+    }
 }

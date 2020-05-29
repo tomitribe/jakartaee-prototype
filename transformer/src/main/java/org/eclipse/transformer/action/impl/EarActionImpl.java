@@ -15,29 +15,29 @@ import org.eclipse.transformer.action.ActionType;
 import org.slf4j.Logger;
 
 public class EarActionImpl extends ContainerActionImpl {
-	public EarActionImpl(
-		Logger logger, boolean isTerse, boolean isVerbose,
-		InputBufferImpl buffer,
-		SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
+    public EarActionImpl(
+        Logger logger, boolean isTerse, boolean isVerbose,
+        InputBufferImpl buffer,
+        SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
 
-		super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
-	}
+        super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
+    }
 
-	//
+    //
 
-	public String getName() {
-		return "EAR Action";
-	}
+    public String getName() {
+        return "EAR Action";
+    }
 
-	@Override
-	public ActionType getActionType() {
-		return ActionType.EAR;
-	}
+    @Override
+    public ActionType getActionType() {
+        return ActionType.EAR;
+    }
 
-	//
+    //
 
-	@Override
-	public String getAcceptExtension() {
-		return ".ear";
-	}
+    @Override
+    public String getAcceptExtension() {
+        return ".ear";
+    }
 }

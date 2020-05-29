@@ -29,9 +29,9 @@ import org.slf4j.Logger;
 
 /**
  * Transform service configuration bytes.
- * 
+ *
  * Per: https://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html
- *	
+ *
  * A service provider is identified by placing a provider-configuration file in the
  * resource directory META-INF/services. The file's name is the fully-qualified binary
  * name of the service's type. The file contains a list of fully-qualified binary names
@@ -41,247 +41,247 @@ import org.slf4j.Logger;
  * must be encoded in UTF-8.
  */
 public class ServiceLoaderConfigActionImpl extends ActionImpl {
-	public static final String META_INF = "META-INF/";
-	public static final String META_INF_SERVICES = "META-INF/services/";
+    public static final String META_INF = "META-INF/";
+    public static final String META_INF_SERVICES = "META-INF/services/";
 
-	//
+    //
 
-	public ServiceLoaderConfigActionImpl(
-		Logger logger, boolean isTerse, boolean isVerbose,
-		InputBufferImpl buffer,
-		SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
+    public ServiceLoaderConfigActionImpl(
+        Logger logger, boolean isTerse, boolean isVerbose,
+        InputBufferImpl buffer,
+        SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
 
-		super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
-	}
+        super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
+    }
 
-	//
+    //
 
-	public String getName() {
-		return "Service Config Action";
-	}
+    public String getName() {
+        return "Service Config Action";
+    }
 
-	@Override
-	public ActionType getActionType() {
-		return ActionType.SERVICE_LOADER_CONFIG;
-	}
+    @Override
+    public ActionType getActionType() {
+        return ActionType.SERVICE_LOADER_CONFIG;
+    }
 
-	//
+    //
 
-	@Override
-	protected ServiceLoaderConfigChangesImpl newChanges() {
-		return new ServiceLoaderConfigChangesImpl();
-	}
+    @Override
+    protected ServiceLoaderConfigChangesImpl newChanges() {
+        return new ServiceLoaderConfigChangesImpl();
+    }
 
-	@Override
-	public ServiceLoaderConfigChangesImpl getLastActiveChanges() {
-		return (ServiceLoaderConfigChangesImpl) super.getLastActiveChanges();
-	}
+    @Override
+    public ServiceLoaderConfigChangesImpl getLastActiveChanges() {
+        return (ServiceLoaderConfigChangesImpl) super.getLastActiveChanges();
+    }
 
-	@Override
-	public ServiceLoaderConfigChangesImpl getActiveChanges() {
-		return (ServiceLoaderConfigChangesImpl) super.getActiveChanges();
-	}
+    @Override
+    public ServiceLoaderConfigChangesImpl getActiveChanges() {
+        return (ServiceLoaderConfigChangesImpl) super.getActiveChanges();
+    }
 
-	protected void addUnchangedProvider() {
-		getActiveChanges().addUnchangedProvider();
-	}
+    protected void addUnchangedProvider() {
+        getActiveChanges().addUnchangedProvider();
+    }
 
-	protected void addChangedProvider() {
-		getActiveChanges().addChangedProvider();
-	}
+    protected void addChangedProvider() {
+        getActiveChanges().addChangedProvider();
+    }
 
-	//
+    //
 
-	@Override
-	public String getAcceptExtension() {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public String getAcceptExtension() {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public boolean accept(String resourceName, File resourceFile) {
-		return resourceName.contains(META_INF_SERVICES);
-	}
+    @Override
+    public boolean accept(String resourceName, File resourceFile) {
+        return resourceName.contains(META_INF_SERVICES);
+    }
 
-	//
+    //
 
-	@Override
-	public ByteData apply(String inputName, byte[] inputBytes, int inputLength) 
-		throws TransformException {
+    @Override
+    public ByteData apply(String inputName, byte[] inputBytes, int inputLength)
+        throws TransformException {
 
-		String outputName = renameInput(inputName);
-		if ( outputName == null ) {
-			outputName = inputName;
-		} else {
-			verbose("Service name  [ {} ] -> [ {} ]", inputName, outputName);
-		}
-		setResourceNames(inputName, outputName);
+        String outputName = renameInput(inputName);
+        if ( outputName == null ) {
+            outputName = inputName;
+        } else {
+            verbose("Service name  [ {} ] -> [ {} ]", inputName, outputName);
+        }
+        setResourceNames(inputName, outputName);
 
-		InputStream inputStream = new ByteArrayInputStream(inputBytes);
-		InputStreamReader inputReader;
-		try {
-			inputReader = new InputStreamReader(inputStream, "UTF-8");
-		} catch ( UnsupportedEncodingException e ) {
-			error("Strange: UTF-8 is an unrecognized encoding for reading [ {} ]", e, inputName);
-			return null;
-		}
+        InputStream inputStream = new ByteArrayInputStream(inputBytes);
+        InputStreamReader inputReader;
+        try {
+            inputReader = new InputStreamReader(inputStream, "UTF-8");
+        } catch ( UnsupportedEncodingException e ) {
+            error("Strange: UTF-8 is an unrecognized encoding for reading [ {} ]", e, inputName);
+            return null;
+        }
 
-		BufferedReader reader = new BufferedReader(inputReader);
+        BufferedReader reader = new BufferedReader(inputReader);
 
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream(inputBytes.length);
-		OutputStreamWriter outputWriter;
-		try {
-			outputWriter = new OutputStreamWriter(outputStream, "UTF-8");
-		} catch ( UnsupportedEncodingException e ) {
-			error("Strange: UTF-8 is an unrecognized encoding for writing [ {} ]", e, inputName);
-			return null;
-		}
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(inputBytes.length);
+        OutputStreamWriter outputWriter;
+        try {
+            outputWriter = new OutputStreamWriter(outputStream, "UTF-8");
+        } catch ( UnsupportedEncodingException e ) {
+            error("Strange: UTF-8 is an unrecognized encoding for writing [ {} ]", e, inputName);
+            return null;
+        }
 
-		BufferedWriter writer = new BufferedWriter(outputWriter);
+        BufferedWriter writer = new BufferedWriter(outputWriter);
 
-		try {
-			transform(reader, writer); // throws IOException
-		} catch ( IOException e ) {
-			error("Failed to transform [ {} ]", e, inputName);
-			return null;
-		}
+        try {
+            transform(reader, writer); // throws IOException
+        } catch ( IOException e ) {
+            error("Failed to transform [ {} ]", e, inputName);
+            return null;
+        }
 
-		try {
-			writer.flush(); // throws
-		} catch ( IOException e ) {
-			error("Failed to flush [ {} ]", e, inputName);
-			return null;
-		}
+        try {
+            writer.flush(); // throws
+        } catch ( IOException e ) {
+            error("Failed to flush [ {} ]", e, inputName);
+            return null;
+        }
 
-		if ( !hasNonResourceNameChanges() ) {
-			return null;
-		}
+        if ( !hasNonResourceNameChanges() ) {
+            return null;
+        }
 
-		byte[] outputBytes = outputStream.toByteArray();
-		return new ByteData(inputName, outputBytes, 0, outputBytes.length);
-	}
+        byte[] outputBytes = outputStream.toByteArray();
+        return new ByteData(inputName, outputBytes, 0, outputBytes.length);
+    }
 
-	protected void transform(BufferedReader reader, BufferedWriter writer)
-		throws IOException {
+    protected void transform(BufferedReader reader, BufferedWriter writer)
+        throws IOException {
 
-		String inputLine;
-		while ( (inputLine = reader.readLine()) != null ) { // throws IOException
-			// Goal is to find the input package name.  Find it by
-			// successively taking text off of the input line.
+        String inputLine;
+        while ( (inputLine = reader.readLine()) != null ) { // throws IOException
+            // Goal is to find the input package name.  Find it by
+            // successively taking text off of the input line.
 
-			String inputPackageName;
+            String inputPackageName;
 
-			// The first '#' and all following characters are ignored.
+            // The first '#' and all following characters are ignored.
 
-			int poundLocation = inputLine.indexOf('#');
-			if ( poundLocation != -1 ) {
-				inputPackageName = inputLine.substring(0, poundLocation);
-			} else {
-				inputPackageName = inputLine;
-			}
+            int poundLocation = inputLine.indexOf('#');
+            if ( poundLocation != -1 ) {
+                inputPackageName = inputLine.substring(0, poundLocation);
+            } else {
+                inputPackageName = inputLine;
+            }
 
-			// Leading and trailing whitespace which surrounds the fully
-			// qualified name is ignored.  This step must be done after
-			// trimming off a comment, since the trim must be of immediately
-			// surrounding whitespace.
+            // Leading and trailing whitespace which surrounds the fully
+            // qualified name is ignored.  This step must be done after
+            // trimming off a comment, since the trim must be of immediately
+            // surrounding whitespace.
 
-			inputPackageName = inputPackageName.trim();
+            inputPackageName = inputPackageName.trim();
 
-			// Renames are performed on package names.  Per the documentation,
-			// the values are fully qualified class names.
+            // Renames are performed on package names.  Per the documentation,
+            // the values are fully qualified class names.
 
-			int dotLocation;
-			String outputPackageName;
+            int dotLocation;
+            String outputPackageName;
 
-			if ( inputPackageName.isEmpty() ) {
-				// The line was either entirely blank space, or was just
-				// comment.  There is no package to rename.
-				dotLocation = -1;
-				outputPackageName = null;
+            if ( inputPackageName.isEmpty() ) {
+                // The line was either entirely blank space, or was just
+                // comment.  There is no package to rename.
+                dotLocation = -1;
+                outputPackageName = null;
 
-			} else {
-				dotLocation = inputPackageName.lastIndexOf('.');
-				if ( dotLocation == -1 ) {
-					// A class which uses the default package: There is no package
-					// to rename.
-					outputPackageName = null;
-				} else if ( dotLocation == 0 ) {
-					// Strange leading ".": Ignore it.
-					outputPackageName = null;
-				} else {
-					// Nab just the fully qualified package name.
-					inputPackageName = inputPackageName.substring(0, dotLocation);
-					// And perform any renames which apply.
-					outputPackageName = replacePackage(inputPackageName);
-				}
-			}
+            } else {
+                dotLocation = inputPackageName.lastIndexOf('.');
+                if ( dotLocation == -1 ) {
+                    // A class which uses the default package: There is no package
+                    // to rename.
+                    outputPackageName = null;
+                } else if ( dotLocation == 0 ) {
+                    // Strange leading ".": Ignore it.
+                    outputPackageName = null;
+                } else {
+                    // Nab just the fully qualified package name.
+                    inputPackageName = inputPackageName.substring(0, dotLocation);
+                    // And perform any renames which apply.
+                    outputPackageName = replacePackage(inputPackageName);
+                }
+            }
 
-			String outputLine;
+            String outputLine;
 
-			if ( outputPackageName == null ) {
-				// For one of the reasons, above, no rename was performed on the line.
-				outputLine = inputLine;
-				addUnchangedProvider();
+            if ( outputPackageName == null ) {
+                // For one of the reasons, above, no rename was performed on the line.
+                outputLine = inputLine;
+                addUnchangedProvider();
 
-			} else {
-				// Not most efficient, but good enough:
-				// Service configuration files are expected to have only a few
-				// values, and these are expected to use little or no white space.
+            } else {
+                // Not most efficient, but good enough:
+                // Service configuration files are expected to have only a few
+                // values, and these are expected to use little or no white space.
 
-				// Figure where the input fully qualified package name began and ended.
+                // Figure where the input fully qualified package name began and ended.
 
-				int inputPackageStart = inputLine.indexOf(inputPackageName);
-				int inputPackageEnd = inputPackageStart + dotLocation;
-		
-				// Recover as much of the original file as possible.
+                int inputPackageStart = inputLine.indexOf(inputPackageName);
+                int inputPackageEnd = inputPackageStart + dotLocation;
 
-				outputLine =
-					inputLine.substring(0, inputPackageStart) +
-					outputPackageName +
-					inputLine.substring(inputPackageEnd);
+                // Recover as much of the original file as possible.
 
-				addChangedProvider();
-			}
+                outputLine =
+                    inputLine.substring(0, inputPackageStart) +
+                    outputPackageName +
+                    inputLine.substring(inputPackageEnd);
 
-			writer.write(outputLine); // throws IOException
-			writer.newLine(); // throws IOException
-		}
-	}
+                addChangedProvider();
+            }
 
-	protected String renameInput(String inputName) {
-		String inputPrefix;
-		String serviceQualifiedName;
+            writer.write(outputLine); // throws IOException
+            writer.newLine(); // throws IOException
+        }
+    }
 
-		int lastSlash = inputName.lastIndexOf('/');
-		if ( lastSlash == -1 ) {
-			inputPrefix = null;
-			serviceQualifiedName = inputName;
-		} else {
-			inputPrefix = inputName.substring(0, lastSlash + 1);
-			serviceQualifiedName = inputName.substring(lastSlash + 1);
-		}
+    protected String renameInput(String inputName) {
+        String inputPrefix;
+        String serviceQualifiedName;
 
-		int classStart = serviceQualifiedName.lastIndexOf('.');
-		if ( classStart == -1 ) {
-			return null;
-		}
+        int lastSlash = inputName.lastIndexOf('/');
+        if ( lastSlash == -1 ) {
+            inputPrefix = null;
+            serviceQualifiedName = inputName;
+        } else {
+            inputPrefix = inputName.substring(0, lastSlash + 1);
+            serviceQualifiedName = inputName.substring(lastSlash + 1);
+        }
 
-		String packageName = serviceQualifiedName.substring(0, classStart);
-		if ( packageName.isEmpty() ) {
-			return null;
-		}
+        int classStart = serviceQualifiedName.lastIndexOf('.');
+        if ( classStart == -1 ) {
+            return null;
+        }
 
-		// 'className' includes a leading '.'
-		String className = serviceQualifiedName.substring(classStart);
+        String packageName = serviceQualifiedName.substring(0, classStart);
+        if ( packageName.isEmpty() ) {
+            return null;
+        }
 
-		String outputName = replacePackage(packageName);
-		if ( outputName == null ) {
-			return null;
-		}
+        // 'className' includes a leading '.'
+        String className = serviceQualifiedName.substring(classStart);
 
-		if ( inputPrefix == null ) {
-			return outputName + className;
-		} else {
-			return inputPrefix + outputName + className;
-		}
-	}
+        String outputName = replacePackage(packageName);
+        if ( outputName == null ) {
+            return null;
+        }
+
+        if ( inputPrefix == null ) {
+            return outputName + className;
+        } else {
+            return inputPrefix + outputName + className;
+        }
+    }
 }

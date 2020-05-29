@@ -1,2 +1,0 @@
-include 'transformer'
-include 'transformer-maven-plugin'

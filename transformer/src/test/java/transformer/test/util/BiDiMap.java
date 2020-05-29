@@ -41,17 +41,17 @@ public interface BiDiMap<Holder, Held> {
 
     //
 
-	boolean record(Holder holder, Held held);
+    boolean record(Holder holder, Held held);
 
-	<OtherHolder extends Holder, OtherHeld extends Held>
-	    void record(BiDiMap<OtherHolder, OtherHeld> otherMap);
-	
-	<OtherHolder extends Holder, OtherHeld extends Held>
-	    void record(BiDiMap<OtherHolder, OtherHeld> otherMap,
-			        Set<? extends Holder> restrictedHolders);
+    <OtherHolder extends Holder, OtherHeld extends Held>
+        void record(BiDiMap<OtherHolder, OtherHeld> otherMap);
 
-	//
+    <OtherHolder extends Holder, OtherHeld extends Held>
+        void record(BiDiMap<OtherHolder, OtherHeld> otherMap,
+                    Set<? extends Holder> restrictedHolders);
 
-	<OtherHolder extends Holder, OtherHeld extends Held>
-	    boolean sameAs(BiDiMap<OtherHolder, OtherHeld> otherMap);
+    //
+
+    <OtherHolder extends Holder, OtherHeld extends Held>
+        boolean sameAs(BiDiMap<OtherHolder, OtherHeld> otherMap);
 }

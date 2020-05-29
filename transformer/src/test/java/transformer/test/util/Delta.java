@@ -15,17 +15,17 @@ import java.io.PrintWriter;
 
 public interface Delta {
 
-	public static boolean strCmp(String str1, String str2) {
-		if ( (str1 == null) && (str2 == null) ) {
-			return true;
-		} else if ( (str1 == null) || (str2 == null) ) {
-			return false;
-		} else {
-			return str1.equals(str2);
-		}
-	}
+    public static boolean strCmp(String str1, String str2) {
+        if ( (str1 == null) && (str2 == null) ) {
+            return true;
+        } else if ( (str1 == null) || (str2 == null) ) {
+            return false;
+        } else {
+            return str1.equals(str2);
+        }
+    }
 
-	//
+    //
 
     boolean DO_RECORD_ADDED = true;
     boolean DO_RECORD_REMOVED = true;

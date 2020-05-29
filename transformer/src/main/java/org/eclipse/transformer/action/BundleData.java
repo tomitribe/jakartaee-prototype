@@ -16,15 +16,15 @@ public interface BundleData {
     char QUOTE_CHAR = '"';
     char COMMA_CHAR = ',';
 
-	String getSymbolicName();
-	String getVersion();
+    String getSymbolicName();
+    String getVersion();
 
-	boolean getAddName();
-	String getName();
+    boolean getAddName();
+    String getName();
 
-	boolean getAddDescription();
-	String getDescription();
+    boolean getAddDescription();
+    String getDescription();
 
-	String updateName(String initialName);
-	String updateDescription(String initialDescription);
+    String updateName(String initialName);
+    String updateDescription(String initialDescription);
 }

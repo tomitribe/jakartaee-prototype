@@ -16,27 +16,27 @@ import org.slf4j.Logger;
 
 public class ZipActionImpl extends ContainerActionImpl {
 
-	public ZipActionImpl(
-		Logger logger, boolean isTerse, boolean isVerbose,
-		InputBufferImpl buffer,
-		SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
+    public ZipActionImpl(
+        Logger logger, boolean isTerse, boolean isVerbose,
+        InputBufferImpl buffer,
+        SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
 
-		super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
-	}
+        super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
+    }
 
-	//
+    //
 
-	public String getName() {
-		return "Zip Action";
-	}
+    public String getName() {
+        return "Zip Action";
+    }
 
-	@Override
-	public ActionType getActionType() {
-		return ActionType.ZIP;
-	}
+    @Override
+    public ActionType getActionType() {
+        return ActionType.ZIP;
+    }
 
-	@Override
-	public String getAcceptExtension() {
-		return ".zip";
-	}
+    @Override
+    public String getAcceptExtension() {
+        return ".zip";
+    }
 }

@@ -18,6 +18,8 @@ import org.eclipse.transformer.Transformer;
 import org.eclipse.transformer.Transformer.AppOption;
 
 public class JakartaTransformer {
+    private JakartaTransformer() {
+    }
 
     public static void main(String[] args) throws Exception {
         Transformer jTrans = new Transformer(System.out, System.err);
@@ -36,15 +38,15 @@ public class JakartaTransformer {
     public static final String DEFAULT_MASTER_XML_REFERENCE = "jakarta-xml-master.properties";
 
     public static Map<Transformer.AppOption, String> getOptionDefaults() {
-    	HashMap<Transformer.AppOption, String> optionDefaults =
-    		new HashMap<Transformer.AppOption, String>();
+        HashMap<Transformer.AppOption, String> optionDefaults =
+            new HashMap<Transformer.AppOption, String>();
 
-    	optionDefaults.put(AppOption.RULES_RENAMES, DEFAULT_RENAMES_REFERENCE);
-    	optionDefaults.put(AppOption.RULES_VERSIONS, DEFAULT_VERSIONS_REFERENCE);
-    	optionDefaults.put(AppOption.RULES_BUNDLES, DEFAULT_BUNDLES_REFERENCE);
-    	optionDefaults.put(AppOption.RULES_DIRECT, DEFAULT_DIRECT_REFERENCE);
-    	optionDefaults.put(AppOption.RULES_MASTER_XML, DEFAULT_MASTER_XML_REFERENCE);
+        optionDefaults.put(AppOption.RULES_RENAMES, DEFAULT_RENAMES_REFERENCE);
+        optionDefaults.put(AppOption.RULES_VERSIONS, DEFAULT_VERSIONS_REFERENCE);
+        optionDefaults.put(AppOption.RULES_BUNDLES, DEFAULT_BUNDLES_REFERENCE);
+        optionDefaults.put(AppOption.RULES_DIRECT, DEFAULT_DIRECT_REFERENCE);
+        optionDefaults.put(AppOption.RULES_MASTER_XML, DEFAULT_MASTER_XML_REFERENCE);
 
-    	return optionDefaults;
+        return optionDefaults;
     }
 }

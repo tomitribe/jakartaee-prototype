@@ -17,66 +17,66 @@ import org.slf4j.Logger;
 
 public class ServiceLoaderConfigChangesImpl extends ChangesImpl {
 
-	public ServiceLoaderConfigChangesImpl() {
-		super();
+    public ServiceLoaderConfigChangesImpl() {
+        super();
 
-		this.clearChanges();
-	}
+        this.clearChanges();
+    }
 
-	//
+    //
 
-	@Override
-	public boolean hasNonResourceNameChanges() {
-		return ( changedProviders > 0 );
-	}
+    @Override
+    public boolean hasNonResourceNameChanges() {
+        return ( changedProviders > 0 );
+    }
 
-	@Override
-	public void clearChanges() {
-		changedProviders = 0;
-		unchangedProviders = 0;
+    @Override
+    public void clearChanges() {
+        changedProviders = 0;
+        unchangedProviders = 0;
 
-		super.clearChanges();
-	}
+        super.clearChanges();
+    }
 
-	//
+    //
 
-	private int changedProviders;
-	private int unchangedProviders;
+    private int changedProviders;
+    private int unchangedProviders;
 
-	public void addChangedProvider() {
-		changedProviders++;
-	}
+    public void addChangedProvider() {
+        changedProviders++;
+    }
 
-	public int getChangedProviders() {
-		return changedProviders;
-	}
+    public int getChangedProviders() {
+        return changedProviders;
+    }
 
-	public void addUnchangedProvider() {
-		unchangedProviders++;
-	}
+    public void addUnchangedProvider() {
+        unchangedProviders++;
+    }
 
-	public int getUnchangedProviders() {
-		return unchangedProviders;
-	}
+    public int getUnchangedProviders() {
+        return unchangedProviders;
+    }
 
-	//
+    //
 
-	@Override
-	public void displayVerbose(PrintStream printStream, String inputPath, String outputPath) {
-		printStream.printf("Input  [ %s ] as [ %s ]\n", getInputResourceName(), inputPath);
-		printStream.printf("Output [ %s ] as [ %s ]\n", getOutputResourceName(), outputPath);
-		printStream.printf( "Replacements [ %s ]\n", getChangedProviders() );
-	}
+    @Override
+    public void displayVerbose(PrintStream printStream, String inputPath, String outputPath) {
+        printStream.printf("Input  [ %s ] as [ %s ]\n", getInputResourceName(), inputPath);
+        printStream.printf("Output [ %s ] as [ %s ]\n", getOutputResourceName(), outputPath);
+        printStream.printf( "Replacements [ %s ]\n", getChangedProviders() );
+    }
 
-	@Override
-	public void displayVerbose(Logger logger, String inputPath, String outputPath) {
-		if ( !logger.isInfoEnabled() ) {
-			return;
-		}
+    @Override
+    public void displayVerbose(Logger logger, String inputPath, String outputPath) {
+        if ( !logger.isInfoEnabled() ) {
+            return;
+        }
 
-		logger.info("Input  [ {} ] as [ {} ]", getInputResourceName(), inputPath);
-		logger.info("Output [ {} ] as [ {} ]", getOutputResourceName(), outputPath);
-		logger.info( "Replacements [ {} ]", getChangedProviders() );
-	}
+        logger.info("Input  [ {} ] as [ {} ]", getInputResourceName(), inputPath);
+        logger.info("Output [ {} ] as [ {} ]", getOutputResourceName(), outputPath);
+        logger.info( "Replacements [ {} ]", getChangedProviders() );
+    }
 
 }
