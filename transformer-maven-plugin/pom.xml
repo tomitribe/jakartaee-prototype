@@ -20,20 +20,20 @@
     <groupId>org.tomitribe.transformer</groupId>
     <artifactId>transformer-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <version>0.0.1</version>
+    <version>0.0.2-SNAPSHOT</version>
     <name>Eclipse Transformer :: Maven Plugin</name>
 
     <parent>
         <groupId>org.tomitribe.transformer</groupId>
         <artifactId>transformer-parent</artifactId>
-        <version>0.0.1</version>
+        <version>0.0.2-SNAPSHOT</version>
     </parent>
 
     <scm>
         <connection>scm:git:git@github.com:tomitribe/transformer.git</connection>
         <url>scm:git:git@github.com:tomitribe/transformer.git</url>
         <developerConnection>scm:git:git@github.com:tomitribe/transformer.git</developerConnection>
-        <tag>transformer-parent-0.0.1</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <properties>
@@ -111,7 +111,7 @@
         <dependency>
             <groupId>org.tomitribe.transformer</groupId>
             <artifactId>transformer</artifactId>
-            <version>0.0.1</version>
+            <version>0.0.2-SNAPSHOT</version>
         </dependency>
 
         <!-- TESTS -->
