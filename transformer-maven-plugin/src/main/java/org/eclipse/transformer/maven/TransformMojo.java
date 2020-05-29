@@ -35,9 +35,15 @@ import org.eclipse.transformer.Transformer;
 import org.eclipse.transformer.jakarta.JakartaTransformer;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+/**
+ * This is a Maven plugin which runs the Eclipse Transformer on build artifacts as part of the build.
+ */
 @Mojo(name = "run", requiresDependencyResolution = ResolutionScope.RUNTIME_PLUS_SYSTEM, defaultPhase = LifecyclePhase.PACKAGE, requiresProject = true, threadSafe = true)
 public class TransformMojo extends AbstractMojo {
 
@@ -86,25 +92,78 @@ public class TransformMojo extends AbstractMojo {
     @Parameter
     private Artifact artifact;
 
-
+    /**
+     * Main execution point of the plugin. This looks at the attached artifacts, and runs the transformer on them.
+     * @throws MojoExecutionException Thrown if there is an error during plugin execution
+     */
     public void execute() throws MojoExecutionException {
-        final File sourceFile = project.getArtifact().getFile();
-        final File targetFile = getTargetFile();
+        try {
+            final Transformer transformer = getTransformer();
 
-        final Transformer transformer = new Transformer(System.out, System.err);
-        transformer.setOptionDefaults(JakartaTransformer.class, getOptionDefaults());
-        transformer.setArgs(new String[]{sourceFile.getAbsolutePath(), targetFile.getAbsolutePath()});
-
-        int rc = transformer.run();
-        projectHelper.attachArtifact(project, project.getArtifact().getType(), classifier, targetFile);
+            final Artifact[] sourceArtifacts = getSourceArtifacts();
+            for (final Artifact sourceArtifact : sourceArtifacts) {
+                transform(transformer, sourceArtifact);
+            }
+        } catch (IOException e) {
+            throw new MojoExecutionException("Error occurred during execution", e);
+        }
     }
 
-    protected File getTargetFile() {
-        final StringBuilder fileName = new StringBuilder(finalName);
-        fileName.append("-").append(classifier);
+    /**
+     * This runs the transformation process on the source artifact with the transformer provided.
+     * The transformed artifact is attached to the project.
+     * @param transformer The Transformer to use for the transformation
+     * @param sourceArtifact The Artifact to transform
+     * @throws IOException
+     */
+    public void transform(final Transformer transformer, final Artifact sourceArtifact) throws IOException {
+        final File targetFile = File.createTempFile("transform", "." + sourceArtifact.getType());
+        targetFile.delete();
 
-        fileName.append(".").append(this.project.getArtifact().getType());
-        return new File(outputDirectory, fileName.toString());
+        transformer.setArgs(new String[] { sourceArtifact.getFile().getAbsolutePath(), targetFile.getAbsolutePath() });
+        int rc = transformer.run();
+
+        if (targetFile.exists()) {
+            targetFile.deleteOnExit();
+        }
+
+        final String sourceClassifier = sourceArtifact.getClassifier();
+
+        projectHelper.attachArtifact(
+            project,
+            sourceArtifact.getType(),
+            (sourceClassifier == null || sourceClassifier.length() == 0) ? this.classifier : sourceClassifier + "-" + this.classifier,
+            targetFile
+        );
+    }
+
+    /**
+     * Builds a configured transformer for the specified source and target artifacts
+     * @return A configured transformer
+     */
+    public Transformer getTransformer() {
+        final Transformer transformer = new Transformer(System.out, System.err);
+        transformer.setOptionDefaults(JakartaTransformer.class, getOptionDefaults());
+        return transformer;
+    }
+
+    /**
+     * Gets the source artifacts that should be transformed
+     * @return an array to artifacts to be transformed
+     */
+    public Artifact[] getSourceArtifacts() {
+        List<Artifact> artifactList = new ArrayList<Artifact>();
+        if (project.getArtifact() != null && project.getArtifact().getFile() != null) {
+            artifactList.add(project.getArtifact());
+        }
+
+        for (final Artifact attachedArtifact : project.getAttachedArtifacts()) {
+            if (attachedArtifact.getFile() != null) {
+                artifactList.add(attachedArtifact);
+            }
+        }
+
+        return artifactList.toArray(new Artifact[0]);
     }
 
     private Map<Transformer.AppOption, String> getOptionDefaults() {
@@ -119,5 +178,125 @@ public class TransformMojo extends AbstractMojo {
 
     private boolean isEmpty(final String input) {
         return input == null || input.trim().length() == 0;
+    }
+
+    public MavenProject getProject() {
+        return project;
+    }
+
+    public void setProject(MavenProject project) {
+        this.project = project;
+    }
+
+    public MavenSession getSession() {
+        return session;
+    }
+
+    public void setSession(MavenSession session) {
+        this.session = session;
+    }
+
+    public Boolean getInvert() {
+        return invert;
+    }
+
+    public void setInvert(Boolean invert) {
+        this.invert = invert;
+    }
+
+    public String getRulesRenamesUri() {
+        return rulesRenamesUri;
+    }
+
+    public void setRulesRenamesUri(String rulesRenamesUri) {
+        this.rulesRenamesUri = rulesRenamesUri;
+    }
+
+    public String getRulesVersionUri() {
+        return rulesVersionUri;
+    }
+
+    public void setRulesVersionUri(String rulesVersionUri) {
+        this.rulesVersionUri = rulesVersionUri;
+    }
+
+    public String getRulesBundlesUri() {
+        return rulesBundlesUri;
+    }
+
+    public void setRulesBundlesUri(String rulesBundlesUri) {
+        this.rulesBundlesUri = rulesBundlesUri;
+    }
+
+    public String getRulesDirectUri() {
+        return rulesDirectUri;
+    }
+
+    public void setRulesDirectUri(String rulesDirectUri) {
+        this.rulesDirectUri = rulesDirectUri;
+    }
+
+    public String getRulesXmlsUri() {
+        return rulesXmlsUri;
+    }
+
+    public void setRulesXmlsUri(String rulesXmlsUri) {
+        this.rulesXmlsUri = rulesXmlsUri;
+    }
+
+    public String getClassifier() {
+        return classifier;
+    }
+
+    public void setClassifier(String classifier) {
+        this.classifier = classifier;
+    }
+
+    public File getOutputDirectory() {
+        return outputDirectory;
+    }
+
+    public void setOutputDirectory(File outputDirectory) {
+        this.outputDirectory = outputDirectory;
+    }
+
+    public String getFinalName() {
+        return finalName;
+    }
+
+    public void setFinalName(String finalName) {
+        this.finalName = finalName;
+    }
+
+    public MavenProjectHelper getProjectHelper() {
+        return projectHelper;
+    }
+
+    public void setProjectHelper(MavenProjectHelper projectHelper) {
+        this.projectHelper = projectHelper;
+    }
+
+    public ArtifactFactory getFactory() {
+        return factory;
+    }
+
+    public void setFactory(ArtifactFactory factory) {
+        this.factory = factory;
+    }
+
+    public ArtifactResolver getResolver() {
+        return resolver;
+    }
+
+    public void setResolver(ArtifactResolver resolver) {
+        this.resolver = resolver;
+    }
+
+    public Artifact getArtifact() {
+        return artifact;
+    }
+
+    public void setArtifact(Artifact artifact) {
+        this.artifact = artifact;
     }
 }
