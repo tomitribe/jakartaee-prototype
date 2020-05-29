@@ -14,3 +14,6 @@ bin/
 .*.swp
 
 gradle.properties
+.idea/
+*.iml
+target/
