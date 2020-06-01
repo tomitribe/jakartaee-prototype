@@ -20,13 +20,13 @@
     <groupId>org.tomitribe.transformer</groupId>
     <artifactId>transformer</artifactId>
     <packaging>jar</packaging>
-    <version>0.0.2</version>
+    <version>0.0.3-SNAPSHOT</version>
     <name>Eclipse Transformer :: Transformer</name>
 
     <parent>
         <groupId>org.tomitribe.transformer</groupId>
         <artifactId>transformer-parent</artifactId>
-        <version>0.0.2</version>
+        <version>0.0.3-SNAPSHOT</version>
     </parent>
 
     <dependencies>
