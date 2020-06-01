@@ -130,11 +130,6 @@ public class TransformMojo extends AbstractMojo {
         transformer.setArgs(new String[] { sourceArtifact.getFile().getAbsolutePath(), targetFile.getAbsolutePath() });
         int rc = transformer.run();
 
-        if (targetFile.exists()) {
-            targetFile.deleteOnExit();
-        }
-
-
         projectHelper.attachArtifact(
             project,
             sourceArtifact.getType(),
