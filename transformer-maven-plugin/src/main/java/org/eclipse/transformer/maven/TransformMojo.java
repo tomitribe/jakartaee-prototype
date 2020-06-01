@@ -117,8 +117,15 @@ public class TransformMojo extends AbstractMojo {
      * @throws IOException
      */
     public void transform(final Transformer transformer, final Artifact sourceArtifact) throws IOException {
-        final File targetFile = File.createTempFile("transform", "." + sourceArtifact.getType());
-        targetFile.delete();
+
+        final String sourceClassifier = sourceArtifact.getClassifier();
+        final String targetClassifier = (sourceClassifier == null || sourceClassifier.length() == 0) ?
+            this.classifier : sourceClassifier + "-" + this.classifier;
+
+        final File targetFile = new File(outputDirectory,
+            sourceArtifact.getArtifactId() + "-" +
+                targetClassifier + "-" + sourceArtifact.getVersion() + "."
+                + sourceArtifact.getType());
 
         transformer.setArgs(new String[] { sourceArtifact.getFile().getAbsolutePath(), targetFile.getAbsolutePath() });
         int rc = transformer.run();
@@ -127,12 +134,11 @@ public class TransformMojo extends AbstractMojo {
             targetFile.deleteOnExit();
         }
 
-        final String sourceClassifier = sourceArtifact.getClassifier();
 
         projectHelper.attachArtifact(
             project,
             sourceArtifact.getType(),
-            (sourceClassifier == null || sourceClassifier.length() == 0) ? this.classifier : sourceClassifier + "-" + this.classifier,
+            targetClassifier,
             targetFile
         );
     }
