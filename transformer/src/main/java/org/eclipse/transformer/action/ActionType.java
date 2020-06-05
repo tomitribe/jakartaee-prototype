@@ -14,7 +14,7 @@ package org.eclipse.transformer.action;
 public enum ActionType {
     NULL,
 
-    CLASS,
+    CLASS, RESOURCE,
     MANIFEST, FEATURE,
     SERVICE_LOADER_CONFIG,
     XML,
