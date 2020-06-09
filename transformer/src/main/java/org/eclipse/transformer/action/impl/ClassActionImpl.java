@@ -570,14 +570,20 @@ public class ClassActionImpl extends ActionImpl {
                 EnclosingMethodAttribute attribute = (EnclosingMethodAttribute) attr;
 
                 String inputDescriptor = attribute.method_descriptor;
-                if ( inputDescriptor == null ) {
-                    return null;
-                }
 
                 String className = transformBinaryType(attribute.class_name);
 
-                String outputDescriptor = transformDescriptor(inputDescriptor);
-                if ( outputDescriptor == null && className == null) {
+                if ( inputDescriptor == null && className == null) {
+                    return null;
+                }
+
+                String outputDescriptor = null;
+
+                if (inputDescriptor != null) {
+                    outputDescriptor = transformDescriptor(inputDescriptor);
+                }
+
+                if ( outputDescriptor == null  && className == null) {
                     return null;
                 }
 
