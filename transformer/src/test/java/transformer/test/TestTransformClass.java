@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import aQute.bnd.classfile.*;
 import org.eclipse.transformer.TransformException;
 import org.eclipse.transformer.TransformProperties;
 import org.eclipse.transformer.action.impl.ClassActionImpl;
@@ -45,13 +46,6 @@ import org.eclipse.transformer.util.InputStreamData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import aQute.bnd.classfile.AnnotationInfo;
-import aQute.bnd.classfile.AnnotationsAttribute;
-import aQute.bnd.classfile.Attribute;
-import aQute.bnd.classfile.ClassFile;
-import aQute.bnd.classfile.ElementValueInfo;
-import aQute.bnd.classfile.FieldInfo;
-import aQute.bnd.classfile.MethodInfo;
 import aQute.lib.io.ByteBufferDataInput;
 import transformer.test.data.Sample_InjectAPI_Jakarta;
 import transformer.test.data.Sample_InjectAPI_Javax;
@@ -678,6 +672,74 @@ public class TestTransformClass extends CaptureTest {
         Assertions.assertEquals(
             expectedChanges, actualChanges,
             "Incorrect count of constant changes");
+    }
+
+    public static final String OUTER_CLASS_RESOURCE_NAME = "/xformme/Sample_OuterClass$1.class";
+
+    @Test
+    public void testOuterClass() throws TransformException, IOException {
+        consumeCapturedEvents();
+
+        ClassActionImpl classAction = createOuterClassAction();
+
+        String resourceName = TEST_DATA_RESOURCE_NAME + '/' + OUTER_CLASS_RESOURCE_NAME;
+        InputStream inputStream = getResourceStream(resourceName); // throws IOException
+
+        @SuppressWarnings("unused")
+        InputStreamData outputStreamData = classAction.apply(resourceName, inputStream); // throws TransformException
+        final InputStream is = outputStreamData.stream;
+
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        int bytesRead = -1;
+        byte[] buffer = new byte[8192];
+
+        while ((bytesRead = is.read(buffer)) > -1) {
+            os.write(buffer, 0, bytesRead);
+        }
+
+        is.close();
+        os.close();
+
+        display( classAction.getLastActiveChanges() );
+
+        List<? extends CaptureLoggerImpl.LogEvent> capturedEvents =
+            consumeCapturedEvents();
+
+        int expectedChanges = 7;
+        int actualChanges = classAction.getLastActiveChanges().getModifiedConstants();
+        Assertions.assertEquals(
+            expectedChanges, actualChanges,
+            "Incorrect count of constant changes");
+
+        final byte[] classBytes = os.toByteArray();
+        DataInput inputClassData = ByteBufferDataInput.wrap(classBytes, 0, classBytes.length);
+        final ClassFile classFile = ClassFile.parseClassFile(inputClassData);
+
+        int foundEnclosingMethodAttributes = 0;
+        final Attribute[] attributes = classFile.attributes;
+        for (final Attribute attribute : attributes) {
+            if (attribute instanceof EnclosingMethodAttribute) {
+                foundEnclosingMethodAttributes++;
+
+                final EnclosingMethodAttribute ema = (EnclosingMethodAttribute) attribute;
+                Assertions.assertFalse(ema.class_name.contains("xformme"));
+            }
+        }
+
+        Assertions.assertEquals(1, foundEnclosingMethodAttributes);
+
+    }
+
+    private ClassActionImpl createOuterClassAction() {
+        CaptureLoggerImpl useLogger = getCaptureLogger();
+
+        Map<String, String> renames = new HashMap<>();
+        renames.put("transformer.test.data.xformme", "transformer.test.data.xformed");
+
+        return new ClassActionImpl(useLogger, false, false, createBuffer(),
+            createSelectionRule(useLogger, Collections.emptySet(), Collections.emptySet()),
+            createSignatureRule(useLogger, renames, null, null, null));
     }
 
     public static final boolean IS_EXACT = false;

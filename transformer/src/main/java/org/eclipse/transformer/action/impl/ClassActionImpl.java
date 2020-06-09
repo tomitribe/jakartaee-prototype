@@ -568,17 +568,23 @@ public class ClassActionImpl extends ActionImpl {
 
             case EnclosingMethodAttribute.NAME: {
                 EnclosingMethodAttribute attribute = (EnclosingMethodAttribute) attr;
+
                 String inputDescriptor = attribute.method_descriptor;
                 if ( inputDescriptor == null ) {
                     return null;
                 }
+
+                String className = transformBinaryType(attribute.class_name);
+
                 String outputDescriptor = transformDescriptor(inputDescriptor);
-                if ( outputDescriptor == null ) {
+                if ( outputDescriptor == null && className == null) {
                     return null;
-                } else {
-                    return new EnclosingMethodAttribute(
-                        attribute.class_name, attribute.method_name, outputDescriptor);
                 }
+
+                return new EnclosingMethodAttribute(
+                        className == null ? attribute.class_name : className,
+                        attribute.method_name,
+                        outputDescriptor == null ? inputDescriptor : outputDescriptor);
             }
 
             case StackMapTableAttribute.NAME: {
