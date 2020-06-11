@@ -38,6 +38,7 @@
 	<modules>
 		<module>org.eclipse.transformer</module>
 		<module>org.eclipse.transformer.cli</module>
+		<module>org.eclipse.transformer.maven</module>
 	</modules>
 
 	<url>https://projects.eclipse.org/projects/technology.transformer</url>
@@ -322,6 +323,12 @@
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>
 				<artifactId>junit-jupiter-api</artifactId>
+				<version>${junit-jupiter.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-migrationsupport</artifactId>
 				<version>${junit-jupiter.version}</version>
 				<scope>test</scope>
 			</dependency>
