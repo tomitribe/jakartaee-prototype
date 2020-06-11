@@ -173,7 +173,7 @@ public class TransformMojo extends AbstractMojo {
         optionDefaults.put(Transformer.AppOption.RULES_VERSIONS, isEmpty(rulesVersionUri) ? "jakarta-versions.properties" : rulesVersionUri);
         optionDefaults.put(Transformer.AppOption.RULES_BUNDLES, isEmpty(rulesBundlesUri) ? "jakarta-bundles.properties" : rulesBundlesUri);
         optionDefaults.put(Transformer.AppOption.RULES_DIRECT, isEmpty(rulesDirectUri) ? "jakarta-direct.properties" : rulesDirectUri);
-        optionDefaults.put(Transformer.AppOption.RULES_MASTER_TEXT, isEmpty(rulesXmlsUri) ? "jakarta-xml-master.properties" : rulesXmlsUri);
+        optionDefaults.put(Transformer.AppOption.RULES_MASTER_TEXT, isEmpty(rulesXmlsUri) ? "jakarta-text-master.properties" : rulesXmlsUri);
         return optionDefaults;
     }
 
