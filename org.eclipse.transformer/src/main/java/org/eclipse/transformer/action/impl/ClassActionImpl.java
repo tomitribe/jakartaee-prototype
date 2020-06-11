@@ -121,8 +121,8 @@ public class ClassActionImpl extends ActionImpl {
 	 * @param outputClassName The final class name.
 	 *
 	 * @return An output path for the class, placing the output class name in the same
-	 *	 relationship to the output path as the input class name has relative to the
-	 *	 input path.
+	 *     relationship to the output path as the input class name has relative to the
+	 *     input path.
 	 */
 	public static String relocateClass(
 		Logger logger,
@@ -304,22 +304,22 @@ public class ClassActionImpl extends ActionImpl {
 		debug("Class [ {} ] as [ {} ] ", inputName, inputClass.this_class);
 		debug("  Super [ {} ]", inputClass.super_class);
 		if ( inputClass.interfaces != null ) {
-			debug("  Interfaces [ {} ]", inputClass.interfaces.length);
-			for ( String interfaceName : inputClass.interfaces ) {
-				debug("	[ {} ]", interfaceName);
-			}
+		    debug("  Interfaces [ {} ]", inputClass.interfaces.length);
+		    for ( String interfaceName : inputClass.interfaces ) {
+		        debug("    [ {} ]", interfaceName);
+		    }
 		}
 		if ( inputClass.fields != null ) {
-			debug("  Fields [ {} ]", inputClass.fields.length);
-			for ( FieldInfo field : inputClass.fields ) {
-				debug("	[ {} ] [ {} ]", field.name, field.descriptor);
-			}
+		    debug("  Fields [ {} ]", inputClass.fields.length);
+		    for ( FieldInfo field : inputClass.fields ) {
+		        debug("    [ {} ] [ {} ]", field.name, field.descriptor);
+		    }
 		}
 		if ( inputClass.methods != null ) {
-			debug("  Methods [ {} ]", inputClass.methods.length);
-			for ( MethodInfo method : inputClass.methods) {
-				debug("	[ {} ] [ {} ]", method.name, method.descriptor);
-			}
+		    debug("  Methods [ {} ]", inputClass.methods.length);
+		    for ( MethodInfo method : inputClass.methods) {
+		        debug("    [ {} ] [ {} ]", method.name, method.descriptor);
+		    }
 		}
 
 		ClassFileBuilder classBuilder = new ClassFileBuilder(inputClass);
@@ -356,7 +356,7 @@ public class ClassActionImpl extends ActionImpl {
 			setSuperClassNames(inputSuperName, outputSuperName);
 
 			if ( !outputSuperName.equals("java/lang/Object") ) {
-				debug("  extends {}", outputSuperName);
+			    debug("  extends {}", outputSuperName);
 			}
 		}
 
@@ -378,7 +378,7 @@ public class ClassActionImpl extends ActionImpl {
 
 		ListIterator<FieldInfo> fields = classBuilder.fields().listIterator();
 		if ( fields.hasNext() ) {
-			debug("  Fields:");
+		    debug("  Fields:");
 		}
 		while ( fields.hasNext() ) {
 			FieldInfo inputField = fields.next();
@@ -386,7 +386,7 @@ public class ClassActionImpl extends ActionImpl {
 			if ( outputField != null ) {
 				fields.set(outputField);
 				addModifiedField();
-				debug("	   {}	-> {}", inputField, outputField);
+				debug("       {}    -> {}", inputField, outputField);
 
 				verbose("Field {} -> {}", inputField, outputField);
 			}
@@ -394,7 +394,7 @@ public class ClassActionImpl extends ActionImpl {
 
 		ListIterator<MethodInfo> methods = classBuilder.methods().listIterator();
 		if ( methods.hasNext() ) {
-			debug("  Methods:");
+		    debug("  Methods:");
 		}
 		while ( methods.hasNext() ) {
 			MethodInfo inputMethod = methods.next();
@@ -402,7 +402,7 @@ public class ClassActionImpl extends ActionImpl {
 			if ( outputMethod != null ) {
 				methods.set(outputMethod);
 				addModifiedMethod();
-				debug( "	   {}	-> {}", inputMethod, outputMethod);
+				debug( "       {}    -> {}", inputMethod, outputMethod);
 
 				verbose("Method {} -> {}", inputMethod, outputMethod);
 			}
@@ -414,7 +414,7 @@ public class ClassActionImpl extends ActionImpl {
 
 		ListIterator<Attribute> attributes = classBuilder.attributes().listIterator();
 		if ( attributes.hasNext() ) {
-			debug("  Attributes:");
+		    debug("  Attributes:");
 		}
 		while ( attributes.hasNext() ) {
 			Attribute inputAttribute = attributes.next();
@@ -422,7 +422,7 @@ public class ClassActionImpl extends ActionImpl {
 			if ( outputAttribute != null ) {
 				attributes.set(outputAttribute);
 				addModifiedAttribute();
-				debug("	   {}	-> {}", inputAttribute, outputAttribute);
+				debug("       {}    -> {}", inputAttribute, outputAttribute);
 				verbose("Attribute {} -> {}", inputAttribute, outputAttribute);
 			}
 		}
@@ -465,7 +465,7 @@ public class ClassActionImpl extends ActionImpl {
 		String inputDescriptor = member.descriptor;
 		String outputDescriptor = transformDescriptor(inputDescriptor);
 		if ( outputDescriptor != null ) {
-			debug("	{}	   {}	-> {}", member.name, member.descriptor, outputDescriptor);
+		    debug("    {}       {}    -> {}", member.name, member.descriptor, outputDescriptor);
 			verbose("Member {}.{} > {}", member.name, member.descriptor, outputDescriptor);
 		}
 
@@ -494,7 +494,7 @@ public class ClassActionImpl extends ActionImpl {
 				}
 				outputAttributes[attributeNo] = outputAttribute;
 
-				debug("	   {}	-> {}", inputAttribute, outputAttribute);
+				debug("       {}    -> {}", inputAttribute, outputAttribute);
 				verbose("Attribute {} -> {}", inputAttribute, outputAttribute);
 			}
 		}
@@ -565,32 +565,32 @@ public class ClassActionImpl extends ActionImpl {
 				}
 			}
 
-			case EnclosingMethodAttribute.NAME: {
-				EnclosingMethodAttribute attribute = (EnclosingMethodAttribute) attr;
+            case EnclosingMethodAttribute.NAME: {
+                EnclosingMethodAttribute attribute = (EnclosingMethodAttribute) attr;
 
-				String inputDescriptor = attribute.method_descriptor;
+                String inputDescriptor = attribute.method_descriptor;
 
-				String className = transformBinaryType(attribute.class_name);
+                String className = transformBinaryType(attribute.class_name);
 
-				if ( inputDescriptor == null && className == null) {
-					return null;
-				}
+                if ( inputDescriptor == null && className == null) {
+                    return null;
+                }
 
-				String outputDescriptor = null;
+                String outputDescriptor = null;
 
-				if (inputDescriptor != null) {
-					outputDescriptor = transformDescriptor(inputDescriptor);
-				}
+                if (inputDescriptor != null) {
+                    outputDescriptor = transformDescriptor(inputDescriptor);
+                }
 
-				if ( outputDescriptor == null  && className == null) {
-					return null;
-				}
+                if ( outputDescriptor == null  && className == null) {
+                    return null;
+                }
 
-				return new EnclosingMethodAttribute(
-						className == null ? attribute.class_name : className,
-						attribute.method_name,
-						outputDescriptor == null ? inputDescriptor : outputDescriptor);
-			}
+                return new EnclosingMethodAttribute(
+                        className == null ? attribute.class_name : className,
+                        attribute.method_name,
+                        outputDescriptor == null ? inputDescriptor : outputDescriptor);
+            }
 
 			case StackMapTableAttribute.NAME: {
 				StackMapTableAttribute inputAttribute = (StackMapTableAttribute) attr;
@@ -834,31 +834,31 @@ public class ClassActionImpl extends ActionImpl {
 		return null;
 	}
 
-	private Object transformConstantValue(Object inputValue) {
-		if ( inputValue instanceof String ) {
-			String inputString = (String) inputValue;
-			String transformCase = "constant";  // dotted package format
-			String outputString = transformConstantAsDescriptor(inputString, SignatureRule.ALLOW_SIMPLE_SUBSTITUTION);
-			if ( outputString == null ) {
-				transformCase = "resource";  // url format (slashes)
-				outputString = transformConstantAsBinaryType(inputString, SignatureRule.ALLOW_SIMPLE_SUBSTITUTION);
-				if ( outputString == null ) {
-					transformCase = "direct";
-					outputString = transformDirectString(inputString);
-				}
-			}
-			if ( outputString == null ) {
-				debug("	String ConstantValue: {} (unchanged)", inputValue);
-			} else {
-				debug("	String ConstantValue: {}					   -> {} ({})", inputValue, outputString, transformCase);
-				verbose("String ConstantValue: {} -> {} ({})", inputValue, outputString, transformCase);
-			}
-			return outputString;
-		} else {
-			debug("	Non-String ConstantValue: {} (unchanged)", inputValue);
-			return null;
-		}
-	}
+    private Object transformConstantValue(Object inputValue) {
+        if ( inputValue instanceof String ) {
+            String inputString = (String) inputValue;
+            String transformCase = "constant";  // dotted package format
+            String outputString = transformConstantAsDescriptor(inputString, SignatureRule.ALLOW_SIMPLE_SUBSTITUTION);
+            if ( outputString == null ) {
+                transformCase = "resource";  // url format (slashes)
+                outputString = transformConstantAsBinaryType(inputString, SignatureRule.ALLOW_SIMPLE_SUBSTITUTION);
+                if ( outputString == null ) {
+                    transformCase = "direct";
+                    outputString = transformDirectString(inputString);
+                }
+            }
+            if ( outputString == null ) {
+                debug("    String ConstantValue: {} (unchanged)", inputValue);
+            } else {
+                debug("    String ConstantValue: {}                       -> {} ({})", inputValue, outputString, transformCase);
+                verbose("String ConstantValue: {} -> {} ({})", inputValue, outputString, transformCase);
+            }
+            return outputString;
+        } else {
+            debug("    Non-String ConstantValue: {} (unchanged)", inputValue);
+            return null;
+        }
+    }
 
 	private <A extends AnnotationsAttribute> A transform(
 		A inputAttribute,
@@ -1083,9 +1083,9 @@ public class ClassActionImpl extends ActionImpl {
 
 		int numConstants = constants.size();
 		for ( int constantNo = 1; constantNo < numConstants; constantNo++ ) {
-			debug( String.format(
-				"Constant [ %3s ] [ %16s ] [ %s ]",
-				constantNo, constants.tag(constantNo), constants.entry(constantNo) ) );
+		    debug( String.format(
+		    	"Constant [ %3s ] [ %16s ] [ %s ]",
+		        constantNo, constants.tag(constantNo), constants.entry(constantNo) ) );
 
 			switch ( constants.tag(constantNo) ) {
 				case ConstantPool.CONSTANT_Class: {
@@ -1095,10 +1095,10 @@ public class ClassActionImpl extends ActionImpl {
 					if ( outputClassName != null ) {
 						constants.entry( constantNo, new ClassInfo(constants.utf8Info(outputClassName)) );
 						modifiedConstants++;
-						debug("	Class: {}		-> {}", inputClassName, outputClassName);
+						debug("    Class: {}        -> {}", inputClassName, outputClassName);
 						verbose("Class Reference: {} -> {}", inputClassName, outputClassName);
 					} else {
-						debug("Skip class {} (unchanged)", inputClassName);
+					    debug("Skip class {} (unchanged)", inputClassName);
 					}
 					break;
 				}
@@ -1111,10 +1111,10 @@ public class ClassActionImpl extends ActionImpl {
 						constants.entry(constantNo,
 							new NameAndTypeInfo( info.name_index, constants.utf8Info(outputDescriptor)) );
 						modifiedConstants++;
-						debug("	NameAndType: {}			  -> {}", inputDescriptor, outputDescriptor);
+						debug("    NameAndType: {}              -> {}", inputDescriptor, outputDescriptor);
 						verbose("NameAndType: {} -> {}", inputDescriptor, outputDescriptor);
 					} else {
-						debug("Skip name-and-type {} (unchanged)", inputDescriptor);
+					    debug("Skip name-and-type {} (unchanged)", inputDescriptor);
 					}
 					break;
 				}
@@ -1126,10 +1126,10 @@ public class ClassActionImpl extends ActionImpl {
 					if ( outputDescriptor != null ) {
 						constants.entry( constantNo, new MethodTypeInfo(constants.utf8Info(outputDescriptor)) );
 						modifiedConstants++;
-						debug("	MethodType: {} -> {}", inputDescriptor, outputDescriptor);
+						debug("    MethodType: {} -> {}", inputDescriptor, outputDescriptor);
 						verbose("MethodType: {} -> {}", inputDescriptor, outputDescriptor);
 					} else {
-						debug("Skip method-type {} (unchanged)", inputDescriptor);
+					    debug("Skip method-type {} (unchanged)", inputDescriptor);
 					}
 					break;
 				}
@@ -1149,20 +1149,20 @@ public class ClassActionImpl extends ActionImpl {
 						if ( outputUtf8 == null ) {
 							transformCase = "resource";  // url format (slashes)
 							outputUtf8 = transformConstantAsBinaryType(inputUtf8, SignatureRule.ALLOW_SIMPLE_SUBSTITUTION);
-							if ( outputUtf8 == null ) {
-								transformCase = "Direct";
-								outputUtf8 = transformDirectString(inputUtf8);
-							}
+	                        if ( outputUtf8 == null ) {
+	                        	transformCase = "Direct";
+	                        	outputUtf8 = transformDirectString(inputUtf8);
+	                        }
 						}
 					}
 
 					if ( outputUtf8 != null ) {
 						constants.entry(constantNo, outputUtf8);
 						modifiedConstants++;
-						debug("	UTF8: {} -> {} ({})", inputUtf8, outputUtf8, transformCase);
+						debug("    UTF8: {} -> {} ({})", inputUtf8, outputUtf8, transformCase);
 						verbose("UTF8: {} -> {} ({})", inputUtf8, outputUtf8, transformCase);
 					} else {
-						debug("Skip UTF8 {} (unchanged)", inputUtf8);
+					    debug("Skip UTF8 {} (unchanged)", inputUtf8);
 					}
 
 					break;
@@ -1172,21 +1172,21 @@ public class ClassActionImpl extends ActionImpl {
 					String inputString = constants.utf8(stringInfo.string_index);
 					transformCase = "constant";   // dotted package format
 					String outputString = transformConstantAsDescriptor(inputString, SignatureRule.ALLOW_SIMPLE_SUBSTITUTION);
-					if ( outputString == null ) {
-						transformCase = "String";   // url format (slashes)
-						outputString = transformConstantAsBinaryType(inputString, SignatureRule.ALLOW_SIMPLE_SUBSTITUTION);
-						if ( outputString == null ) {
-							transformCase = "Direct";
-							outputString = transformDirectString(inputString);
-						}
-					}
+                    if ( outputString == null ) {
+                        transformCase = "String";   // url format (slashes)
+                        outputString = transformConstantAsBinaryType(inputString, SignatureRule.ALLOW_SIMPLE_SUBSTITUTION);
+                        if ( outputString == null ) {
+                        	transformCase = "Direct";
+                        	outputString = transformDirectString(inputString);
+                        }
+                    }
 					if ( outputString != null ) {
 						constants.entry(constantNo, new StringInfo( constants.utf8Info(outputString) ) );
 						modifiedConstants++;
-						debug("	String: {} -> {}", inputString, outputString);
+						debug("    String: {} -> {}", inputString, outputString);
 						verbose("String: {} -> {}", inputString, outputString);
 					} else {
-						debug("Skip string {} (unchanged)", inputString);
+					    debug("Skip string {} (unchanged)", inputString);
 					}
 					break;
 				}
