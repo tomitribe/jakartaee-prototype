@@ -33,7 +33,14 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import aQute.bnd.classfile.*;
+import aQute.bnd.classfile.AnnotationInfo;
+import aQute.bnd.classfile.AnnotationsAttribute;
+import aQute.bnd.classfile.Attribute;
+import aQute.bnd.classfile.ClassFile;
+import aQute.bnd.classfile.ElementValueInfo;
+import aQute.bnd.classfile.EnclosingMethodAttribute;
+import aQute.bnd.classfile.FieldInfo;
+import aQute.bnd.classfile.MethodInfo;
 import org.eclipse.transformer.TransformException;
 import org.eclipse.transformer.TransformProperties;
 import org.eclipse.transformer.action.impl.ClassActionImpl;
