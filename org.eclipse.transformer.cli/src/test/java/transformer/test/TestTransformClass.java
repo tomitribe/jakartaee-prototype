@@ -713,7 +713,7 @@ public class TestTransformClass extends CaptureTest {
         List<? extends CaptureLoggerImpl.LogEvent> capturedEvents =
             consumeCapturedEvents();
 
-        int expectedChanges = 8;
+        int expectedChanges = 7;
         int actualChanges = classAction.getLastActiveChanges().getModifiedConstants();
         Assertions.assertEquals(
             expectedChanges, actualChanges,
