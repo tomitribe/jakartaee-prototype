@@ -33,6 +33,14 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import aQute.bnd.classfile.AnnotationInfo;
+import aQute.bnd.classfile.AnnotationsAttribute;
+import aQute.bnd.classfile.Attribute;
+import aQute.bnd.classfile.ClassFile;
+import aQute.bnd.classfile.ElementValueInfo;
+import aQute.bnd.classfile.EnclosingMethodAttribute;
+import aQute.bnd.classfile.FieldInfo;
+import aQute.bnd.classfile.MethodInfo;
 import org.eclipse.transformer.TransformException;
 import org.eclipse.transformer.TransformProperties;
 import org.eclipse.transformer.action.impl.ClassActionImpl;
@@ -45,13 +53,6 @@ import org.eclipse.transformer.util.InputStreamData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import aQute.bnd.classfile.AnnotationInfo;
-import aQute.bnd.classfile.AnnotationsAttribute;
-import aQute.bnd.classfile.Attribute;
-import aQute.bnd.classfile.ClassFile;
-import aQute.bnd.classfile.ElementValueInfo;
-import aQute.bnd.classfile.FieldInfo;
-import aQute.bnd.classfile.MethodInfo;
 import aQute.lib.io.ByteBufferDataInput;
 import transformer.test.data.Sample_InjectAPI_Jakarta;
 import transformer.test.data.Sample_InjectAPI_Javax;
@@ -72,12 +73,12 @@ public class TestTransformClass extends CaptureTest {
 
 	// Rename used by the annotated servlet.
 
-	public static final String JAVAX_ANNO_PACKAGE_NAME = "javax.annotation"; 
-	public static final String JAVAX_SERVLET_PACKAGE_NAME = "javax.servlet";	
+	public static final String JAVAX_ANNO_PACKAGE_NAME = "javax.annotation";
+	public static final String JAVAX_SERVLET_PACKAGE_NAME = "javax.servlet";
 	public static final String JAVAX_SERVLET_ANNO_PACKAGE_NAME = "javax.servlet.annotation";
 
-	public static final String JAKARTA_ANNO_PACKAGE_NAME = "jakarta.annotation"; 
-	public static final String JAKARTA_SERVLET_PACKAGE_NAME = "jakarta.servlet";	
+	public static final String JAKARTA_ANNO_PACKAGE_NAME = "jakarta.annotation";
+	public static final String JAKARTA_SERVLET_PACKAGE_NAME = "jakarta.servlet";
 	public static final String JAKARTA_SERVLET_ANNO_PACKAGE_NAME = "jakarta.servlet.annotation";
 
 	// These test classes are build within the project:
@@ -96,19 +97,19 @@ public class TestTransformClass extends CaptureTest {
 
 	// "AnnotatedServlet" has these runtime visible annotations:
 	//
-	// #46 = Utf8               RuntimeVisibleAnnotations
-	// #47 = Utf8               Ljavax/servlet/annotation/WebServlet;
+	// #46 = Utf8			   RuntimeVisibleAnnotations
+	// #47 = Utf8			   Ljavax/servlet/annotation/WebServlet;
 
 	// com.ibm.ws.sample.sci.AnnotatedServlet extends javax.servlet.http.HttpServlet
 	// public static final String ANNOTATED_SERVLET_SIMPLE_CLASS_NAME = "AnnotatedServlet.class";
 
 	// "BasicEnvPrimMixServlet" has these runtime visible annotations:
 	//
-	// #103 = Utf8               RuntimeVisibleAnnotations
-	// #104 = Utf8               Ljavax/annotation/Resource;
-	// #129 = Utf8               Lorg/junit/Test;
-	// #151 = Utf8               Ljavax/annotation/Resources;
-	// #171 = Utf8               Ljavax/servlet/annotation/WebServlet;
+	// #103 = Utf8			   RuntimeVisibleAnnotations
+	// #104 = Utf8			   Ljavax/annotation/Resource;
+	// #129 = Utf8			   Lorg/junit/Test;
+	// #151 = Utf8			   Ljavax/annotation/Resources;
+	// #171 = Utf8			   Ljavax/servlet/annotation/WebServlet;
 
 	// public class com.ibm.ws.injection.envmix.web.BasicEnvPrimMixServlet extends componenttest.app.FATServlet
 	// public static final String MIXED_SERVLET_SIMPLE_CLASS_NAME = "BasicEnvPrimMixServlet.class";
@@ -183,8 +184,8 @@ public class TestTransformClass extends CaptureTest {
 
 			includes.add( ClassActionImpl.classNameToResourceName(REPEAT_TARGET_CLASS_NAME) );
 
-			// includes.add( TEST_DATA_RESOURCE_NAME + '/' + ANNOTATED_SERVLET_SIMPLE_CLASS_NAME); 
-			// includes.add( TEST_DATA_RESOURCE_NAME + '/' + MIXED_SERVLET_SIMPLE_CLASS_NAME); 
+			// includes.add( TEST_DATA_RESOURCE_NAME + '/' + ANNOTATED_SERVLET_SIMPLE_CLASS_NAME);
+			// includes.add( TEST_DATA_RESOURCE_NAME + '/' + MIXED_SERVLET_SIMPLE_CLASS_NAME);
 		}
 
 		return includes;
@@ -205,25 +206,25 @@ public class TestTransformClass extends CaptureTest {
 
 			toJakartaRenames.put(JAVAX_ANNO_PACKAGE_NAME, JAKARTA_ANNO_PACKAGE_NAME);
 			toJakartaRenames.put(JAVAX_SERVLET_PACKAGE_NAME, JAKARTA_SERVLET_PACKAGE_NAME);
-			toJakartaRenames.put(JAVAX_SERVLET_ANNO_PACKAGE_NAME, JAKARTA_SERVLET_ANNO_PACKAGE_NAME);						
+			toJakartaRenames.put(JAVAX_SERVLET_ANNO_PACKAGE_NAME, JAKARTA_SERVLET_ANNO_PACKAGE_NAME);
 		}
 		return toJakartaRenames;
 	}
 
 	protected Map<String, String> toJakartaPrefixes;
-	
+
 	public Map<String, String> getToJakartaPrefixes() {
 		if ( toJakartaPrefixes == null ) {
 			Map<String, String> useRenames = getToJakartaRenames();
 			toJakartaPrefixes = new HashMap<String, String>( useRenames.size() );
-			
+
 			for ( Map.Entry<String, String> renameEntry : useRenames.entrySet() ) {
 				String initialName = renameEntry.getKey();
 				String finalName= renameEntry.getValue();
-				
+
 				String initialPrefix = 'L' + initialName.replace('.', '/');
 				String finalPrefix = 'L' + finalName.replace('.', '/');
-				
+
 				toJakartaPrefixes.put(initialPrefix, finalPrefix);
 			}
 		}
@@ -366,7 +367,7 @@ public class TestTransformClass extends CaptureTest {
 
 		Map<String, String> packageRenames = getToJakartaRenames();
 		display(packageRenames);
-		
+
 		Map<String, String> packagePrefixes = getToJakartaPrefixes();
 		display(packagePrefixes);
 
@@ -423,26 +424,26 @@ public class TestTransformClass extends CaptureTest {
 		display("Class [ %s ] ", classFile.this_class);
 		display("  Super [ %s ]", classFile.super_class);
 		if ( classFile.interfaces != null ) {
-		    display("  Interfaces [ %s ]", classFile.interfaces.length);
-		    for ( String interfaceName : classFile.interfaces ) {
-		        display("    [ %s ]", interfaceName);
-		    }
+			display("  Interfaces [ %s ]", classFile.interfaces.length);
+			for ( String interfaceName : classFile.interfaces ) {
+				display("	[ %s ]", interfaceName);
+			}
 		}
-        display(classFile.attributes);
+		display(classFile.attributes);
 
 		if ( classFile.fields != null ) {
-		    display("  Fields [ %s ]", classFile.fields.length);
-		    for ( FieldInfo field : classFile.fields ) {
-		        display("    Field [ %s ] [ %s ]", field.name, field.descriptor);
-		        display(field.attributes);
-		    }
+			display("  Fields [ %s ]", classFile.fields.length);
+			for ( FieldInfo field : classFile.fields ) {
+				display("	Field [ %s ] [ %s ]", field.name, field.descriptor);
+				display(field.attributes);
+			}
 		}
 		if ( classFile.methods != null ) {
-		    display("  Methods [ %s ]", classFile.methods.length);
-		    for ( MethodInfo method : classFile.methods) {
-		        display("    Method [ %s ] [ %s ]", method.name, method.descriptor);
-		        display(method.attributes);
-		    }
+			display("  Methods [ %s ]", classFile.methods.length);
+			for ( MethodInfo method : classFile.methods) {
+				display("	Method [ %s ] [ %s ]", method.name, method.descriptor);
+				display(method.attributes);
+			}
 		}
 	}
 
@@ -451,10 +452,10 @@ public class TestTransformClass extends CaptureTest {
 			return;
 		}
 
-		display("    Attributes [ %s ]", attributes.length);
+		display("	Attributes [ %s ]", attributes.length);
 
 		for ( Attribute attribute : attributes ) {
-			display( "      [ %s ] [ %s ]", attribute.getClass(), attribute.name() );
+			display( "	  [ %s ] [ %s ]", attribute.getClass(), attribute.name() );
 			if ( attribute instanceof AnnotationsAttribute ) {
 				display( (AnnotationsAttribute) attribute );
 			}
@@ -462,16 +463,16 @@ public class TestTransformClass extends CaptureTest {
 	}
 
 	private void display(AnnotationsAttribute attribute) {
-		display("    Annotations [ %s ]", attribute.annotations.length);
+		display("	Annotations [ %s ]", attribute.annotations.length);
 		int numAnno = attribute.annotations.length;
 		for ( int annoNo = 0; annoNo < numAnno; annoNo++ ) {
 			AnnotationInfo annoInfo = attribute.annotations[annoNo];
-			display("      Annotation [ %s ]", annoInfo.type);
+			display("	  Annotation [ %s ]", annoInfo.type);
 
 			int numValues = annoInfo.values.length;
 			for ( int valueNo = 0; valueNo < numValues; valueNo++ ) {
 				 ElementValueInfo valueInfo = annoInfo.values[valueNo];
-				 display("        [ %s ] [ %s ]", valueInfo.name, valueInfo.value);
+				 display("		[ %s ] [ %s ]", valueInfo.name, valueInfo.value);
 			}
 		}
 	}
@@ -500,7 +501,7 @@ public class TestTransformClass extends CaptureTest {
 		for ( int fieldNo = 0; fieldNo < numFields; fieldNo++ ) {
 			FieldInfo inputField = inputClass.fields[fieldNo];
 			FieldInfo outputField = outputClass.fields[fieldNo];
-			display("    [ %s ] [ %s ]", inputField.name, outputField.name);
+			display("	[ %s ] [ %s ]", inputField.name, outputField.name);
 			validateAnnotations(
 				packageRenames, packagePrefixes,
 				inputField.attributes, outputField.attributes);
@@ -513,7 +514,7 @@ public class TestTransformClass extends CaptureTest {
 		for ( int methodNo = 0; methodNo < numMethods; methodNo++ ) {
 			MethodInfo inputMethod = inputClass.methods[methodNo];
 			MethodInfo outputMethod = outputClass.methods[methodNo];
-			display("    [ %s ] [ %s ]", inputMethod.name, outputMethod.name);
+			display("	[ %s ] [ %s ]", inputMethod.name, outputMethod.name);
 			validateAnnotations(
 				packageRenames, packagePrefixes,
 				inputMethod.attributes, outputMethod.attributes);
@@ -526,13 +527,13 @@ public class TestTransformClass extends CaptureTest {
 		Map<String, String> packageRenames, Map<String, String> packagePrefixes,
 		Attribute[] inputAttributes, Attribute[] outputAttributes) {
 
-		display("    Attributes [ %s ] [ %s ]", inputAttributes.length, outputAttributes.length);
+		display("	Attributes [ %s ] [ %s ]", inputAttributes.length, outputAttributes.length);
 
 		for ( int attrNo = 0; attrNo < inputAttributes.length; attrNo++ ) {
 			Attribute inputAttr = inputAttributes[attrNo];
 			Attribute outputAttr = outputAttributes[attrNo];
 
-			display("    [ %s ] [ %s ]",
+			display("	[ %s ] [ %s ]",
 				inputAttr.getClass(), outputAttr.getClass());
 
 			if ( inputAttr instanceof AnnotationsAttribute ) {
@@ -548,7 +549,7 @@ public class TestTransformClass extends CaptureTest {
 		Map<String, String> packageRenames, Map<String, String> packagePrefixes,
 		AnnotationsAttribute inputAttributes, AnnotationsAttribute outputAttributes) {
 
-		display("      Annotations [ %s ] [ %s ]",
+		display("	  Annotations [ %s ] [ %s ]",
 			inputAttributes.annotations.length, outputAttributes.annotations.length);
 
 		int numAnno = inputAttributes.annotations.length;
@@ -556,7 +557,7 @@ public class TestTransformClass extends CaptureTest {
 			AnnotationInfo inputAnno = inputAttributes.annotations[annoNo];
 			AnnotationInfo outputAnno = outputAttributes.annotations[annoNo];
 
-			display("        [ %s ] [ %s ]", inputAnno.type, outputAnno.type);
+			display("		[ %s ] [ %s ]", inputAnno.type, outputAnno.type);
 
 			verifyRename(packageRenames, packagePrefixes, inputAnno.type, outputAnno.type);
 
@@ -594,14 +595,14 @@ public class TestTransformClass extends CaptureTest {
 		Map<String, String> packageRenames, Map<String, String> packagePrefixes,
 		ElementValueInfo[] inputValues, ElementValueInfo[] outputValues) {
 
-		display("        Values [ %s ] [ %s ]", inputValues.length, outputValues.length);
+		display("		Values [ %s ] [ %s ]", inputValues.length, outputValues.length);
 
 		int numValues = inputValues.length;
 		for ( int valueNo = 0; valueNo < numValues; valueNo++ ) {
 			ElementValueInfo inputValue = inputValues[valueNo];
 			ElementValueInfo outputValue = outputValues[valueNo];
 
-			display("          [ %s ] [ %s ]", inputValue.value, outputValue.value);
+			display("		  [ %s ] [ %s ]", inputValue.value, outputValue.value);
 		}
 	}
 
@@ -680,6 +681,73 @@ public class TestTransformClass extends CaptureTest {
 			"Incorrect count of constant changes");
 	}
 
+	public static final String OUTER_CLASS_RESOURCE_NAME = "/xformme/Sample_OuterClass$1.class";
+
+	@Test
+	public void testOuterClass() throws TransformException, IOException {
+		consumeCapturedEvents();
+
+		ClassActionImpl classAction = createOuterClassAction();
+
+		String resourceName = TEST_DATA_RESOURCE_NAME + '/' + OUTER_CLASS_RESOURCE_NAME;
+		InputStream inputStream = getResourceStream(resourceName); // throws IOException
+
+		@SuppressWarnings("unused")
+		InputStreamData outputStreamData = classAction.apply(resourceName, inputStream); // throws TransformException
+		final InputStream is = outputStreamData.stream;
+
+		final ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+		int bytesRead = -1;
+		byte[] buffer = new byte[8192];
+
+		while ((bytesRead = is.read(buffer)) > -1) {
+			os.write(buffer, 0, bytesRead);
+		}
+
+		is.close();
+		os.close();
+
+		display( classAction.getLastActiveChanges() );
+
+		List<? extends CaptureLoggerImpl.LogEvent> capturedEvents =
+			consumeCapturedEvents();
+
+		int expectedChanges = 7;
+		int actualChanges = classAction.getLastActiveChanges().getModifiedConstants();
+		Assertions.assertEquals(
+			expectedChanges, actualChanges,
+			"Incorrect count of constant changes");
+
+		final byte[] classBytes = os.toByteArray();
+		DataInput inputClassData = ByteBufferDataInput.wrap(classBytes, 0, classBytes.length);
+		final ClassFile classFile = ClassFile.parseClassFile(inputClassData);
+
+		int foundEnclosingMethodAttributes = 0;
+		final Attribute[] attributes = classFile.attributes;
+		for (final Attribute attribute : attributes) {
+			if (attribute instanceof EnclosingMethodAttribute) {
+				foundEnclosingMethodAttributes++;
+
+				final EnclosingMethodAttribute ema = (EnclosingMethodAttribute) attribute;
+				Assertions.assertFalse(ema.class_name.contains("xformme"));
+			}
+		}
+
+		Assertions.assertEquals(1, foundEnclosingMethodAttributes);
+
+	}
+
+	private ClassActionImpl createOuterClassAction() {
+		CaptureLoggerImpl useLogger = getCaptureLogger();
+
+		Map<String, String> renames = new HashMap<>();
+		renames.put("transformer.test.data.xformme", "transformer.test.data.xformed");
+
+		return new ClassActionImpl(useLogger, false, false, createBuffer(),
+			createSelectionRule(useLogger, Collections.emptySet(), Collections.emptySet()),
+			createSignatureRule(useLogger, renames, null, null, null));
+	}
 	public static final boolean IS_EXACT = false;
 
 	public static class ClassRelocation {
@@ -712,7 +780,7 @@ public class TestTransformClass extends CaptureTest {
 			 "com.ibm.prod.Sample", "com/ibm/prod/Sample.class", IS_EXACT),
 		new ClassRelocation(
 			"WEB-INF/classes/com/ibm/test/Sample.class", "com.ibm.test.Sample",
-		    "com.ibm.prod.Sample", "WEB-INF/classes/com/ibm/prod/Sample.class", IS_EXACT),
+			"com.ibm.prod.Sample", "WEB-INF/classes/com/ibm/prod/Sample.class", IS_EXACT),
 		new ClassRelocation(
 			"META-INF/versions/9/com/ibm/test/Sample.class", "com.ibm.test.Sample",
 			"com.ibm.prod.Sample", "META-INF/versions/9/com/ibm/prod/Sample.class", IS_EXACT),
@@ -749,9 +817,9 @@ public class TestTransformClass extends CaptureTest {
 				consumeCapturedEvents();
 
 			System.out.printf("Relocation [ %s ] as [ %s ]\n" +
-			                  "        to [ %s ] as [ %s ]\n",
-			                  relocationCase.inputPath, relocationCase.inputName,
-			                  relocationCase.outputName, outputPath);
+							  "		to [ %s ] as [ %s ]\n",
+							  relocationCase.inputPath, relocationCase.inputName,
+							  relocationCase.outputName, outputPath);
 
 			boolean capturedApproximate = false;
 			for ( CaptureLoggerImpl.LogEvent event : capturedEvents ) {
@@ -770,7 +838,7 @@ public class TestTransformClass extends CaptureTest {
 				"Approximate error not logged");
 		}
 	}
-	
+
 	//
 
 	public static Map<String, String> getStandardRenames() throws IOException {
@@ -796,5 +864,5 @@ public class TestTransformClass extends CaptureTest {
 		// 'getStandardRenames' throws IOException
 	}
 
-	
+
 }
