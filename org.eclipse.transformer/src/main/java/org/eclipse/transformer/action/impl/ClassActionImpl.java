@@ -565,16 +565,16 @@ public class ClassActionImpl extends ActionImpl {
 				}
 			}
 
-			case EnclosingMethodAttribute.NAME: {
-				EnclosingMethodAttribute attribute = (EnclosingMethodAttribute) attr;
+            case EnclosingMethodAttribute.NAME: {
+                EnclosingMethodAttribute attribute = (EnclosingMethodAttribute) attr;
 
-				String inputDescriptor = attribute.method_descriptor;
+                String inputDescriptor = attribute.method_descriptor;
 
 				String className = transformBinaryType(attribute.class_name);
 
 				if ( inputDescriptor == null && className == null) {
-					return null;
-				}
+                    return null;
+                }
 
 				String outputDescriptor = null;
 
@@ -583,14 +583,14 @@ public class ClassActionImpl extends ActionImpl {
 				}
 
 				if ( outputDescriptor == null  && className == null) {
-					return null;
+                    return null;
 				}
 
-				return new EnclosingMethodAttribute(
+					return new EnclosingMethodAttribute(
 						className == null ? attribute.class_name : className,
 						attribute.method_name,
 						outputDescriptor == null ? inputDescriptor : outputDescriptor);
-			}
+            }
 
 			case StackMapTableAttribute.NAME: {
 				StackMapTableAttribute inputAttribute = (StackMapTableAttribute) attr;
@@ -851,7 +851,7 @@ public class ClassActionImpl extends ActionImpl {
 				debug("	String ConstantValue: {} (unchanged)", inputValue);
 			} else {
 				debug("	String ConstantValue: {}					   -> {} ({})", inputValue, outputString, transformCase);
-				verbose("String ConstantValue: {} -> {} ({})", inputValue, outputString, transformCase);
+                verbose("String ConstantValue: {} -> {} ({})", inputValue, outputString, transformCase);                
 			}
 			return outputString;
 		} else {
@@ -1084,7 +1084,7 @@ public class ClassActionImpl extends ActionImpl {
 		int numConstants = constants.size();
 		for ( int constantNo = 1; constantNo < numConstants; constantNo++ ) {
 			debug( String.format(
-				"Constant [ %3s ] [ %16s ] [ %s ]",
+		    	"Constant [ %3s ] [ %16s ] [ %s ]", 
 				constantNo, constants.tag(constantNo), constants.entry(constantNo) ) );
 
 			switch ( constants.tag(constantNo) ) {

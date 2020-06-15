@@ -748,6 +748,7 @@ public class TestTransformClass extends CaptureTest {
 			createSelectionRule(useLogger, Collections.emptySet(), Collections.emptySet()),
 			createSignatureRule(useLogger, renames, null, null, null));
 	}
+	
 	public static final boolean IS_EXACT = false;
 
 	public static class ClassRelocation {
