@@ -17,7 +17,7 @@
 	<description>Eclipse Transformer Parent</description>
 	<name>${project.groupId}:${project.artifactId}</name>
 	<packaging>pom</packaging>
-	<version>0.1.1</version>
+	<version>0.1.2-SNAPSHOT</version>
 
 	<properties>
 		<revision>0.1.1-SNAPSHOT</revision>
@@ -56,7 +56,7 @@
 		<connection>scm:git:git@github.com:tomitribe/transformer.git</connection>
 		<url>scm:git:git@github.com:tomitribe/transformer.git</url>
 		<developerConnection>scm:git:git@github.com:tomitribe/transformer.git</developerConnection>
-		<tag>org.eclipse.transformer.parent-0.1.1</tag>
+		<tag>HEAD</tag>
 	</scm>
 	<developers>
 		<developer>
