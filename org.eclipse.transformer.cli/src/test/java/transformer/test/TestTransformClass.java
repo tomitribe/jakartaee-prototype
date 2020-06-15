@@ -50,6 +50,7 @@ import aQute.bnd.classfile.AnnotationsAttribute;
 import aQute.bnd.classfile.Attribute;
 import aQute.bnd.classfile.ClassFile;
 import aQute.bnd.classfile.ElementValueInfo;
+import aQute.bnd.classfile.EnclosingMethodAttribute;
 import aQute.bnd.classfile.FieldInfo;
 import aQute.bnd.classfile.MethodInfo;
 import aQute.lib.io.ByteBufferDataInput;
@@ -72,12 +73,12 @@ public class TestTransformClass extends CaptureTest {
 
 	// Rename used by the annotated servlet.
 
-	public static final String JAVAX_ANNO_PACKAGE_NAME = "javax.annotation"; 
-	public static final String JAVAX_SERVLET_PACKAGE_NAME = "javax.servlet";	
+	public static final String JAVAX_ANNO_PACKAGE_NAME = "javax.annotation";
+	public static final String JAVAX_SERVLET_PACKAGE_NAME = "javax.servlet";
 	public static final String JAVAX_SERVLET_ANNO_PACKAGE_NAME = "javax.servlet.annotation";
 
-	public static final String JAKARTA_ANNO_PACKAGE_NAME = "jakarta.annotation"; 
-	public static final String JAKARTA_SERVLET_PACKAGE_NAME = "jakarta.servlet";	
+	public static final String JAKARTA_ANNO_PACKAGE_NAME = "jakarta.annotation";
+	public static final String JAKARTA_SERVLET_PACKAGE_NAME = "jakarta.servlet";
 	public static final String JAKARTA_SERVLET_ANNO_PACKAGE_NAME = "jakarta.servlet.annotation";
 
 	// These test classes are build within the project:
@@ -183,8 +184,8 @@ public class TestTransformClass extends CaptureTest {
 
 			includes.add( ClassActionImpl.classNameToResourceName(REPEAT_TARGET_CLASS_NAME) );
 
-			// includes.add( TEST_DATA_RESOURCE_NAME + '/' + ANNOTATED_SERVLET_SIMPLE_CLASS_NAME); 
-			// includes.add( TEST_DATA_RESOURCE_NAME + '/' + MIXED_SERVLET_SIMPLE_CLASS_NAME); 
+			// includes.add( TEST_DATA_RESOURCE_NAME + '/' + ANNOTATED_SERVLET_SIMPLE_CLASS_NAME);
+			// includes.add( TEST_DATA_RESOURCE_NAME + '/' + MIXED_SERVLET_SIMPLE_CLASS_NAME);
 		}
 
 		return includes;
@@ -205,25 +206,25 @@ public class TestTransformClass extends CaptureTest {
 
 			toJakartaRenames.put(JAVAX_ANNO_PACKAGE_NAME, JAKARTA_ANNO_PACKAGE_NAME);
 			toJakartaRenames.put(JAVAX_SERVLET_PACKAGE_NAME, JAKARTA_SERVLET_PACKAGE_NAME);
-			toJakartaRenames.put(JAVAX_SERVLET_ANNO_PACKAGE_NAME, JAKARTA_SERVLET_ANNO_PACKAGE_NAME);						
+			toJakartaRenames.put(JAVAX_SERVLET_ANNO_PACKAGE_NAME, JAKARTA_SERVLET_ANNO_PACKAGE_NAME);
 		}
 		return toJakartaRenames;
 	}
 
 	protected Map<String, String> toJakartaPrefixes;
-	
+
 	public Map<String, String> getToJakartaPrefixes() {
 		if ( toJakartaPrefixes == null ) {
 			Map<String, String> useRenames = getToJakartaRenames();
 			toJakartaPrefixes = new HashMap<String, String>( useRenames.size() );
-			
+
 			for ( Map.Entry<String, String> renameEntry : useRenames.entrySet() ) {
 				String initialName = renameEntry.getKey();
 				String finalName= renameEntry.getValue();
-				
+
 				String initialPrefix = 'L' + initialName.replace('.', '/');
 				String finalPrefix = 'L' + finalName.replace('.', '/');
-				
+
 				toJakartaPrefixes.put(initialPrefix, finalPrefix);
 			}
 		}
@@ -366,7 +367,7 @@ public class TestTransformClass extends CaptureTest {
 
 		Map<String, String> packageRenames = getToJakartaRenames();
 		display(packageRenames);
-		
+
 		Map<String, String> packagePrefixes = getToJakartaPrefixes();
 		display(packagePrefixes);
 
@@ -680,6 +681,74 @@ public class TestTransformClass extends CaptureTest {
 			"Incorrect count of constant changes");
 	}
 
+	public static final String OUTER_CLASS_RESOURCE_NAME = "/xformme/Sample_OuterClass$1.class";
+
+	@Test
+	public void testOuterClass() throws TransformException, IOException {
+		consumeCapturedEvents();
+
+		ClassActionImpl classAction = createOuterClassAction();
+
+		String resourceName = TEST_DATA_RESOURCE_NAME + '/' + OUTER_CLASS_RESOURCE_NAME;
+		InputStream inputStream = getResourceStream(resourceName); // throws IOException
+
+		@SuppressWarnings("unused")
+		InputStreamData outputStreamData = classAction.apply(resourceName, inputStream); // throws TransformException
+		final InputStream is = outputStreamData.stream;
+
+		final ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+		int bytesRead = -1;
+		byte[] buffer = new byte[8192];
+
+		while ((bytesRead = is.read(buffer)) > -1) {
+			os.write(buffer, 0, bytesRead);
+		}
+
+		is.close();
+		os.close();
+
+		display( classAction.getLastActiveChanges() );
+
+		List<? extends CaptureLoggerImpl.LogEvent> capturedEvents =
+			consumeCapturedEvents();
+
+		int expectedChanges = 7;
+		int actualChanges = classAction.getLastActiveChanges().getModifiedConstants();
+		Assertions.assertEquals(
+			expectedChanges, actualChanges,
+			"Incorrect count of constant changes");
+
+		final byte[] classBytes = os.toByteArray();
+		DataInput inputClassData = ByteBufferDataInput.wrap(classBytes, 0, classBytes.length);
+		final ClassFile classFile = ClassFile.parseClassFile(inputClassData);
+
+		int foundEnclosingMethodAttributes = 0;
+		final Attribute[] attributes = classFile.attributes;
+		for (final Attribute attribute : attributes) {
+			if (attribute instanceof EnclosingMethodAttribute) {
+				foundEnclosingMethodAttributes++;
+
+				final EnclosingMethodAttribute ema = (EnclosingMethodAttribute) attribute;
+				Assertions.assertFalse(ema.class_name.contains("xformme"));
+			}
+		}
+
+		Assertions.assertEquals(1, foundEnclosingMethodAttributes);
+
+	}
+
+	private ClassActionImpl createOuterClassAction() {
+		CaptureLoggerImpl useLogger = getCaptureLogger();
+
+		Map<String, String> renames = new HashMap<>();
+		renames.put("transformer.test.data.xformme", "transformer.test.data.xformed");
+
+		return new ClassActionImpl(useLogger, false, false, createBuffer(),
+			createSelectionRule(useLogger, Collections.emptySet(), Collections.emptySet()),
+			createSignatureRule(useLogger, renames, null, null, null));
+	}
+
 	public static final boolean IS_EXACT = false;
 
 	public static class ClassRelocation {
@@ -770,7 +839,7 @@ public class TestTransformClass extends CaptureTest {
 				"Approximate error not logged");
 		}
 	}
-	
+
 	//
 
 	public static Map<String, String> getStandardRenames() throws IOException {
@@ -796,5 +865,5 @@ public class TestTransformClass extends CaptureTest {
 		// 'getStandardRenames' throws IOException
 	}
 
-	
+
 }
