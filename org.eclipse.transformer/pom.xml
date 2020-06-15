@@ -15,7 +15,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.eclipse.transformer</groupId>
+		<groupId>org.tomitribe.transformer</groupId>
 		<artifactId>org.eclipse.transformer.parent</artifactId>
 		<version>${revision}</version>
 		<relativePath>../pom.xml</relativePath>
