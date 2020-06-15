@@ -54,9 +54,10 @@
 		</license>
 	</licenses>
 	<scm>
-		<url>https://github.com/eclipse/transformer</url>
-		<connection>scm:git:https://github.com/eclipse/transformer.git</connection>
-		<developerConnection>scm:git:git@github.com:eclipse/transformer.git</developerConnection>
+		<connection>scm:git:git@github.com:tomitribe/transformer.git</connection>
+		<url>scm:git:git@github.com:tomitribe/transformer.git</url>
+		<developerConnection>scm:git:git@github.com:tomitribe/transformer.git</developerConnection>
+		<tag>HEAD</tag>
 	</scm>
 	<developers>
 		<developer>
@@ -337,6 +338,12 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-migrationsupport</artifactId>
+				<version>${junit-jupiter.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
 				<groupId>org.junit.platform</groupId>
 				<artifactId>junit-platform-commons</artifactId>
 				<version>${junit-platform.version}</version>
@@ -453,6 +460,10 @@
 					<id>ossrh</id>
 					<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
 				</snapshotRepository>
+				<repository>
+					<id>Releases</id>
+					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+				</repository>
 			</distributionManagement>
 		</profile>
 		<profile>
