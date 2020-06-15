@@ -29,9 +29,9 @@ import org.slf4j.Logger;
 
 /**
  * Transform service configuration bytes.
- * 
+ *
  * Per: https://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html
- *	
+ *
  * A service provider is identified by placing a provider-configuration file in the
  * resource directory META-INF/services. The file's name is the fully-qualified binary
  * name of the service's type. The file contains a list of fully-qualified binary names
@@ -105,7 +105,7 @@ public class ServiceLoaderConfigActionImpl extends ActionImpl {
 	//
 
 	@Override
-	public ByteData apply(String inputName, byte[] inputBytes, int inputLength) 
+	public ByteData apply(String inputName, byte[] inputBytes, int inputLength)
 		throws TransformException {
 
 		String outputName = renameInput(inputName);
@@ -116,7 +116,7 @@ public class ServiceLoaderConfigActionImpl extends ActionImpl {
 		}
 		setResourceNames(inputName, outputName);
 
-		InputStream inputStream = new ByteArrayInputStream(inputBytes);
+		InputStream inputStream = new ByteArrayInputStream(inputBytes, 0, inputLength);
 		InputStreamReader inputReader;
 		try {
 			inputReader = new InputStreamReader(inputStream, "UTF-8");
@@ -127,7 +127,7 @@ public class ServiceLoaderConfigActionImpl extends ActionImpl {
 
 		BufferedReader reader = new BufferedReader(inputReader);
 
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream(inputBytes.length);
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream(inputLength);
 		OutputStreamWriter outputWriter;
 		try {
 			outputWriter = new OutputStreamWriter(outputStream, "UTF-8");
@@ -231,7 +231,7 @@ public class ServiceLoaderConfigActionImpl extends ActionImpl {
 
 				int inputPackageStart = inputLine.indexOf(inputPackageName);
 				int inputPackageEnd = inputPackageStart + dotLocation;
-		
+
 				// Recover as much of the original file as possible.
 
 				outputLine =
