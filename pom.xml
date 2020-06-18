@@ -21,12 +21,6 @@
 	<packaging>pom</packaging>
 	<version>${revision}</version>
 
-	<parent>
-		<groupId>org.tomitribe</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>4</version>
-	</parent>
-
 	<properties>
 		<revision>0.1.1-SNAPSHOT</revision>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -278,10 +272,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -310,53 +300,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>flatten-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.rat</groupId>
-				<artifactId>apache-rat-plugin</artifactId>
-				<version>0.10</version>
-				<configuration>
-					<includes>
-						<include>src/**/*</include>
-						<include>pom.xml</include>
-					</includes>
-					<excludes>
-						<exclude>**/*/MANIFEST.MF</exclude>
-						<exclude>**/*/output_MANIFEST.MF</exclude>
-						<exclude>**/*.properties</exclude>
-						<exclude>.git</exclude>
-						<exclude>.gitignore</exclude>
-						<exclude>derby.log</exclude>
-						<exclude>**/META-INF/services/*</exclude>
-						<exclude>**/bootstrap-*</exclude>
-						<exclude>**/js/jquery-*</exclude>
-						<exclude>**/*.json</exclude>
-						<exclude>src/test/resources/**</exclude>
-						<exclude>src/*/resources/META-INF/beans.xml</exclude>
-					</excludes>
-					<licenses>
-						<license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
-							<licenseFamilyCategory>Eclipse</licenseFamilyCategory>
-							<licenseFamilyName>EPL</licenseFamilyName>
-							<patterns>
-								<pattern>Contributors to the Eclipse Foundation</pattern>
-								<pattern>SPDX-License-Identifier: (EPL-2.0 OR Apache-2.0)</pattern>
-							</patterns>
-						</license>
-					</licenses>
-					<licenseFamilies>
-						<licenseFamily implementation="org.apache.rat.license.SimpleLicenseFamily">
-							<familyName>EPL</familyName>
-						</licenseFamily>
-					</licenseFamilies>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>2.17</version>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
