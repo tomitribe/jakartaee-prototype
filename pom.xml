@@ -22,7 +22,7 @@
 	<version>${revision}</version>
 
 	<properties>
-		<revision>0.1.1-SNAPSHOT</revision>
+		<revision>0.1.1a-SNAPSHOT</revision>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>

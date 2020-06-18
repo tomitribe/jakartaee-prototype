@@ -27,6 +27,7 @@ import org.eclipse.transformer.jakarta.JakartaTransformer;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +63,7 @@ public class TransformMojo extends AbstractMojo {
     @Parameter(property = "transformer-plugin.xml", defaultValue = "")
     private String rulesXmlsUri;
 
-    @Parameter(defaultValue = "transformed")
+    @Parameter(defaultValue = "")
     private String classifier;
 
     @Parameter(defaultValue = "${project.build.directory}", required = true)
@@ -93,37 +94,68 @@ public class TransformMojo extends AbstractMojo {
      */
     public void transform(final Transformer transformer, final Artifact sourceArtifact) throws MojoFailureException {
 
-        final String sourceClassifier = sourceArtifact.getClassifier();
-        final String targetClassifier = (sourceClassifier == null || sourceClassifier.length() == 0) ?
-            this.classifier : sourceClassifier + "-" + this.classifier;
+		try {
+			final String sourceClassifier = sourceArtifact.getClassifier();
 
-        final File targetFile = new File(outputDirectory,
-            sourceArtifact.getArtifactId() + "-" +
-                targetClassifier + "-" + sourceArtifact.getVersion() + "."
-                + sourceArtifact.getType());
+			String targetClassifier = null;
 
-        final List<String> args = new ArrayList<>();
-        args.add(sourceArtifact.getFile().getAbsolutePath());
-        args.add(targetFile.getAbsolutePath());
+        /*
+         If a classifier is specified, the plugin will attach the transformed artifact as new artifact with the classifier
+         to the project.
 
-        if (this.overwrite) {
-            args.add("-o");
-        }
+         If it isn't, we'll simply overwrite the artifact.
+         */
+			if (this.classifier != null) {
+				targetClassifier =  (sourceClassifier == null || sourceClassifier.length() == 0) ?
+					this.classifier : sourceClassifier + "-" + this.classifier;
+			}
 
-        transformer.setArgs(args.toArray(new String[0]));
-        int rc = transformer.run();
+			File sourceFile;
+			File targetFile;
 
-        if (rc != 0) {
-            throw new MojoFailureException("Transformer failed with an error: " + Transformer.RC_DESCRIPTIONS[rc]);
-        }
+			if (targetClassifier == null) {
 
-        projectHelper.attachArtifact(
-            project,
-            sourceArtifact.getType(),
-            targetClassifier,
-            targetFile
-        );
-    }
+				final File src = sourceArtifact.getFile();
+				final File dest = new File(src.getParent(), "original-" + src.getName());
+				Files.move(src.toPath(), dest.toPath());
+
+				sourceFile = dest;
+				targetFile = src;
+			} else {
+				sourceFile = sourceArtifact.getFile();
+				targetFile = new File(outputDirectory,
+					sourceArtifact.getArtifactId() + "-" +
+						targetClassifier + "-" + sourceArtifact.getVersion() + "."
+						+ sourceArtifact.getType());
+			}
+
+			final List<String> args = new ArrayList<>();
+			args.add(sourceFile.getAbsolutePath());
+			args.add(targetFile.getAbsolutePath());
+
+			if (this.overwrite) {
+				args.add("-o");
+			}
+
+			transformer.setArgs(args.toArray(new String[0]));
+			int rc = transformer.run();
+
+			if (rc != 0) {
+				throw new MojoFailureException("Transformer failed with an error: " + Transformer.RC_DESCRIPTIONS[rc]);
+			}
+
+			if (targetClassifier != null) {
+				projectHelper.attachArtifact(
+					project,
+					sourceArtifact.getType(),
+					targetClassifier,
+					targetFile
+				);
+			}
+		} catch (IOException e) {
+			throw new MojoFailureException("Transformer failed with an IO error: " + e.getMessage());
+		}
+	}
 
     /**
      * Builds a configured transformer for the specified source and target artifacts
