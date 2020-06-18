@@ -14,7 +14,7 @@
     <parent>
 		<groupId>org.tomitribe.transformer</groupId>
 		<artifactId>org.eclipse.transformer.parent</artifactId>
-		<version>0.1.2a-SNAPSHOT</version>
+		<version>${revision}</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -127,7 +127,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
-					<archive combine.self="override" />
+					<archive  combine.self="override"/>
 				</configuration>
 			</plugin>
         </plugins>
