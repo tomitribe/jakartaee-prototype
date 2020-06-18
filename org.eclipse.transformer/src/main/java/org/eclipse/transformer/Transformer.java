@@ -384,7 +384,7 @@ public class Transformer {
 
 	private static final String		SHORT_VERSION_PROPERTY_NAME		= "version";
 
-	private static final String		TRANSFORMER_BUILD_PROPERTIES	= "META-INF/maven/org.eclipse.transformer/org.eclipse.transformer/pom.properties";
+	private static final String		TRANSFORMER_BUILD_PROPERTIES	= "META-INF/maven/org.tomitribe.transformer/org.eclipse.transformer/pom.properties";
 
 	private final Properties		buildProperties;
 
