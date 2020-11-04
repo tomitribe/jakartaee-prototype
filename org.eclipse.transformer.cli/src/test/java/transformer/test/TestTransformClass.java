@@ -66,7 +66,7 @@ public class TestTransformClass extends CaptureTest {
 
 	public static final String	JAVAX_INJECT_PACKAGE_NAME			= "javax.inject";
 	public static final String	JAKARTA_INJECT_PACKAGE_NAME			= "jakarta.inject";
-	
+
 	// Rename used by the security sample.
 	public static final String JAVAX_SECURITY_AUTH_MESSAGE_CONFIG = "javax.security.auth.message.config";
 	public static final String JAKARTA_SECURITY_AUTH_MESSAGE_CONFIG = "jakarta.security.auth.message.config";
@@ -95,8 +95,8 @@ public class TestTransformClass extends CaptureTest {
 	public static final String	REPEAT_TARGET_RESOURCE_NAME			= "Sample_Repeat_Target.class";
 
 	public static final String	SECURITY_JAVAX_CLASS_NAME			= Sample_SecurityAPI_Javax.class.getName();
-	
-	
+
+
 	// The annotated servlet and the mixed servlet classes are provided from
 	// open-liberty.
 
@@ -158,7 +158,7 @@ public class TestTransformClass extends CaptureTest {
 		testData.log(new PrintWriter(System.out, true)); // autoflush
 	}
 
-	
+
 	@Test
 	public void testJakartaAsJavax_inject() {
 		System.out.println("Test jakarta to javax transformation on the injection sample");
@@ -816,7 +816,7 @@ public class TestTransformClass extends CaptureTest {
 
 		return new ClassActionImpl(useLogger, false, false, createBuffer(),
 			createSelectionRule(useLogger, Collections.emptySet(), Collections.emptySet()),
-			createSignatureRule(useLogger, renames, null, null, null));
+			createSignatureRule(useLogger, renames, null, null, null, null));
 	}
 
 	public static final boolean IS_EXACT = false;

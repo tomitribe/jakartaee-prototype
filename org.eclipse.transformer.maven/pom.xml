@@ -14,7 +14,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.eclipse.transformer</groupId>
+		<groupId>org.tomitribe.transformer</groupId>
 		<artifactId>org.eclipse.transformer.parent</artifactId>
 		<version>${revision}</version>
 		<relativePath>../pom.xml</relativePath>
@@ -28,7 +28,7 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.eclipse.transformer</groupId>
+			<groupId>org.tomitribe.transformer</groupId>
 			<artifactId>org.eclipse.transformer.cli</artifactId>
 			<version>${project.version}</version>
 		</dependency>
