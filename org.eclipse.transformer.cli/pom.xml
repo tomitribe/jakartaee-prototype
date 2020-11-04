@@ -61,6 +61,10 @@
 			<artifactId>javax.servlet-api</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>javax.security.auth.message</groupId>
+			<artifactId>javax.security.auth.message-api</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>jakarta.annotation</groupId>
 			<artifactId>jakarta.annotation-api</artifactId>
 		</dependency>
@@ -83,6 +87,14 @@
 		<dependency>
 			<groupId>jakarta.management.j2ee</groupId>
 			<artifactId>jakarta.management.j2ee-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.shrinkwrap</groupId>
+			<artifactId>shrinkwrap-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.shrinkwrap</groupId>
+			<artifactId>shrinkwrap-impl-base</artifactId>
 		</dependency>
 	</dependencies>
 

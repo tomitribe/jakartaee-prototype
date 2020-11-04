@@ -21,15 +21,12 @@ jobs:
   JDKxx_Matrix:
     strategy:
       matrix:
-        java: [ 8, 11, 14, 15-ea ]
+        java: [ 11, 15 ]
         os: [ ubuntu-latest ]
-        exclude:
-        - os: ubuntu-latest
-          java: 8
         include:
         - os: ubuntu-latest
           java: 8
-          canonical: ${{ (github.repository == 'eclipse/transformer') && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}
+          canonical: ${{ (github.repository == 'eclipse/transformer') && ((github.ref == 'refs/heads/main') || (github.ref == 'refs/heads/release')) && (github.event_name != 'pull_request') }}
         - os: ubuntu-latest
           java: 8
           experimental: true
@@ -52,14 +49,14 @@ jobs:
         ./.github/scripts/build.sh ${{ matrix.mavenopts }}
     - name: Import GPG key
       id: import_gpg
-      if: (matrix.canonical)
-      continue-on-error: true
-      uses: crazy-max/ghaction-import-gpg@v2
+      if: (matrix.canonical && (steps.build.outcome == 'success'))
+      uses: mbarbero/ghaction-import-gpg@subkeys
       env:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        FINGERPRINT: ${{ secrets.GPG_FINGERPRINT }}
     - name: GPG key information
-      if: (steps.import_gpg.conclusion == 'success')
+      if: (steps.import_gpg.outcome == 'success')
       run: |
         echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
         echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"

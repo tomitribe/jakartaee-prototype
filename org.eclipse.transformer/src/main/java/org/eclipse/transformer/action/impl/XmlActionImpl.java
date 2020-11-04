@@ -11,17 +11,16 @@
 
 package org.eclipse.transformer.action.impl;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
 import javax.xml.parsers.SAXParser;
@@ -36,11 +35,12 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import aQute.lib.io.ByteBufferInputStream;
+import aQute.lib.io.ByteBufferOutputStream;
+
 public class XmlActionImpl extends ActionImpl {
 
-	public XmlActionImpl(
-		Logger logger, boolean isTerse, boolean isVerbose,
-		InputBufferImpl buffer,
+	public XmlActionImpl(Logger logger, boolean isTerse, boolean isVerbose, InputBufferImpl buffer,
 		SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {
 
 		super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);
@@ -66,36 +66,37 @@ public class XmlActionImpl extends ActionImpl {
 
 	@Override
 	public boolean accept(String resourceName, File resourceFile) {
-	    if ( resourceName.toLowerCase().endsWith( getAcceptExtension() ) ) {
-	        if ( signatureRule.getTextSubstitutions(resourceName) != null ) {
-	            return true;
-	        }
-	    }
-	    return false;
+		if (resourceName.toLowerCase()
+			.endsWith(getAcceptExtension())) {
+			if (signatureRule.getTextSubstitutions(resourceName) != null) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	//
 
-    static final boolean XML_AS_PLAIN_TEXT;
-    static {
-        String value = System.getProperty("XML_AS_PLAIN_TEXT", "true");
-        XML_AS_PLAIN_TEXT = Boolean.valueOf(value);
-    }
+	static final boolean XML_AS_PLAIN_TEXT;
+	static {
+		String value = System.getProperty("XML_AS_PLAIN_TEXT", "true");
+		XML_AS_PLAIN_TEXT = Boolean.valueOf(value);
+	}
 
 	@Override
 	public ByteData apply(String inputName, byte[] inputBytes, int inputCount) throws TransformException {
-	    if (XML_AS_PLAIN_TEXT ) {
-	        return applyAsPlainText(inputName, inputBytes, inputCount);
-	    }
+		if (XML_AS_PLAIN_TEXT) {
+			return applyAsPlainText(inputName, inputBytes, inputCount);
+		}
 
 		setResourceNames(inputName, inputName);
 
-		InputStream inputStream = new ByteArrayInputStream(inputBytes, 0, inputCount);
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream(inputCount);
+		InputStream inputStream = new ByteBufferInputStream(inputBytes, 0, inputCount);
+		ByteBufferOutputStream outputStream = new ByteBufferOutputStream(inputCount);
 
 		transformUsingSaxParser(inputName, inputStream, outputStream);
 
-		if ( !hasNonResourceNameChanges() ) {
+		if (!hasNonResourceNameChanges()) {
 			return null;
 
 		} else {
@@ -105,55 +106,43 @@ public class XmlActionImpl extends ActionImpl {
 	}
 
 	@SuppressWarnings("unused")
-	public ByteData applyAsPlainText(String inputName, byte[] inputBytes, int inputLength)
-	    throws TransformException {
+	public ByteData applyAsPlainText(String inputName, byte[] inputBytes, int inputLength) throws TransformException {
 
-	    String outputName = inputName;
+		String outputName = inputName;
 
-	    setResourceNames(inputName, outputName);
+		setResourceNames(inputName, outputName);
 
-	    InputStream inputStream = new ByteArrayInputStream(inputBytes, 0, inputLength);
-	    InputStreamReader inputReader;
-	    try {
-	        inputReader = new InputStreamReader(inputStream, "UTF-8");
-	    } catch ( UnsupportedEncodingException e ) {
-	        error("Strange: UTF-8 is an unrecognized encoding for reading [ {} ]", e, inputName);
-	        return null;
-	    }
+		InputStream inputStream = new ByteBufferInputStream(inputBytes, 0, inputLength);
+		InputStreamReader inputReader = new InputStreamReader(inputStream, UTF_8);
 
-	    BufferedReader reader = new BufferedReader(inputReader);
+		BufferedReader reader = new BufferedReader(inputReader);
 
-	    ByteArrayOutputStream outputStream = new ByteArrayOutputStream(inputBytes.length);
-	    OutputStreamWriter outputWriter;
-	    try {
-	        outputWriter = new OutputStreamWriter(outputStream, "UTF-8");
-	    } catch ( UnsupportedEncodingException e ) {
-	        error("Strange: UTF-8 is an unrecognized encoding for writing [ {} ]", e, inputName);
-	        return null;
-	    }
+		ByteBufferOutputStream outputStream = new ByteBufferOutputStream(inputBytes.length);
+		OutputStreamWriter outputWriter = new OutputStreamWriter(outputStream, UTF_8);
 
-	    BufferedWriter writer = new BufferedWriter(outputWriter);
+		BufferedWriter writer = new BufferedWriter(outputWriter);
 
-	    try {
-	        transformAsPlainText(inputName, reader, writer); // throws IOException
-	    } catch ( IOException e ) {
-	        error("Failed to transform [ {} ]", e, inputName);
-	        return null;
-	    }
+		try {
+			transformAsPlainText(inputName, reader, writer); // throws
+																// IOException
+		} catch (IOException e) {
+			error("Failed to transform [ {} ]", e, inputName);
+			return null;
+		}
 
-	    try {
-	        writer.flush(); // throws
-	    } catch ( IOException e ) {
-	        error("Failed to flush [ {} ]", e, inputName);
-	        return null;
-	    }
+		try {
+			writer.flush(); // throws
+		} catch (IOException e) {
+			error("Failed to flush [ {} ]", e, inputName);
+			return null;
+		}
 
-	    if ( !hasNonResourceNameChanges() ) {
-	        return null;
-	    }
+		if (!hasNonResourceNameChanges()) {
+			return null;
+		}
 
-	    byte[] outputBytes = outputStream.toByteArray();
-	    return new ByteData(inputName, outputBytes, 0, outputBytes.length);
+		byte[] outputBytes = outputStream.toByteArray();
+		return new ByteData(inputName, outputBytes, 0, outputBytes.length);
 	}
 
 	//
@@ -169,23 +158,9 @@ public class XmlActionImpl extends ActionImpl {
 		return parserFactory;
 	}
 
-	//
-
-	private static Charset utf8;
-
-	static {
-		utf8 = Charset.forName("UTF-8");
-	}
-
-	public static Charset getUTF8() {
-		return utf8;
-	}
-
-	//
-
 	public void transform(String inputName, InputStream input, OutputStream output) throws TransformException {
 		InputSource inputSource = new InputSource(input);
-		inputSource.setEncoding("UTF-8");
+		inputSource.setEncoding(UTF_8.name());
 
 		XMLContentHandler handler = new XMLContentHandler(inputName, inputSource, output);
 
@@ -193,52 +168,53 @@ public class XmlActionImpl extends ActionImpl {
 		try {
 			parser = getParserFactory().newSAXParser();
 			// 'newSAXParser' throws ParserConfigurationException, SAXException
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			throw new TransformException("Failed to obtain parser for [ " + inputName + " ]", e);
 		}
 
 		try {
 			parser.parse(input, handler); // throws SAXException, IOException
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			throw new TransformException("Failed to parse [ " + inputName + " ]", e);
 		}
 	}
 
-	public void transformUsingSaxParser(String inputName, InputStream input, OutputStream output) throws TransformException {
-	    InputSource inputSource = new InputSource(input);
-	    inputSource.setEncoding("UTF-8");
+	public void transformUsingSaxParser(String inputName, InputStream input, OutputStream output)
+		throws TransformException {
+		InputSource inputSource = new InputSource(input);
+		inputSource.setEncoding(UTF_8.name());
 
-	    XMLContentHandler handler = new XMLContentHandler(inputName, inputSource, output);
+		XMLContentHandler handler = new XMLContentHandler(inputName, inputSource, output);
 
-	    SAXParser parser;
-	    try {
-	        parser = getParserFactory().newSAXParser();
-	        // 'newSAXParser' throws ParserConfigurationException, SAXException
-	    } catch ( Exception e ) {
-	        throw new TransformException("Failed to obtain parser for [ " + inputName + " ]", e);
-	    }
+		SAXParser parser;
+		try {
+			parser = getParserFactory().newSAXParser();
+			// 'newSAXParser' throws ParserConfigurationException, SAXException
+		} catch (Exception e) {
+			throw new TransformException("Failed to obtain parser for [ " + inputName + " ]", e);
+		}
 
-	    try {
-	        parser.parse(input, handler); // throws SAXException, IOException
-	    } catch ( Exception e ) {
-	        throw new TransformException("Failed to parse [ " + inputName + " ]", e);
-	    }
+		try {
+			parser.parse(input, handler); // throws SAXException, IOException
+		} catch (Exception e) {
+			throw new TransformException("Failed to parse [ " + inputName + " ]", e);
+		}
 	}
 
 	protected void transformAsPlainText(String inputName, BufferedReader reader, BufferedWriter writer)
-	        throws IOException {
+		throws IOException {
 
-	    String inputLine;
-	    while ( (inputLine = reader.readLine()) != null ) {
-	        String outputLine = replaceText(inputName, inputLine);
-	        if ( outputLine == null ) {
-	            outputLine = inputLine;
-	        } else {
-	            addReplacement();
-	        }
-	        writer.write(outputLine);
-	        writer.write('\n');
-	    }
+		String inputLine;
+		while ((inputLine = reader.readLine()) != null) {
+			String outputLine = replaceText(inputName, inputLine);
+			if (outputLine == null) {
+				outputLine = inputLine;
+			} else {
+				addReplacement();
+			}
+			writer.write(outputLine);
+			writer.write('\n');
+		}
 	}
 
 	//
@@ -246,7 +222,7 @@ public class XmlActionImpl extends ActionImpl {
 	public class XMLContentHandler extends DefaultHandler {
 		public XMLContentHandler(String inputName, InputSource inputSource, OutputStream outputStream) {
 			this.inputName = inputName;
-			this.charset = Charset.forName( inputSource.getEncoding() );
+			this.charset = Charset.forName(inputSource.getEncoding());
 			this.publicId = inputSource.getPublicId();
 			this.systemId = inputSource.getSystemId();
 
@@ -257,13 +233,13 @@ public class XmlActionImpl extends ActionImpl {
 
 		//
 
-		private final String inputName;
+		private final String		inputName;
 
-		private final String publicId;
-		private final String systemId;
-		private Charset charset;
+		private final String		publicId;
+		private final String		systemId;
+		private Charset				charset;
 
-		private final OutputStream outputStream;
+		private final OutputStream	outputStream;
 
 		public String getInputName() {
 			return inputName;
@@ -288,17 +264,17 @@ public class XmlActionImpl extends ActionImpl {
 		}
 
 		public void write(String text) throws SAXException {
-			write( text, getCharset() );
+			write(text, getCharset());
 		}
 
 		public void writeUTF8(String text) throws SAXException {
-			write( text, getUTF8() );
+			write(text, UTF_8);
 		}
 
 		public void write(String text, Charset useCharset) throws SAXException {
 			try {
-				outputStream.write( text.getBytes(useCharset) );
-			} catch ( IOException e ) {
+				outputStream.write(text.getBytes(useCharset));
+			} catch (IOException e) {
 				throw new SAXException("Failed to write [ " + text + " ]", e);
 			}
 		}
@@ -316,8 +292,8 @@ public class XmlActionImpl extends ActionImpl {
 		}
 
 		protected void append(char[] buffer, int start, int length) {
-			for ( int trav = start; trav < start + length; trav++ ) {
-				lineBuilder.append( buffer[trav] );
+			for (int trav = start; trav < start + length; trav++) {
+				lineBuilder.append(buffer[trav]);
 			}
 		}
 
@@ -327,12 +303,12 @@ public class XmlActionImpl extends ActionImpl {
 		}
 
 		protected void append(String text) {
-		    debug("appending [" + text + "]");
+			debug("appending [" + text + "]");
 			lineBuilder.append(text);
 		}
 
 		protected void appendLine(String text) {
-		    debug("appendline[" + text + "]");
+			debug("appendline[" + text + "]");
 			lineBuilder.append(text);
 			lineBuilder.append('\n');
 		}
@@ -344,6 +320,7 @@ public class XmlActionImpl extends ActionImpl {
 			write(nextLine); // throws SAXException
 		}
 
+		@SuppressWarnings("unused")
 		protected void emitLineUTF8(String text) throws SAXException {
 			String nextLine = lineBuilder.toString();
 			lineBuilder.setLength(0);
@@ -356,25 +333,26 @@ public class XmlActionImpl extends ActionImpl {
 		@Override
 		public void startDocument() throws SAXException {
 			String charsetName = getCharset().name();
-			emitLineUTF8("<?xml version = \"1.0\" encoding = \""+ charsetName + "\"?>\n");
+			emitLineUTF8("<?xml version = \"1.0\" encoding = \"" + charsetName + "\"?>\n");
 		}
 
-//		@Override
-//		public void endDocument() throws SAXException {
-//			super.endDocument();
-//		}
-//
-//		@Override
-//		public void setDocumentLocator(Locator locator) {
-//			super.setDocumentLocator(locator);
-//		}
+		// @Override
+		// public void endDocument() throws SAXException {
+		// super.endDocument();
+		// }
+		//
+		// @Override
+		// public void setDocumentLocator(Locator locator) {
+		// super.setDocumentLocator(locator);
+		// }
 
+		@SuppressWarnings("unused")
 		@Override
 		public void processingInstruction(String target, String data) throws SAXException {
 			append("<?");
 			append(target);
-			if ( (data != null) && data.length() > 0) {
-			    debug("processingInstruction: data["+data+"]");
+			if ((data != null) && data.length() > 0) {
+				debug("processingInstruction: data[" + data + "]");
 				append(' ');
 				append(data);
 			}
@@ -383,76 +361,83 @@ public class XmlActionImpl extends ActionImpl {
 
 		//
 
-//		@Override
-//		public void startPrefixMapping(String prefix, String uri) throws SAXException {
-//			super.startPrefixMapping(prefix, uri);
-//		}
-//
-//		@Override
-//		public void endPrefixMapping(String prefix) throws SAXException {
-//			super.endPrefixMapping(prefix);
-//		}
+		// @Override
+		// public void startPrefixMapping(String prefix, String uri) throws
+		// SAXException {
+		// super.startPrefixMapping(prefix, uri);
+		// }
+		//
+		// @Override
+		// public void endPrefixMapping(String prefix) throws SAXException {
+		// super.endPrefixMapping(prefix);
+		// }
 
 		//
 
+		@SuppressWarnings("unused")
 		@Override
-		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-		      debug("startElement: uri["+uri+"] localName["+localName+"] qName[" +qName+"] attributes[" +attributes+"]");
-		      append('<' + localName);
-		      append(uri);
+		public void startElement(String uri, String localName, String qName, Attributes attributes)
+			throws SAXException {
+			debug("startElement: uri[" + uri + "] localName[" + localName + "] qName[" + qName + "] attributes["
+				+ attributes + "]");
+			append('<' + localName);
+			append(uri);
 
-		      if ( attributes != null ) {
-		         int numberAttributes = attributes.getLength();
-		         for (int i = 0; i < numberAttributes; i++) {
-		            append(' ');
-		            append( attributes.getQName(i) );
-		            debug("startElement: attributes.getQName("+i+")["+attributes.getQName(i)+"]");
-		            append("=\"");
-		            append( attributes.getValue(i) );
-		            debug("startElement: attributes.getValue("+i+")["+attributes.getValue(i)+"]");
-		            append('"');
-		         }
-		      }
+			if (attributes != null) {
+				int numberAttributes = attributes.getLength();
+				for (int i = 0; i < numberAttributes; i++) {
+					append(' ');
+					append(attributes.getQName(i));
+					debug("startElement: attributes.getQName(" + i + ")[" + attributes.getQName(i) + "]");
+					append("=\"");
+					append(attributes.getValue(i));
+					debug("startElement: attributes.getValue(" + i + ")[" + attributes.getValue(i) + "]");
+					append('"');
+				}
+			}
 
-		      appendLine('>');
+			appendLine('>');
 
-		      emit();
+			emit();
 		}
 
+		@SuppressWarnings("unused")
 		@Override
 		public void endElement(String uri, String localName, String qName) throws SAXException {
-		    debug("endElement: uri["+uri+"] localName["+localName+"] qName[" +qName+"]");
-		    append("</");
-		    append(localName + '>');
+			debug("endElement: uri[" + uri + "] localName[" + localName + "] qName[" + qName + "]");
+			append("</");
+			append(localName + '>');
 		}
 
+		@SuppressWarnings("unused")
 		@Override
 		public void characters(char[] chars, int start, int length) throws SAXException {
-		    String initialText = new String(chars, start, length);
-		    debug("characters: initialText["+initialText+"]");
+			String initialText = new String(chars, start, length);
+			debug("characters: initialText[" + initialText + "]");
 
-		    String finalText = XmlActionImpl.this.replaceText(inputName, initialText);
-		    if ( finalText == null ) {
-		        finalText = initialText;
-		        XmlActionImpl.this.addReplacement();
-		    }
+			String finalText = XmlActionImpl.this.replaceText(inputName, initialText);
+			if (finalText == null) {
+				finalText = initialText;
+				XmlActionImpl.this.addReplacement();
+			}
 
-		    debug("characters:  finalText["+ finalText+"]");
-		    append(finalText);
+			debug("characters:  finalText[" + finalText + "]");
+			append(finalText);
 		}
 
+		@SuppressWarnings("unused")
 		@Override
 		public void ignorableWhitespace(char[] whitespace, int start, int length) throws SAXException {
 			append(whitespace, start, length);
 		}
 
-//		@Override
-//		public void skippedEntity(String name) throws SAXException {
-//			super.skippedEntity(name);
-//		}
+		// @Override
+		// public void skippedEntity(String name) throws SAXException {
+		// super.skippedEntity(name);
+		// }
 	}
 
-//	protected void debug(String s) {
-//	    System.out.println(s);
-//	}
+	// protected void debug(String s) {
+	// System.out.println(s);
+	// }
 }

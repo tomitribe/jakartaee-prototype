@@ -40,7 +40,7 @@
         <finalName>rest-sample</finalName>
         <plugins>
             <plugin>
-                <groupId>org.tomitribe.transformer</groupId>
+                <groupId>org.eclipse.transformer</groupId>
                 <artifactId>org.eclipse.transformer.maven</artifactId>
                 <version>${revision}</version>
                 <configuration>
